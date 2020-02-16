@@ -42,7 +42,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>de.azcore.azcoreRuntime.AZCoreRuntimeApp</mainClass>
-                            <classpathPrefix>lib/rt/</classpathPrefix>
+                            <classpathPrefix>lib/rt</classpathPrefix>
                         </manifest>
                     </archive>
                 </configuration>
@@ -67,7 +67,7 @@
                         </goals>
 
                         <configuration>
-                            <outputDirectory>lib/rt</outputDirectory>
+                            <outputDirectory>target/lib/rt</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

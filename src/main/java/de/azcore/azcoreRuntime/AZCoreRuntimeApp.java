@@ -11,12 +11,15 @@
 
 package de.azcore.azcoreRuntime;
 
-import de.azcore.azcoreRuntime.module.appConfiguration.AppConfigurationModule;
-import de.azcore.azcoreRuntime.module.database.DatabaseModule;
-import de.azcore.azcoreRuntime.module.network.NetworkModule;
-import de.azcore.azcoreRuntime.module.notification.NotificationModule;
-import de.azcore.azcoreRuntime.module.plugin.PluginModule;
-import de.azcore.azcoreRuntime.module.terminal.TerminalModule;
+import de.azcore.azcoreRuntime.configuration.AppConfiguration;
+import de.azcore.azcoreRuntime.modules.commandModule.CommandModule;
+import de.azcore.azcoreRuntime.modules.databaseModule.DatabaseModule;
+import de.azcore.azcoreRuntime.modules.notificationModule.NotificationModule;
+import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
+import de.azcore.azcoreRuntime.modules.pluginModule.PluginModule;
+import de.azcore.azcoreRuntime.modules.zSocketModule.ZSocketModule;
+import de.azcore.azcoreRuntime.taskManagment.CoreRunner;
+import de.azcore.azcoreRuntime.taskManagment.SchedulerService;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,15 +34,16 @@ import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
 public class AZCoreRuntimeApp {
-    // The main instance
+
     private static AZCoreRuntimeApp instance;
     private static Logger fileLogger;
     private static AtomicBoolean verbose = new AtomicBoolean(false);
+    private AtomicBoolean isActive;
 
-    private Heartbeat heartbeat;
-    private AppConfigurationModule appConfigurationModule;
-    private NetworkModule networkModule;
-    private TerminalModule terminalModule;
+    private CoreRunner coreRunner;
+    private AppConfiguration appConfiguration;
+    private ZSocketModule zSocketModule;
+    private CommandModule commandModule;
     private NotificationModule notificationModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
@@ -48,9 +52,10 @@ public class AZCoreRuntimeApp {
     public AZCoreRuntimeApp(String[] args) {
         this.start_time = System.nanoTime();
         instance = this;
-        this.heartbeat = new Heartbeat(instance);
-        Thread main = new Thread(this.heartbeat);
-        main.setName("heartbeat");
+        this.isActive = new AtomicBoolean(true);
+        this.coreRunner = new CoreRunner(instance);
+        Thread main = new Thread(this.coreRunner);
+        main.setName("AZCore");
         main.start();
         loadModules();
         finishStartup();
@@ -78,7 +83,7 @@ public class AZCoreRuntimeApp {
         fileLogger = Logger.getLogger("AZCore");
         fileLogger.setUseParentHandlers(false);
         FileHandler fh;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy-HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy-HH.mm.ss");
 
         try {
             File logsDir = new File("logs");
@@ -121,17 +126,19 @@ public class AZCoreRuntimeApp {
 
     // Load the modules for the framework
     private void loadModules() {
-        this.heartbeat.runSyncTask(() -> appConfigurationModule = new AppConfigurationModule(instance));
-        this.heartbeat.runSyncTask(() -> databaseModule = new DatabaseModule(instance));
-        this.heartbeat.runSyncTask(() -> networkModule = new NetworkModule(instance));
-        this.heartbeat.runSyncTask(() -> terminalModule = new TerminalModule(instance));
-        this.heartbeat.runSyncTask(() -> notificationModule = new NotificationModule(instance));
-        this.heartbeat.runSyncTask(() -> pluginModule = new PluginModule(instance));
+        AZPlugin azPlugin = this.coreRunner.getSchedulerService().getDefaultAZPlugin();
+        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> appConfiguration = new AppConfiguration(instance));
+
+        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> databaseModule = new DatabaseModule(instance));
+        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> zSocketModule = new ZSocketModule(instance));
+        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> commandModule = new CommandModule(instance));
+        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> notificationModule = new NotificationModule(instance));
+        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> pluginModule = new PluginModule(instance));
     }
 
     private void finishStartup() {
         Runnable finish = () -> logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true, false);
-        this.heartbeat.runSyncTask(finish);
+        this.coreRunner.getSchedulerService().runTask(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), finish);
     }
 
     public String getVersion() {
@@ -153,16 +160,26 @@ public class AZCoreRuntimeApp {
         return version;
     }
 
-    public AppConfigurationModule getAppConfigurationModule() {
-        return appConfigurationModule;
+    public boolean isActive() {
+        return this.isActive.get();
     }
 
-    public NetworkModule getNetworkModule() {
-        return networkModule;
+    public void shutdown() {
+        this.coreRunner.endCore();
+        this.isActive.set(false);
+        System.exit(0);
     }
 
-    public TerminalModule getTerminalModule() {
-        return terminalModule;
+    public AppConfiguration getConfiguration() {
+        return appConfiguration;
+    }
+
+    public ZSocketModule getzSocketModule() {
+        return zSocketModule;
+    }
+
+    public CommandModule getCommandModule() {
+        return commandModule;
     }
 
     public NotificationModule getNotificationModule() {
@@ -177,8 +194,8 @@ public class AZCoreRuntimeApp {
         return pluginModule;
     }
 
-    public Heartbeat getHeartbeat() {
-        return heartbeat;
+    public SchedulerService getScheduler() {
+        return this.coreRunner.getSchedulerService();
     }
 
 }
