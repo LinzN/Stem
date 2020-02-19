@@ -11,7 +11,7 @@
 package de.azcore.azcoreRuntime.modules.pluginModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
-import de.azcore.azcoreRuntime.modules.Module;
+import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.pluginModule.loader.PluginClassLoader;
 import de.linzn.openJL.pairs.Pair;
 import org.yaml.snakeyaml.Yaml;
@@ -23,7 +23,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-public class PluginModule extends Module {
+public class PluginModule extends AbstractModule {
     public static File pluginDirectory = new File("plugins");
     private static String pluginFileName = "plugin.yml";
     private PluginClassLoader pluginClassLoader;

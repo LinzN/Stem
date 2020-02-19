@@ -127,18 +127,17 @@ public class AZCoreRuntimeApp {
     // Load the modules for the framework
     private void loadModules() {
         AZPlugin azPlugin = this.coreRunner.getSchedulerService().getDefaultAZPlugin();
-        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> appConfiguration = new AppConfiguration(instance));
-
-        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> databaseModule = new DatabaseModule(instance));
-        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> zSocketModule = new ZSocketModule(instance));
-        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> commandModule = new CommandModule(instance));
-        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> notificationModule = new NotificationModule(instance));
-        this.coreRunner.getSchedulerService().runTask(azPlugin, () -> pluginModule = new PluginModule(instance));
+        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> appConfiguration = new AppConfiguration(instance));
+        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> databaseModule = new DatabaseModule(instance));
+        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> zSocketModule = new ZSocketModule(instance));
+        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> notificationModule = new NotificationModule(instance));
+        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> commandModule = new CommandModule(instance));
+        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> pluginModule = new PluginModule(instance));
     }
 
     private void finishStartup() {
         Runnable finish = () -> logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true, false);
-        this.coreRunner.getSchedulerService().runTask(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), finish);
+        this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), finish);
     }
 
     public String getVersion() {

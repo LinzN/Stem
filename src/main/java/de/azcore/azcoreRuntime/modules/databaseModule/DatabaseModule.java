@@ -12,7 +12,7 @@
 package de.azcore.azcoreRuntime.modules.databaseModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
-import de.azcore.azcoreRuntime.modules.Module;
+import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.operations.DataContainer;
 import de.azcore.azcoreRuntime.utils.Color;
 import de.linzn.simplyConfiguration.FileConfiguration;
@@ -21,7 +21,7 @@ import de.linzn.simplyConfiguration.provider.YamlConfiguration;
 import java.io.File;
 import java.sql.*;
 
-public class DatabaseModule extends Module {
+public class DatabaseModule extends AbstractModule {
     // Define variables
     private AZCoreRuntimeApp azCoreRuntime;
 

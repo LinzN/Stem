@@ -39,49 +39,49 @@ public class SchedulerService {
         this.defaultAZPlugin = new DefaultAZPlugin();
     }
 
-    public AZTask runTask(AZPlugin plugin, Runnable task) {
+    public AZTask runTaskInCore(AZPlugin plugin, Runnable task) {
         return execTask(plugin, task, true);
     }
 
-    public AZTask runTaskAsynchronously(AZPlugin plugin, Runnable task) {
+    public AZTask runTask(AZPlugin plugin, Runnable task) {
         return execTask(plugin, task, false);
     }
 
 
-    public AZTask runTaskLater(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
+    public AZTask runTaskLaterInCore(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return execTaskDelay(plugin, task, delay, timeUnit, true);
     }
 
-    public AZTask runTaskLaterAsynchronously(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
+    public AZTask runTaskLater(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return execTaskDelay(plugin, task, delay, timeUnit, false);
     }
 
 
-    public AZTask runRepeatScheduler(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
+    public AZTask runRepeatSchedulerInCore(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return execRepeatTask(plugin, task, delay, period, timeUnit, true);
     }
 
-    public AZTask runRepeatSchedulerAsynchronously(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
+    public AZTask runRepeatScheduler(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return execRepeatTask(plugin, task, delay, period, timeUnit, false);
     }
 
-    public AZTask runFixedScheduler(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
+    public AZTask runFixedSchedulerInCore(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
         return execFixedTask(plugin, task, days, hours, minutes, daily, true);
     }
 
-    public AZTask runFixedSchedulerAsynchronously(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
+    public AZTask runFixedScheduler(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
         return execFixedTask(plugin, task, days, hours, minutes, daily, false);
     }
 
-    /* todo remove info logger*/
-    private AZTask execFixedTask(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean sync) {
+
+    private AZTask execFixedTask(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
         if (!checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, sync);
+        AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, false);
+        AZCoreRuntimeApp.logger("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
         long times = getTimerTime(days, hours, minutes);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
@@ -103,14 +103,14 @@ public class SchedulerService {
         return azTask;
     }
 
-    private AZTask execRepeatTask(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean sync) {
+    private AZTask execRepeatTask(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
         if (!checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, sync);
+        AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, false);
+        AZCoreRuntimeApp.logger("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
                 pushCoreRunner(azTask, task);
@@ -127,32 +127,31 @@ public class SchedulerService {
         return azTask;
     }
 
-    private AZTask execTask(AZPlugin plugin, Runnable task, boolean sync) {
+    private AZTask execTask(AZPlugin plugin, Runnable task, boolean runInCore) {
         if (!checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, sync);
+        AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, false);
-        Runnable runnableContainer = () -> {
-            tasks.remove(azTask);
-            if (!azTask.isCanceled) {
-                pushCoreRunner(azTask, task);
-            }
-        };
-        this.executorService.submit(runnableContainer);
+        AZCoreRuntimeApp.logger("Task from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+
+        tasks.remove(azTask);
+        if (!azTask.isCanceled) {
+            pushCoreRunner(azTask, task);
+        }
+
         return azTask;
     }
 
-    private AZTask execTaskDelay(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean sync) {
+    private AZTask execTaskDelay(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean runInCore) {
         if (!checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, sync);
+        AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, false);
+        AZCoreRuntimeApp.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
         Runnable runnableContainer = () -> {
             tasks.remove(azTask);
             if (!azTask.isCanceled) {
@@ -165,7 +164,7 @@ public class SchedulerService {
     }
 
     private void pushCoreRunner(AZTask azTask, Runnable task) {
-        if (azTask.isSync) {
+        if (azTask.runInCore) {
             coreRunner.queueTask(task);
         } else {
             Runnable asyncTask = () -> executorService.submit(task);
@@ -233,12 +232,12 @@ public class SchedulerService {
     public class AZTask {
         private long taskId;
         private boolean isCanceled;
-        private boolean isSync;
+        private boolean runInCore;
         private AZPlugin owner;
 
-        public AZTask(AZPlugin owner, boolean isSync) {
+        public AZTask(AZPlugin owner, boolean runInCore) {
             this.owner = owner;
-            this.isSync = isSync;
+            this.runInCore = runInCore;
             this.taskId = System.nanoTime();
         }
 
@@ -254,8 +253,8 @@ public class SchedulerService {
             return isCanceled;
         }
 
-        public boolean isSync() {
-            return isSync;
+        public boolean isRunInCore() {
+            return runInCore;
         }
 
         public AZPlugin getOwner() {

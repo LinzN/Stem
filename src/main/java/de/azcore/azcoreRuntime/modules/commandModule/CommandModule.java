@@ -12,21 +12,21 @@
 package de.azcore.azcoreRuntime.modules.commandModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
-import de.azcore.azcoreRuntime.modules.Module;
+import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.commandModule.defaultCommands.CommandSetup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommandModule extends Module implements Runnable {
+public class CommandModule extends AbstractModule implements Runnable {
     private AZCoreRuntimeApp azCoreRuntime;
     private CommandSetup commandSetup;
 
     public CommandModule(AZCoreRuntimeApp azCoreRuntime) {
         this.azCoreRuntime = azCoreRuntime;
-        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getScheduler().getDefaultAZPlugin(), this);
         this.commandSetup = new CommandSetup(this.azCoreRuntime);
+        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getScheduler().getDefaultAZPlugin(), this);
     }
 
     @Override

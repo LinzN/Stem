@@ -12,7 +12,7 @@
 package de.azcore.azcoreRuntime.modules.notificationModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
-import de.azcore.azcoreRuntime.modules.Module;
+import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.notificationModule.profiles.ConsoleProfile;
 import de.azcore.azcoreRuntime.modules.notificationModule.profiles.SocketProfile;
 
@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class NotificationModule extends Module {
+public class NotificationModule extends AbstractModule {
     private boolean alive;
 
     private AZCoreRuntimeApp azCoreRuntime;

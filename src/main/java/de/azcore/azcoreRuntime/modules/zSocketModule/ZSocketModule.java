@@ -12,7 +12,7 @@
 package de.azcore.azcoreRuntime.modules.zSocketModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
-import de.azcore.azcoreRuntime.modules.Module;
+import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.zSocketModule.listener.ConnectionListener;
 import de.azcore.azcoreRuntime.modules.zSocketModule.listener.DataListener;
 import de.azcore.azcoreRuntime.modules.zSocketModule.mask.SocketMask;
@@ -25,7 +25,7 @@ import java.io.File;
 import java.util.Arrays;
 
 
-public class ZSocketModule extends Module {
+public class ZSocketModule extends AbstractModule {
     private ZServer zServer;
 
     private FileConfiguration fileConfiguration;

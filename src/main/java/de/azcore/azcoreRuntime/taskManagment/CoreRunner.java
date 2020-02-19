@@ -34,9 +34,10 @@ public class CoreRunner implements Runnable {
 
     public void run() {
         while (isAlive.get()) {
-
+            System.out.print("|");
             if (!this.taskQueue.isEmpty()) {
-                Runnable task = this.taskQueue.removeFirst();
+                Runnable task = this.taskQueue.remove();
+                System.out.println("\nExec Task: " + task.getClass().getName());
                 try {
                     task.run();
                 } catch (Exception e) {
@@ -44,14 +45,14 @@ public class CoreRunner implements Runnable {
                 }
             }
             try {
-                Thread.sleep(20);
+                Thread.sleep(50);
             } catch (InterruptedException ignored) {
             }
         }
     }
 
     void queueTask(Runnable runnable) {
-        this.taskQueue.add(runnable);
+        this.taskQueue.addLast(runnable);
     }
 
 

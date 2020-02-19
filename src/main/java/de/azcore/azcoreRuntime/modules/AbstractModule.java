@@ -13,9 +13,9 @@ package de.azcore.azcoreRuntime.modules;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
 
-public abstract class Module {
+public abstract class AbstractModule {
 
-    public Module() {
+    public AbstractModule() {
         AZCoreRuntimeApp.logger("Load module " + this.getClass().getSimpleName(), true, false);
     }
 }
