@@ -27,7 +27,7 @@ public class CommandSetup {
     }
 
     public void runCommand(String command, String[] args) {
-        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getScheduler().getDefaultAZPlugin(), () -> {
+        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getCommandModule().getModulePlugin(), () -> {
             try {
                 if (this.terminalExecutes.containsKey(command.toLowerCase())) {
                     this.terminalExecutes.get(command.toLowerCase()).executeTerminal(args);

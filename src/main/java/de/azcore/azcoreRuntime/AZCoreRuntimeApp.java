@@ -53,7 +53,7 @@ public class AZCoreRuntimeApp {
         this.start_time = System.nanoTime();
         instance = this;
         this.isActive = new AtomicBoolean(true);
-        this.coreRunner = new CoreRunner(instance);
+        this.coreRunner = new CoreRunner();
         Thread main = new Thread(this.coreRunner);
         main.setName("AZCore");
         main.start();

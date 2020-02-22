@@ -38,7 +38,7 @@ public class AppConfiguration {
 
     /* Load the file in memory */
     public void load() {
-
+        AZCoreRuntimeApp.setVerbose(this.configFile.getBoolean("system.verbose", false));
     }
 
 }

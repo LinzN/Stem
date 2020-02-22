@@ -12,12 +12,20 @@
 package de.azcore.azcoreRuntime.modules.zSocketModule.mask;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.modules.zSocketModule.ZSocketModule;
 import de.linzn.zSocket.components.IZMask;
 
 public class SocketMask implements IZMask {
+
+    private ZSocketModule zSocketModule;
+
+    public SocketMask(ZSocketModule zSocketModule) {
+        this.zSocketModule = zSocketModule;
+    }
+
     @Override
     public void runThread(Runnable runnable) {
-        AZCoreRuntimeApp.getInstance().getScheduler().runTask(AZCoreRuntimeApp.getInstance().getScheduler().getDefaultAZPlugin(), runnable);
+        AZCoreRuntimeApp.getInstance().getScheduler().runTask(this.zSocketModule.getModulePlugin(), runnable);
     }
 
     @Override

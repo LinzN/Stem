@@ -39,11 +39,11 @@ public class NotificationModule extends AbstractModule {
 
     public void pushNotification(NotificationContainer notificationContainer) {
         AZCoreRuntimeApp.logger("Push Notification for profiles", false, false);
-        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getScheduler().getDefaultAZPlugin(), () -> notificationQueue.add(notificationContainer));
+        this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), () -> notificationQueue.add(notificationContainer));
     }
 
     private void startNotificationModule() {
-        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getScheduler().getDefaultAZPlugin(), () -> {
+        this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), () -> {
             alive = true;
             while (alive) {
                 try {

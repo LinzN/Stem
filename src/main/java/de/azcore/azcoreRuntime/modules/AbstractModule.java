@@ -12,10 +12,68 @@
 package de.azcore.azcoreRuntime.modules;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
+import de.linzn.simplyConfiguration.FileConfiguration;
+
+import java.io.File;
 
 public abstract class AbstractModule {
+    private AZPlugin modulePlugin;
 
     public AbstractModule() {
-        AZCoreRuntimeApp.logger("Load module " + this.getClass().getSimpleName(), true, false);
+        this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
+        AZCoreRuntimeApp.logger("Load module " + this.modulePlugin.getPluginName(), true, false);
+    }
+
+    public AZPlugin getModulePlugin() {
+        return this.modulePlugin;
+    }
+
+    private AZPlugin setupModulePlugin(String moduleName) {
+        return this.modulePlugin = new AZPlugin() {
+
+            @Override
+            public void onEnable() {
+            }
+
+            @Override
+            public void onDisable() {
+            }
+
+            @Override
+            public String getPluginName() {
+                return moduleName;
+            }
+
+            @Override
+            public String getVersion() {
+                return AZCoreRuntimeApp.getInstance().getVersion();
+            }
+
+            @Override
+            public String getClassPath() {
+                return null;
+            }
+
+            @Override
+            public String getDescription() {
+                return getPluginName() + "::" + getVersion();
+            }
+
+            @Override
+            public File getDataFolder() {
+                return null;
+            }
+
+            @Override
+            public FileConfiguration getDefaultConfig() {
+                return null;
+            }
+
+            @Override
+            public void setUp(String pluginName, String version, String classPath) {
+
+            }
+        };
     }
 }

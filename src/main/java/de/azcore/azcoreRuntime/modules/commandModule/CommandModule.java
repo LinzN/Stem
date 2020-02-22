@@ -26,7 +26,7 @@ public class CommandModule extends AbstractModule implements Runnable {
     public CommandModule(AZCoreRuntimeApp azCoreRuntime) {
         this.azCoreRuntime = azCoreRuntime;
         this.commandSetup = new CommandSetup(this.azCoreRuntime);
-        this.azCoreRuntime.getScheduler().runTask(this.azCoreRuntime.getScheduler().getDefaultAZPlugin(), this);
+        this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), this);
     }
 
     @Override

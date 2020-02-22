@@ -18,15 +18,14 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CoreRunner implements Runnable {
-    private AZCoreRuntimeApp azCoreRuntime;
+
     private AtomicBoolean isAlive = new AtomicBoolean();
     private SchedulerService schedulerService;
     private LinkedList<Runnable> taskQueue;
     /* The list with the pending tasks*/
 
 
-    public CoreRunner(AZCoreRuntimeApp azCoreRuntime) {
-        this.azCoreRuntime = azCoreRuntime;
+    public CoreRunner() {
         this.schedulerService = new SchedulerService(this);
         this.taskQueue = new LinkedList<>();
         isAlive.set(true);
@@ -37,7 +36,7 @@ public class CoreRunner implements Runnable {
             System.out.print("|");
             if (!this.taskQueue.isEmpty()) {
                 Runnable task = this.taskQueue.remove();
-                System.out.println("\nExec Task: " + task.getClass().getName());
+                AZCoreRuntimeApp.logger("Exec Task: " + task.getClass().getName(), false, false);
                 try {
                     task.run();
                 } catch (Exception e) {

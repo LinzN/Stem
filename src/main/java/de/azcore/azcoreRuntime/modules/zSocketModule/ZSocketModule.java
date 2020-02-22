@@ -38,9 +38,18 @@ public class ZSocketModule extends AbstractModule {
     public ZSocketModule(AZCoreRuntimeApp azCoreRuntime) {
         this.initConfig();
         CryptContainer cryptContainer = new CryptContainer(this.cryptAESKey, this.vector16B);
-        this.zServer = new ZServer(this.socketHost, this.socketPort, new SocketMask(), cryptContainer);
+        this.zServer = new ZServer(this.socketHost, this.socketPort, new SocketMask(this), cryptContainer);
         this.registerEvents();
         this.createNetwork();
+    }
+
+    private static byte[] toByteArray(String string) {
+        String[] strings = string.replace("[", "").replace("]", "").split(", ");
+        byte[] result = new byte[strings.length];
+        for (int i = 0; i < result.length; i++) {
+            result[i] = Byte.parseByte(strings[i]);
+        }
+        return result;
     }
 
     private void registerEvents() {
@@ -58,15 +67,6 @@ public class ZSocketModule extends AbstractModule {
 
     public ZServer getzServer() {
         return this.zServer;
-    }
-
-    private static byte[] toByteArray(String string) {
-        String[] strings = string.replace("[", "").replace("]", "").split(", ");
-        byte[] result = new byte[strings.length];
-        for (int i = 0; i < result.length; i++) {
-            result[i] = Byte.parseByte(strings[i]);
-        }
-        return result;
     }
 
     private void initConfig() {
