@@ -9,10 +9,10 @@
  *
  */
 
-package de.azcore.azcoreRuntime.operations;
+package de.azcore.azcoreRuntime.taskManagment.operations;
 
-import de.azcore.azcoreRuntime.operations.defaultOperations.AZCoreOperations;
-import de.azcore.azcoreRuntime.operations.defaultOperations.LinuxOperations;
+import de.azcore.azcoreRuntime.taskManagment.operations.defaultOperations.AZCoreOperations;
+import de.azcore.azcoreRuntime.taskManagment.operations.defaultOperations.LinuxOperations;
 import de.linzn.openJL.pairs.Pair;
 
 import java.util.ArrayList;

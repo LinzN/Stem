@@ -9,9 +9,9 @@
  *
  */
 
-package de.azcore.azcoreRuntime.operations.defaultOperations;
+package de.azcore.azcoreRuntime.taskManagment.operations.defaultOperations;
 
-import de.azcore.azcoreRuntime.operations.TaskOperation;
+import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

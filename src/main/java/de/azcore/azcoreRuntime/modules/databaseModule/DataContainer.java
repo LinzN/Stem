@@ -9,7 +9,7 @@
  *
  */
 
-package de.azcore.azcoreRuntime.operations;
+package de.azcore.azcoreRuntime.modules.databaseModule;
 
 import org.json.JSONObject;
 

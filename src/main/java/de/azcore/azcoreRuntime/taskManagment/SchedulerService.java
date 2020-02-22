@@ -32,7 +32,7 @@ public class SchedulerService {
     private HashSet<AZTask> tasks;
     private DefaultAZPlugin defaultAZPlugin;
 
-    public SchedulerService(CoreRunner coreRunner) {
+    SchedulerService(CoreRunner coreRunner) {
         this.coreRunner = coreRunner;
         this.scheduledExecutorService = new ScheduledThreadPoolExecutor(50);
         this.executorService = new ThreadPoolExecutor(30, 30, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
@@ -229,39 +229,6 @@ public class SchedulerService {
         return defaultAZPlugin;
     }
 
-
-    public class AZTask {
-        private long taskId;
-        private boolean isCanceled;
-        private boolean runInCore;
-        private AZPlugin owner;
-
-        public AZTask(AZPlugin owner, boolean runInCore) {
-            this.owner = owner;
-            this.runInCore = runInCore;
-            this.taskId = System.nanoTime();
-        }
-
-        public void cancel() {
-            this.isCanceled = true;
-        }
-
-        public long getTaskId() {
-            return taskId;
-        }
-
-        public boolean isCanceled() {
-            return isCanceled;
-        }
-
-        public boolean isRunInCore() {
-            return runInCore;
-        }
-
-        public AZPlugin getOwner() {
-            return owner;
-        }
-    }
 
     private class DefaultAZPlugin extends AZPlugin {
 

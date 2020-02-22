@@ -9,9 +9,9 @@
  *
  */
 
-package de.azcore.azcoreRuntime.operations.defaultOperations;
+package de.azcore.azcoreRuntime.taskManagment.operations.defaultOperations;
 
-import de.azcore.azcoreRuntime.operations.TaskOperation;
+import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
 import org.json.JSONArray;
 import org.json.JSONObject;
 

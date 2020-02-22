@@ -9,11 +9,10 @@
  *
  */
 
-package de.azcore.azcoreRuntime.operations;
+package de.azcore.azcoreRuntime.taskManagment.operations;
 
-import org.json.JSONObject;
+
 
 public interface TaskOperation {
-
-    JSONObject runOperation(Object object);
+    Object runOperation(Object object);
 }

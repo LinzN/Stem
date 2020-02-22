@@ -22,8 +22,6 @@ public class CoreRunner implements Runnable {
     private AtomicBoolean isAlive = new AtomicBoolean();
     private SchedulerService schedulerService;
     private LinkedList<Runnable> taskQueue;
-    /* The list with the pending tasks*/
-
 
     public CoreRunner() {
         this.schedulerService = new SchedulerService(this);
