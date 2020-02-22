@@ -29,7 +29,7 @@ public class CallbackService {
 
     public void registerCallbackListener(AbstractCallback abstractCallback, AZPlugin azPlugin) {
         this.callbackListeners.put(abstractCallback, azPlugin);
-        this.enableCallbackListener(abstractCallback);
+        this.enableCallbackListener(abstractCallback, azPlugin);
     }
 
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
@@ -50,9 +50,7 @@ public class CallbackService {
         this.callbackListeners.remove(abstractCallback);
     }
 
-    private void enableCallbackListener(AbstractCallback abstractCallback) {
-        AZPlugin plugin = abstractCallback.getAZPlugin();
-
+    private void enableCallbackListener(AbstractCallback abstractCallback, AZPlugin plugin) {
         CallbackTime callbackTime = abstractCallback.getTime();
         AZTask taskId;
 

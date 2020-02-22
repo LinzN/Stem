@@ -12,7 +12,6 @@
 package de.azcore.azcoreRuntime.taskManagment;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
-import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
 import de.linzn.openJL.pairs.Pair;
 import org.json.JSONObject;
@@ -25,10 +24,8 @@ public abstract class AbstractCallback {
     LinkedList<Pair<TaskOperation, Object>> operationData;
     private long taskId;
     private long callbackTaskId;
-    private AZPlugin azPlugin;
 
-    public AbstractCallback(AZPlugin azPlugin) {
-        this.azPlugin = azPlugin;
+    public AbstractCallback() {
         this.operationData = new LinkedList<>();
         this.callbackData = new LinkedList<>();
     }
@@ -46,10 +43,6 @@ public abstract class AbstractCallback {
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(taskId);
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(callbackTaskId);
         AZCoreRuntimeApp.getInstance().getCallBackService().removeFromList(this);
-    }
-
-    public AZPlugin getAZPlugin() {
-        return this.azPlugin;
     }
 
     public void addOperationData(TaskOperation taskOperation, JSONObject data) {
