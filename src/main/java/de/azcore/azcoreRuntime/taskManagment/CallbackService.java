@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
-class CallbackService {
+public class CallbackService {
     private HashMap<AbstractCallback, AZPlugin> callbackListeners;
 
     CallbackService() {
@@ -34,7 +34,6 @@ class CallbackService {
 
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
         abstractCallback.disable();
-        this.callbackListeners.remove(abstractCallback);
     }
 
     public void unregisterCallbackListeners(AZPlugin azPlugin) {
@@ -43,9 +42,12 @@ class CallbackService {
             AZPlugin azPlugin1 = this.callbackListeners.get(abstractCallback);
             if (azPlugin == azPlugin1) {
                 abstractCallback.disable();
-                iterator.remove();
             }
         }
+    }
+
+    void removeFromList(AbstractCallback abstractCallback) {
+        this.callbackListeners.remove(abstractCallback);
     }
 
     private void enableCallbackListener(AbstractCallback abstractCallback) {

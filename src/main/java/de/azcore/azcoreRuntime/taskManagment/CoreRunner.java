@@ -21,10 +21,12 @@ public class CoreRunner implements Runnable {
 
     private AtomicBoolean isAlive = new AtomicBoolean();
     private SchedulerService schedulerService;
+    private CallbackService callbackService;
     private LinkedList<Runnable> taskQueue;
 
     public CoreRunner() {
         this.schedulerService = new SchedulerService(this);
+        this.callbackService = new CallbackService();
         this.taskQueue = new LinkedList<>();
         isAlive.set(true);
     }
@@ -60,5 +62,9 @@ public class CoreRunner implements Runnable {
     public void endCore() {
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
+    }
+
+    public CallbackService getCallbackService() {
+        return this.callbackService;
     }
 }

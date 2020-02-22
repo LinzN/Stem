@@ -45,7 +45,7 @@ public abstract class AbstractCallback {
     public void disable() {
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(taskId);
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(callbackTaskId);
-        //todo remove from callbacklist
+        AZCoreRuntimeApp.getInstance().getCallBackService().removeFromList(this);
     }
 
     public AZPlugin getAZPlugin() {

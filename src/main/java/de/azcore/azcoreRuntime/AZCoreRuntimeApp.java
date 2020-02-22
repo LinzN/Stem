@@ -18,6 +18,7 @@ import de.azcore.azcoreRuntime.modules.notificationModule.NotificationModule;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.azcore.azcoreRuntime.modules.pluginModule.PluginModule;
 import de.azcore.azcoreRuntime.modules.zSocketModule.ZSocketModule;
+import de.azcore.azcoreRuntime.taskManagment.CallbackService;
 import de.azcore.azcoreRuntime.taskManagment.CoreRunner;
 import de.azcore.azcoreRuntime.taskManagment.SchedulerService;
 
@@ -136,6 +137,10 @@ public class AZCoreRuntimeApp {
 
     public SchedulerService getScheduler() {
         return this.coreRunner.getSchedulerService();
+    }
+
+    public CallbackService getCallBackService() {
+        return this.coreRunner.getCallbackService();
     }
 
 }
