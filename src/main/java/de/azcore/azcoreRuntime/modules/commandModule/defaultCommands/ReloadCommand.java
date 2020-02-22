@@ -13,6 +13,7 @@ package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 import de.azcore.azcoreRuntime.utils.Color;
 
@@ -20,9 +21,9 @@ public class ReloadCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        AZCoreRuntimeApp.logger(Color.GREEN + "Reloading plugins ..." + Color.RESET, false, false);
+        AppLogger.logger(Color.GREEN + "Reloading plugins ..." + Color.RESET, false, false);
         AZCoreRuntimeApp.getInstance().getPluginModule().reloadPlugins();
-        AZCoreRuntimeApp.logger(Color.GREEN + "Plugins reloaded!" + Color.RESET, false, false);
+        AppLogger.logger(Color.GREEN + "Plugins reloaded!" + Color.RESET, false, false);
         return true;
     }
 

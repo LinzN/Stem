@@ -13,6 +13,7 @@ package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 
 import java.util.List;
@@ -31,7 +32,7 @@ public class HelpCommand implements ICommand {
             }
         }
 
-        AZCoreRuntimeApp.logger(stringBuilder.toString(), false, false);
+        AppLogger.logger(stringBuilder.toString(), false, false);
         return true;
     }
 

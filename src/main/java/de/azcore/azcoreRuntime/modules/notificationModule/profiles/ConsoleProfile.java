@@ -11,7 +11,7 @@
 
 package de.azcore.azcoreRuntime.modules.notificationModule.profiles;
 
-import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.notificationModule.INotificationProfile;
 import de.azcore.azcoreRuntime.modules.notificationModule.NotificationContainer;
 import de.azcore.azcoreRuntime.modules.notificationModule.NotificationPriority;
@@ -20,7 +20,7 @@ public class ConsoleProfile implements INotificationProfile {
     @Override
     public void push(NotificationContainer notificationContainer) {
         if (notificationContainer.notificationPriority.hasPriority(NotificationPriority.LOW)) {
-            AZCoreRuntimeApp.logger("Console -> " + notificationContainer.notification, true, false);
+            AppLogger.logger("Console -> " + notificationContainer.notification, true, false);
         }
     }
 }

@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules.notificationModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.notificationModule.profiles.ConsoleProfile;
 import de.azcore.azcoreRuntime.modules.notificationModule.profiles.SocketProfile;
@@ -38,7 +39,7 @@ public class NotificationModule extends AbstractModule {
     }
 
     public void pushNotification(NotificationContainer notificationContainer) {
-        AZCoreRuntimeApp.logger("Push Notification for profiles", false, false);
+        AppLogger.logger("Push Notification for profiles", false, false);
         this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), () -> notificationQueue.add(notificationContainer));
     }
 

@@ -21,23 +21,14 @@ import de.azcore.azcoreRuntime.modules.zSocketModule.ZSocketModule;
 import de.azcore.azcoreRuntime.taskManagment.CoreRunner;
 import de.azcore.azcoreRuntime.taskManagment.SchedulerService;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.FileHandler;
-import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 
 public class AZCoreRuntimeApp {
 
     private static AZCoreRuntimeApp instance;
-    private static Logger fileLogger;
-    private static AtomicBoolean verbose = new AtomicBoolean(false);
     private AtomicBoolean isActive;
 
     private CoreRunner coreRunner;
@@ -49,9 +40,13 @@ public class AZCoreRuntimeApp {
     private PluginModule pluginModule;
     private long start_time;
 
+    private AppLogger appLogger;
+
+
     public AZCoreRuntimeApp(String[] args) {
-        this.start_time = System.nanoTime();
         instance = this;
+        this.start_time = System.nanoTime();
+        this.appLogger = new AppLogger();
         this.isActive = new AtomicBoolean(true);
         this.coreRunner = new CoreRunner();
         Thread main = new Thread(this.coreRunner);
@@ -62,69 +57,15 @@ public class AZCoreRuntimeApp {
     }
 
     public static void main(String[] args) {
-        logSetup();
-        AZCoreRuntimeApp.logger(AZCoreRuntimeApp.class.getSimpleName() + " load mainframe...", true, false);
+        AppLogger.logger(AZCoreRuntimeApp.class.getSimpleName() + " load mainframe...", false, false);
         new AZCoreRuntimeApp(args);
-    }
-
-    // The default fileLogger
-    public static synchronized void logger(String log, boolean writeToFile, boolean debugInfo) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        if (!debugInfo || verbose.get()) {
-            System.out.print(dateFormat.format(new Date().getTime()) + (debugInfo ? "[Debug]" : "") + " [" + Thread.currentThread().getName() + "] " + log + "\n");
-            System.out.flush();
-            if (writeToFile) {
-                fileLogger.info(dateFormat.format(new Date().getTime()) + "[" + Thread.currentThread().getName() + "] " + log);
-            }
-        }
-    }
-
-    private static void logSetup() {
-        fileLogger = Logger.getLogger("AZCore");
-        fileLogger.setUseParentHandlers(false);
-        FileHandler fh;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy-HH.mm.ss");
-
-        try {
-            File logsDir = new File("logs");
-            if (!logsDir.exists()) {
-                logsDir.mkdir();
-            }
-
-            fh = new FileHandler("logs/" + dateFormat.format(new Date().getTime()) + ".log");
-            fileLogger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter() {
-                private static final String format = "[%1$tF %1$tT] [%2$-7s] %3$s %n";
-
-                @Override
-                public synchronized String format(LogRecord lr) {
-                    return String.format(format,
-                            new Date(lr.getMillis()),
-                            lr.getLevel().getLocalizedName(),
-                            lr.getMessage()
-                    );
-                }
-            };
-
-            fh.setFormatter(formatter);
-        } catch (SecurityException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static boolean getVerbose() {
-        return verbose.get();
-    }
-
-    public static void setVerbose(boolean value) {
-        verbose.set(value);
     }
 
     public static AZCoreRuntimeApp getInstance() {
         return instance;
     }
 
-    // Load the modules for the framework
+
     private void loadModules() {
         AZPlugin azPlugin = this.coreRunner.getSchedulerService().getDefaultAZPlugin();
         this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> appConfiguration = new AppConfiguration(instance));
@@ -136,7 +77,7 @@ public class AZCoreRuntimeApp {
     }
 
     private void finishStartup() {
-        Runnable finish = () -> logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true, false);
+        Runnable finish = () -> AppLogger.logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true, false);
         this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), finish);
     }
 
@@ -173,7 +114,7 @@ public class AZCoreRuntimeApp {
         return appConfiguration;
     }
 
-    public ZSocketModule getzSocketModule() {
+    public ZSocketModule getZSocketModule() {
         return zSocketModule;
     }
 

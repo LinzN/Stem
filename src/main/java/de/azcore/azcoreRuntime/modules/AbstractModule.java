@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.linzn.simplyConfiguration.FileConfiguration;
 
@@ -22,7 +23,7 @@ public abstract class AbstractModule {
 
     public AbstractModule() {
         this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
-        AZCoreRuntimeApp.logger("Load module " + this.modulePlugin.getPluginName(), true, false);
+        AppLogger.logger("Load module " + this.modulePlugin.getPluginName(), true, false);
     }
 
     public AZPlugin getModulePlugin() {

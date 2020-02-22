@@ -11,6 +11,7 @@
 package de.azcore.azcoreRuntime.modules.pluginModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.pluginModule.loader.PluginClassLoader;
 import de.linzn.openJL.pairs.Pair;
@@ -65,7 +66,7 @@ public class PluginModule extends AbstractModule {
     }
 
     public void unloadPlugin(String pluginName) {
-        AZCoreRuntimeApp.logger("Unload plugin: " + pluginName, false, false);
+        AppLogger.logger("Unload plugin: " + pluginName, false, false);
         if (disablePlugin(pluginName)) {
             this.pluginList.remove(pluginName);
         }
@@ -76,7 +77,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AZCoreRuntimeApp.logger("Enable plugin: " + plugin.getDescription(), false, false);
+        AppLogger.logger("Enable plugin: " + plugin.getDescription(), false, false);
 
         try {
             plugin.onEnable();
@@ -92,7 +93,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AZCoreRuntimeApp.logger("Disable plugin: " + plugin.getDescription(), false, false);
+        AppLogger.logger("Disable plugin: " + plugin.getDescription(), false, false);
         try {
             plugin.onDisable();
         } catch (Exception exception) {
@@ -125,7 +126,7 @@ public class PluginModule extends AbstractModule {
                     URLClassLoader child = new URLClassLoader(new URL[]{jarFile.toURL()}, this.getClass().getClassLoader());
 
                     if (child.getResource(pluginFileName) == null) {
-                        AZCoreRuntimeApp.logger("No " + pluginFileName + " file found for " + jarFile.getName(), true, false);
+                        AppLogger.logger("No " + pluginFileName + " file found for " + jarFile.getName(), true, false);
                         continue;
                     }
 
@@ -153,7 +154,7 @@ public class PluginModule extends AbstractModule {
             int maxValue = pluginsWithDependencies.size() * pluginsWithDependencies.size();
 
             if (i > maxValue) { //todo fix this
-                AZCoreRuntimeApp.logger("Some plugins could not be loaded!", true, false);
+                AppLogger.logger("Some plugins could not be loaded!", true, false);
                 break;
             }
 

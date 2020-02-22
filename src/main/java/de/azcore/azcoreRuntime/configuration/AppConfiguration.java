@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.configuration;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
 
@@ -38,7 +39,7 @@ public class AppConfiguration {
 
     /* Load the file in memory */
     public void load() {
-        AZCoreRuntimeApp.setVerbose(this.configFile.getBoolean("system.verbose", false));
+        AppLogger.setVerbose(this.configFile.getBoolean("system.verbose", false));
     }
 
 }

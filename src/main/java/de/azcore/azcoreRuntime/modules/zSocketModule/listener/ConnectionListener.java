@@ -11,7 +11,7 @@
 
 package de.azcore.azcoreRuntime.modules.zSocketModule.listener;
 
-import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.linzn.zSocket.components.events.ConnectEvent;
 import de.linzn.zSocket.components.events.DisconnectEvent;
 import de.linzn.zSocket.components.events.IListener;
@@ -22,12 +22,12 @@ public class ConnectionListener implements IListener {
 
     @EventHandler
     public void onConnectEvent(ConnectEvent event) {
-        AZCoreRuntimeApp.logger("Register new communication device: " + event.getClientUUID(), true, false);
+        AppLogger.logger("Register new communication device: " + event.getClientUUID(), true, false);
 
     }
 
     @EventHandler
     public void onDisconnectEvent(DisconnectEvent event) {
-        AZCoreRuntimeApp.logger("Unregister communication device: " + event.getClientUUID(), true, false);
+        AppLogger.logger("Unregister communication device: " + event.getClientUUID(), true, false);
     }
 }

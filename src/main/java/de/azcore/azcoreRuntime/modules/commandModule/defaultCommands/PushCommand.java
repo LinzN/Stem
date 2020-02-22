@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 import de.azcore.azcoreRuntime.modules.notificationModule.NotificationContainer;
 import de.azcore.azcoreRuntime.modules.notificationModule.NotificationPriority;
@@ -30,7 +31,7 @@ public class PushCommand implements ICommand {
             NotificationContainer notificationContainer = new NotificationContainer(message.toString(), NotificationPriority.DEFAULT);
             AZCoreRuntimeApp.getInstance().getNotificationModule().pushNotification(notificationContainer);
         } else {
-            AZCoreRuntimeApp.logger("Not enough input to chat send", false, false);
+            AppLogger.logger("Not enough input to chat send", false, false);
         }
         return true;
     }

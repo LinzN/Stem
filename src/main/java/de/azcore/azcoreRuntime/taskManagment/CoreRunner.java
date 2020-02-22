@@ -12,7 +12,7 @@
 package de.azcore.azcoreRuntime.taskManagment;
 
 
-import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -36,7 +36,7 @@ public class CoreRunner implements Runnable {
             System.out.print("|");
             if (!this.taskQueue.isEmpty()) {
                 Runnable task = this.taskQueue.remove();
-                AZCoreRuntimeApp.logger("Exec Task: " + task.getClass().getName(), false, false);
+                AppLogger.logger("Exec Task: " + task.getClass().getName(), false, false);
                 try {
                     task.run();
                 } catch (Exception e) {

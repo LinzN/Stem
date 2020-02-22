@@ -11,7 +11,7 @@
 
 package de.azcore.azcoreRuntime.modules.pluginModule.loader;
 
-import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 
 import java.io.File;
@@ -31,7 +31,7 @@ public class PluginClassLoader extends URLClassLoader {
     }
 
     private AZPlugin initPlugin(String pluginName, String classPath, String version) {
-        AZCoreRuntimeApp.logger("Load plugin: " + pluginName, true, false);
+        AppLogger.logger("Load plugin: " + pluginName, true, false);
         try {
             Class<?> jarClass;
             try {

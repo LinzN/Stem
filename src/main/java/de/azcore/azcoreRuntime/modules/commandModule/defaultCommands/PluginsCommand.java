@@ -13,6 +13,7 @@ package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.azcore.azcoreRuntime.utils.Color;
@@ -33,7 +34,7 @@ public class PluginsCommand implements ICommand {
             }
         }
 
-        AZCoreRuntimeApp.logger(stringBuilder.toString(), false, false);
+        AppLogger.logger(stringBuilder.toString(), false, false);
         return true;
     }
 

@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules.commandModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.modules.commandModule.defaultCommands.CommandSetup;
 
@@ -43,7 +44,7 @@ public class CommandModule extends AbstractModule implements Runnable {
     }
 
     public void registerCommand(String command, ICommand ICommand) {
-        AZCoreRuntimeApp.logger("Register new command #" + command, true, false);
+        AppLogger.logger("Register new command #" + command, true, false);
         commandSetup.terminalExecutes.put(command, ICommand);
     }
 

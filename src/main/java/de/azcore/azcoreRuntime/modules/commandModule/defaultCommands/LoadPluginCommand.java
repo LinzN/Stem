@@ -13,6 +13,7 @@ package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 import de.azcore.azcoreRuntime.modules.pluginModule.PluginModule;
 
@@ -34,7 +35,7 @@ public class LoadPluginCommand implements ICommand {
                     e.printStackTrace();
                 }
             } else {
-                AZCoreRuntimeApp.logger("No plugin file found!", false, false);
+                AppLogger.logger("No plugin file found!", false, false);
             }
         }
         return true;

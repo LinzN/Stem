@@ -31,7 +31,7 @@ public class SocketProfile implements INotificationProfile {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            AZCoreRuntimeApp.getInstance().getzSocketModule().getzServer().getClients().values().forEach(serverConnection -> serverConnection.writeOutput("notification", byteArrayOutputStream.toByteArray()));
+            AZCoreRuntimeApp.getInstance().getZSocketModule().getzServer().getClients().values().forEach(serverConnection -> serverConnection.writeOutput("notification", byteArrayOutputStream.toByteArray()));
         }
     }
 }

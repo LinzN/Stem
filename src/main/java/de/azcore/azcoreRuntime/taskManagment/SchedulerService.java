@@ -13,6 +13,7 @@ package de.azcore.azcoreRuntime.taskManagment;
 
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.azcore.azcoreRuntime.utils.Color;
 import de.linzn.simplyConfiguration.FileConfiguration;
@@ -81,7 +82,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.logger("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
         long times = this.getTimerTime(days, hours, minutes);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
@@ -110,7 +111,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.logger("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
                 this.pushCoreRunner(azTask, task);
@@ -134,7 +135,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Task from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.logger("Task from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
 
         tasks.remove(azTask);
         if (!azTask.isCanceled) {
@@ -151,7 +152,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AZCoreRuntimeApp.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
         Runnable runnableContainer = () -> {
             tasks.remove(azTask);
             if (!azTask.isCanceled) {
@@ -219,7 +220,7 @@ public class SchedulerService {
 
     private boolean checkIsValid() {
         if (this.tasks == null) {
-            AZCoreRuntimeApp.logger(Color.RED + "Try to register task while shutdown!" + Color.RESET, false, false);
+            AppLogger.logger(Color.RED + "Try to register task while shutdown!" + Color.RESET, false, false);
         }
         return this.tasks != null;
     }

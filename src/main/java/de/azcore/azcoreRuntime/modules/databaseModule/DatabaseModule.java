@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules.databaseModule;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.AbstractModule;
 import de.azcore.azcoreRuntime.operations.DataContainer;
 import de.azcore.azcoreRuntime.utils.Color;
@@ -48,10 +49,10 @@ public class DatabaseModule extends AbstractModule {
         try {
             return DriverManager.getConnection(this.url, this.username, this.password);
         } catch (SQLException e) {
-            if (AZCoreRuntimeApp.getVerbose()) {
+            if (AppLogger.getVerbose()) {
                 e.printStackTrace();
             }
-            AZCoreRuntimeApp.logger(Color.RED + "MySQL connection is invalid!" + Color.RESET, false, false);
+            AppLogger.logger(Color.RED + "MySQL connection is invalid!" + Color.RESET, false, false);
         }
         return null;
     }

@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 
 import java.util.TreeMap;
@@ -32,7 +33,7 @@ public class CommandSetup {
                 if (this.terminalExecutes.containsKey(command.toLowerCase())) {
                     this.terminalExecutes.get(command.toLowerCase()).executeTerminal(args);
                 } else {
-                    AZCoreRuntimeApp.logger("Error on command", false, false);
+                    AppLogger.logger("Error on command", false, false);
                 }
             } catch (Exception e) {
                 System.err.println(e);
@@ -51,7 +52,7 @@ public class CommandSetup {
     }
 
     private void registerCommand(String command, ICommand ICommand) {
-        AZCoreRuntimeApp.logger("Register internal command #" + command, true, false);
+        AppLogger.logger("Register internal command #" + command, true, false);
         terminalExecutes.put(command, ICommand);
     }
 }

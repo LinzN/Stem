@@ -11,17 +11,17 @@
 
 package de.azcore.azcoreRuntime.modules.commandModule.defaultCommands;
 
-import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.commandModule.ICommand;
 
 public class VerboseCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        boolean value = AZCoreRuntimeApp.getVerbose();
+        boolean value = AppLogger.getVerbose();
         value = !value;
         System.out.println("Set verbose to " + value);
-        AZCoreRuntimeApp.setVerbose(value);
+        AppLogger.setVerbose(value);
         return true;
     }
 
