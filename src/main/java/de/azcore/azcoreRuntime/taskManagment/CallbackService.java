@@ -18,7 +18,6 @@ import de.linzn.openJL.pairs.Pair;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.concurrent.TimeUnit;
 
 public class CallbackService {
     private HashMap<AbstractCallback, AZPlugin> callbackListeners;
@@ -54,41 +53,27 @@ public class CallbackService {
         CallbackTime callbackTime = abstractCallback.getTime();
         AZTask azTask;
 
-        Runnable task = () -> callMethod(abstractCallback);
+        Runnable runnable = () -> callMethod(abstractCallback, plugin);
 
         if (callbackTime.fixedTask) {
-            azTask = AZCoreRuntimeApp.getInstance().getScheduler().runFixedScheduler(plugin, task, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
+            azTask = AZCoreRuntimeApp.getInstance().getScheduler().runFixedScheduler(plugin, runnable, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
         } else {
-            azTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, task, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
+            azTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
         }
 
-        AZTask callbackAzTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, () -> {
-            if (azTask.isCanceled) {
-                abstractCallback.disable();
-            } else {
-                try {
-                    if (!abstractCallback.callbackData.isEmpty()) {
-                        Object object = abstractCallback.callbackData.removeFirst();
-                        abstractCallback.callback(object);
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }, 100, 100, TimeUnit.MILLISECONDS);
-
-        abstractCallback.setIDs(azTask.getTaskId(), callbackAzTask.getTaskId());
-
+        abstractCallback.setIDs(azTask.getTaskId());
     }
 
-    private void callMethod(AbstractCallback abstractCallback) {
+    private void callMethod(AbstractCallback abstractCallback, AZPlugin plugin) {
         abstractCallback.methodToCall();
 
         while (!abstractCallback.operationData.isEmpty()) {
             Pair<TaskOperation, Object> pair = abstractCallback.operationData.removeFirst();
 
-            Object object = pair.getKey().runOperation(pair.getValue());
-            abstractCallback.callback(object);
+            AZCoreRuntimeApp.getInstance().getScheduler().runTask(plugin, () -> {
+                Object object = pair.getKey().runOperation(pair.getValue());
+                abstractCallback.callback(object);
+            });
         }
     }
 }

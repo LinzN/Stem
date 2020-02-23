@@ -20,19 +20,15 @@ import java.util.LinkedList;
 
 public abstract class AbstractCallback {
 
-    LinkedList<Object> callbackData;
     LinkedList<Pair<TaskOperation, Object>> operationData;
     private long taskId;
-    private long callbackTaskId;
 
     public AbstractCallback() {
         this.operationData = new LinkedList<>();
-        this.callbackData = new LinkedList<>();
     }
 
-    void setIDs(long taskId, long callbackTaskId) {
+    void setIDs(long taskId) {
         this.taskId = taskId;
-        this.callbackTaskId = callbackTaskId;
     }
 
     public abstract void methodToCall();
@@ -41,7 +37,6 @@ public abstract class AbstractCallback {
 
     public void disable() {
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(taskId);
-        AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(callbackTaskId);
         AZCoreRuntimeApp.getInstance().getCallBackService().removeFromList(this);
     }
 
