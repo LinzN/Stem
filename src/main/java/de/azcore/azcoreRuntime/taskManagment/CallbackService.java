@@ -52,28 +52,32 @@ public class CallbackService {
 
     private void enableCallbackListener(AbstractCallback abstractCallback, AZPlugin plugin) {
         CallbackTime callbackTime = abstractCallback.getTime();
-        AZTask taskId;
+        AZTask azTask;
 
         Runnable task = () -> callMethod(abstractCallback);
 
         if (callbackTime.fixedTask) {
-            taskId = AZCoreRuntimeApp.getInstance().getScheduler().runFixedScheduler(plugin, task, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
+            azTask = AZCoreRuntimeApp.getInstance().getScheduler().runFixedScheduler(plugin, task, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
         } else {
-            taskId = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, task, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
+            azTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, task, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
         }
 
-        AZTask callbackId = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, () -> {
-            try {
-                if (!abstractCallback.callbackData.isEmpty()) {
-                    Object object = abstractCallback.callbackData.removeFirst();
-                    abstractCallback.callback(object);
+        AZTask callbackAzTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, () -> {
+            if (azTask.isCanceled) {
+                abstractCallback.disable();
+            } else {
+                try {
+                    if (!abstractCallback.callbackData.isEmpty()) {
+                        Object object = abstractCallback.callbackData.removeFirst();
+                        abstractCallback.callback(object);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         }, 100, 100, TimeUnit.MILLISECONDS);
 
-        abstractCallback.setIDs(taskId.getTaskId(), callbackId.getTaskId());
+        abstractCallback.setIDs(azTask.getTaskId(), callbackAzTask.getTaskId());
 
     }
 
