@@ -207,6 +207,10 @@ public class SchedulerService {
         this.tasks = null;
     }
 
+    public HashSet<AZTask> getTasks() {
+        return this.tasks;
+    }
+
 
     private long getTimerTime(int days, int hours, int minute) {
         long selectTime = selectTime(days, hours, minute);

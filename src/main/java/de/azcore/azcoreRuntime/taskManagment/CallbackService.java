@@ -50,6 +50,10 @@ public class CallbackService {
         }
     }
 
+    public HashMap<AbstractCallback, AZPlugin> getCallbackListeners() {
+        return this.callbackListeners;
+    }
+
     private void enableCallbackListener(AbstractCallback abstractCallback, AZPlugin plugin) {
         CallbackTime callbackTime = abstractCallback.getTime();
         AZTask azTask;

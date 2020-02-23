@@ -20,7 +20,7 @@ import java.util.LinkedList;
 public abstract class AbstractCallback {
 
     LinkedList<Pair<TaskOperation, Object>> operationData;
-    long taskId;
+    public long taskId;
 
     public AbstractCallback() {
         this.operationData = new LinkedList<>();

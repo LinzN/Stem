@@ -49,6 +49,7 @@ public class CommandSetup {
         registerCommand("push", new PushCommand());
         registerCommand("help", new HelpCommand());
         registerCommand("verbose", new VerboseCommand());
+        registerCommand("status", new StatusCommand());
     }
 
     private void registerCommand(String command, ICommand ICommand) {
