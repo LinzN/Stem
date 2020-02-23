@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.modules.zSocketModule.mask;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.zSocketModule.ZSocketModule;
 import de.linzn.zSocket.components.IZMask;
 
@@ -30,6 +31,6 @@ public class SocketMask implements IZMask {
 
     @Override
     public boolean isDebugging() {
-        return true;
+        return AppLogger.getVerbose();
     }
 }

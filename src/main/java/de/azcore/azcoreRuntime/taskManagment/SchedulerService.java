@@ -173,6 +173,15 @@ public class SchedulerService {
         }
     }
 
+    public boolean isTask(long taskId) {
+        for (AZTask azTask : this.tasks) {
+            if (azTask.getTaskId() == taskId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void cancelTask(long taskId) {
         for (AZTask azTask : this.tasks) {
             if (azTask.getTaskId() == taskId) {

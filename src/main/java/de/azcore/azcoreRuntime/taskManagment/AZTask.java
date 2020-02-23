@@ -11,6 +11,7 @@
 
 package de.azcore.azcoreRuntime.taskManagment;
 
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 
 public class AZTask {
@@ -27,6 +28,9 @@ public class AZTask {
     }
 
     public void cancel() {
+        if (!this.isCanceled) {
+            AppLogger.logger("Cancel taskId " + taskId + " from plugin " + owner.getPluginName(), false, true);
+        }
         this.isCanceled = true;
     }
 

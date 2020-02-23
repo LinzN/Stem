@@ -23,16 +23,18 @@ import java.util.List;
 public class CommandModule extends AbstractModule implements Runnable {
     private AZCoreRuntimeApp azCoreRuntime;
     private CommandSetup commandSetup;
+    private boolean moduleAlive;
 
     public CommandModule(AZCoreRuntimeApp azCoreRuntime) {
         this.azCoreRuntime = azCoreRuntime;
+        this.moduleAlive = true;
         this.commandSetup = new CommandSetup(this.azCoreRuntime);
         this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), this);
     }
 
     @Override
     public void run() {
-        while (this.azCoreRuntime.isActive()) {
+        while (moduleAlive) {
             String input = System.console().readLine();
 
             String[] inputArray = input.split(" ");
@@ -54,5 +56,10 @@ public class CommandModule extends AbstractModule implements Runnable {
 
     public List<String> getCommandList() {
         return new ArrayList<>(this.commandSetup.terminalExecutes.keySet());
+    }
+
+    @Override
+    public void onShutdown() {
+        this.moduleAlive = false;
     }
 }

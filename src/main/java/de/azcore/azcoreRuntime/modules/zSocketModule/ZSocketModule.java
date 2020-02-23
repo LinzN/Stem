@@ -79,4 +79,9 @@ public class ZSocketModule extends AbstractModule {
 
         this.fileConfiguration.save();
     }
+
+    @Override
+    public void onShutdown() {
+        this.deleteNetwork();
+    }
 }

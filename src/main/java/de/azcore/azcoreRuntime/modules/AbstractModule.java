@@ -30,6 +30,15 @@ public abstract class AbstractModule {
         return this.modulePlugin;
     }
 
+    public void shutdownModule() {
+        AppLogger.logger("Unload module " + this.modulePlugin.getPluginName(), true, false);
+        this.onShutdown();
+        AZCoreRuntimeApp.getInstance().getCallBackService().unregisterCallbackListeners(this.modulePlugin);
+        AZCoreRuntimeApp.getInstance().getScheduler().cancelTasks(this.modulePlugin);
+    }
+
+    public abstract void onShutdown();
+
     private AZPlugin setupModulePlugin(String moduleName) {
         return this.modulePlugin = new AZPlugin() {
 

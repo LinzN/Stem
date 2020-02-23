@@ -111,4 +111,9 @@ public class DatabaseModule extends AbstractModule {
 
         this.fileConfiguration.save();
     }
+
+    @Override
+    public void onShutdown() {
+
+    }
 }

@@ -106,14 +106,30 @@ public class AZCoreRuntimeApp {
     }
 
     public void shutdown() {
+        this.commandModule.shutdownModule();
+        this.pluginModule.shutdownModule();
+        this.zSocketModule.shutdownModule();
+        this.notificationModule.shutdownModule();
+        this.databaseModule.shutdownModule();
+
         this.coreRunner.endCore();
         this.isActive.set(false);
+        AppLogger.logger("Shutdown complete!", true, false);
         System.exit(0);
     }
 
     public AppConfiguration getConfiguration() {
         return appConfiguration;
     }
+
+    public SchedulerService getScheduler() {
+        return this.coreRunner.getSchedulerService();
+    }
+
+    public CallbackService getCallBackService() {
+        return this.coreRunner.getCallbackService();
+    }
+
 
     public ZSocketModule getZSocketModule() {
         return zSocketModule;
@@ -133,14 +149,6 @@ public class AZCoreRuntimeApp {
 
     public PluginModule getPluginModule() {
         return pluginModule;
-    }
-
-    public SchedulerService getScheduler() {
-        return this.coreRunner.getSchedulerService();
-    }
-
-    public CallbackService getCallBackService() {
-        return this.coreRunner.getCallbackService();
     }
 
 }

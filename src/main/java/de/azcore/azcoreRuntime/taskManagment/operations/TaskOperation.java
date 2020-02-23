@@ -12,7 +12,6 @@
 package de.azcore.azcoreRuntime.taskManagment.operations;
 
 
-
 public interface TaskOperation {
     Object runOperation(Object object);
 }

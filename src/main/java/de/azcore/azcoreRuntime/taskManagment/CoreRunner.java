@@ -33,10 +33,13 @@ public class CoreRunner implements Runnable {
 
     public void run() {
         while (isAlive.get()) {
-            System.out.print("|");
+            if (AppLogger.getVerbose()) {
+                System.out.print("|");
+            }
+
             if (!this.taskQueue.isEmpty()) {
                 Runnable task = this.taskQueue.remove();
-                AppLogger.logger("Exec Task: " + task.getClass().getName(), false, false);
+                AppLogger.logger("Exec Task: " + task.getClass().getSimpleName(), false, true);
                 try {
                     task.run();
                 } catch (Exception e) {
@@ -60,6 +63,7 @@ public class CoreRunner implements Runnable {
     }
 
     public void endCore() {
+        AppLogger.logger("Stopping CoreRunner...", true, false);
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
     }

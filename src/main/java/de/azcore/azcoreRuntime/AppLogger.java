@@ -11,6 +11,8 @@
 
 package de.azcore.azcoreRuntime;
 
+import de.azcore.azcoreRuntime.utils.Color;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -62,7 +64,7 @@ public class AppLogger {
     public static synchronized void logger(String log, boolean writeToFile, boolean debugInfo) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         if (!debugInfo || verbose.get()) {
-            System.out.print(dateFormat.format(new Date().getTime()) + (debugInfo ? "[Debug]" : "") + " [" + Thread.currentThread().getName() + "] " + log + "\n");
+            System.out.print(dateFormat.format(new Date().getTime()) + (debugInfo ? Color.YELLOW : "") + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
             System.out.flush();
             if (writeToFile) {
                 fileLogger.info(dateFormat.format(new Date().getTime()) + "[" + Thread.currentThread().getName() + "] " + log);

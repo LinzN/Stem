@@ -22,17 +22,18 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class NotificationModule extends AbstractModule {
-    private boolean alive;
+    private boolean moduleAlive;
 
     private AZCoreRuntimeApp azCoreRuntime;
     private LinkedList<NotificationContainer> notificationQueue;
     private List<INotificationProfile> notificationProfiles;
 
+
     public NotificationModule(AZCoreRuntimeApp azCoreRuntime) {
         this.azCoreRuntime = azCoreRuntime;
         this.notificationQueue = new LinkedList<>();
         this.notificationProfiles = new ArrayList<>();
-        this.alive = true;
+        this.moduleAlive = true;
         this.registerNotificationProfile(new ConsoleProfile());
         this.registerNotificationProfile(new SocketProfile());
         startNotificationModule();
@@ -45,8 +46,8 @@ public class NotificationModule extends AbstractModule {
 
     private void startNotificationModule() {
         this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), () -> {
-            alive = true;
-            while (alive) {
+            moduleAlive = true;
+            while (moduleAlive) {
                 try {
                     if (!notificationQueue.isEmpty()) {
                         NotificationContainer notificationContainer = notificationQueue.removeFirst();
@@ -68,7 +69,7 @@ public class NotificationModule extends AbstractModule {
     }
 
     public void stopNotificationModule() {
-        this.alive = false;
+        this.moduleAlive = false;
     }
 
     public void registerNotificationProfile(INotificationProfile notificationProfile) {
@@ -80,4 +81,8 @@ public class NotificationModule extends AbstractModule {
     }
 
 
+    @Override
+    public void onShutdown() {
+        this.stopNotificationModule();
+    }
 }

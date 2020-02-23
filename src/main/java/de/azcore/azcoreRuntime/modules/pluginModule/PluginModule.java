@@ -77,7 +77,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AppLogger.logger("Enable plugin: " + plugin.getDescription(), false, false);
+        AppLogger.logger("Enable plugin: " + plugin.getDescription(), true, false);
 
         try {
             plugin.onEnable();
@@ -93,9 +93,11 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AppLogger.logger("Disable plugin: " + plugin.getDescription(), false, false);
+        AppLogger.logger("Disable plugin: " + plugin.getDescription(), true, false);
         try {
             plugin.onDisable();
+            this.azCoreRuntime.getCallBackService().unregisterCallbackListeners(plugin);
+            this.azCoreRuntime.getScheduler().cancelTasks(plugin);
         } catch (Exception exception) {
             exception.printStackTrace();
             return false;
@@ -191,4 +193,8 @@ public class PluginModule extends AbstractModule {
         return new ArrayList<>(this.pluginList.values());
     }
 
+    @Override
+    public void onShutdown() {
+        this.unloadPlugins();
+    }
 }
