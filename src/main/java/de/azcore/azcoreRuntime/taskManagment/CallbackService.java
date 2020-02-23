@@ -12,6 +12,7 @@
 package de.azcore.azcoreRuntime.taskManagment;
 
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
+import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
 import de.linzn.openJL.pairs.Pair;
@@ -33,6 +34,7 @@ public class CallbackService {
 
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
         abstractCallback.disable();
+        AppLogger.logger("Callback unregister: " + abstractCallback.getClass().getSimpleName(), false, true);
     }
 
     public void unregisterCallbackListeners(AZPlugin azPlugin) {
@@ -41,6 +43,7 @@ public class CallbackService {
             AZPlugin azPlugin1 = this.callbackListeners.get(abstractCallback);
             if (azPlugin == azPlugin1) {
                 abstractCallback.disable();
+                AppLogger.logger("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + azPlugin.getPluginName(), false, true);
             }
         }
     }
@@ -54,13 +57,12 @@ public class CallbackService {
         AZTask azTask;
 
         Runnable runnable = () -> callMethod(abstractCallback, plugin);
-
         if (callbackTime.fixedTask) {
             azTask = AZCoreRuntimeApp.getInstance().getScheduler().runFixedScheduler(plugin, runnable, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
         } else {
             azTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
         }
-
+        AppLogger.logger("Callback register for " + plugin.getPluginName() + " with taskId :" + azTask.taskId, false, true);
         abstractCallback.setIDs(azTask.getTaskId());
     }
 
@@ -68,6 +70,7 @@ public class CallbackService {
         abstractCallback.operation();
 
         while (!abstractCallback.operationData.isEmpty()) {
+            AppLogger.logger("Callback operation for " + plugin.getPluginName(), false, true);
             Pair<TaskOperation, Object> pair = abstractCallback.operationData.removeFirst();
 
             AZCoreRuntimeApp.getInstance().getScheduler().runTask(plugin, () -> {
