@@ -23,6 +23,7 @@ public class AZTask {
         this.owner = owner;
         this.runInCore = runInCore;
         this.taskId = System.nanoTime();
+        this.isCanceled = false;
     }
 
     public void cancel() {
