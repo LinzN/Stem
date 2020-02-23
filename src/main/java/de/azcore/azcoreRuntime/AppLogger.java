@@ -73,7 +73,7 @@ public class AppLogger {
     public static synchronized void debug(String log) {
         if (verbose.get()) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-            System.out.print(dateFormat.format(new Date().getTime()) + Color.YELLOW + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
+            System.out.print("\n" + dateFormat.format(new Date().getTime()) + Color.YELLOW + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
             System.out.flush();
         }
     }
