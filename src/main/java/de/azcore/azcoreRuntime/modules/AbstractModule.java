@@ -14,6 +14,7 @@ package de.azcore.azcoreRuntime.modules;
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
 import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
+import de.azcore.azcoreRuntime.utils.JavaUtils;
 import de.linzn.simplyConfiguration.FileConfiguration;
 
 import java.io.File;
@@ -57,7 +58,7 @@ public abstract class AbstractModule {
 
             @Override
             public String getVersion() {
-                return AZCoreRuntimeApp.getInstance().getVersion();
+                return JavaUtils.getVersion();
             }
 
             @Override

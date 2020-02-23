@@ -15,16 +15,13 @@ import de.azcore.azcoreRuntime.configuration.AppConfiguration;
 import de.azcore.azcoreRuntime.modules.commandModule.CommandModule;
 import de.azcore.azcoreRuntime.modules.databaseModule.DatabaseModule;
 import de.azcore.azcoreRuntime.modules.notificationModule.NotificationModule;
-import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
 import de.azcore.azcoreRuntime.modules.pluginModule.PluginModule;
 import de.azcore.azcoreRuntime.modules.zSocketModule.ZSocketModule;
 import de.azcore.azcoreRuntime.taskManagment.CallbackService;
 import de.azcore.azcoreRuntime.taskManagment.CoreRunner;
 import de.azcore.azcoreRuntime.taskManagment.SchedulerService;
+import de.azcore.azcoreRuntime.utils.JavaUtils;
 
-import java.io.IOException;
-import java.net.URL;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AZCoreRuntimeApp {
@@ -41,20 +38,21 @@ public class AZCoreRuntimeApp {
     private PluginModule pluginModule;
     private long start_time;
 
-    private AppLogger appLogger;
 
 
     public AZCoreRuntimeApp(String[] args) {
         instance = this;
+        AppLogger.logger("AZCore-Runtime version " + JavaUtils.getVersion(), true);
         this.start_time = System.nanoTime();
-        this.appLogger = new AppLogger();
         this.isActive = new AtomicBoolean(true);
         this.coreRunner = new CoreRunner();
         Thread main = new Thread(this.coreRunner);
         main.setName("AZCore");
         main.start();
-        loadModules();
-        finishStartup();
+        this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), () -> {
+            loadModules();
+            AppLogger.logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true);
+        });
     }
 
     public static void main(String[] args) {
@@ -68,38 +66,14 @@ public class AZCoreRuntimeApp {
 
 
     private void loadModules() {
-        AZPlugin azPlugin = this.coreRunner.getSchedulerService().getDefaultAZPlugin();
-        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> appConfiguration = new AppConfiguration(instance));
-        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> databaseModule = new DatabaseModule(instance));
-        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> zSocketModule = new ZSocketModule(instance));
-        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> notificationModule = new NotificationModule(instance));
-        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> commandModule = new CommandModule(instance));
-        this.coreRunner.getSchedulerService().runTaskInCore(azPlugin, () -> pluginModule = new PluginModule(instance));
+        appConfiguration = new AppConfiguration(instance);
+        databaseModule = new DatabaseModule(instance);
+        zSocketModule = new ZSocketModule(instance);
+        notificationModule = new NotificationModule(instance);
+        commandModule = new CommandModule(instance);
+        pluginModule = new PluginModule(instance);
     }
 
-    private void finishStartup() {
-        Runnable finish = () -> AppLogger.logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true);
-        this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), finish);
-    }
-
-    public String getVersion() {
-        String version;
-        String res = "META-INF/maven/de.azcore/azcore-runtime/pom.properties";
-        URL url = Thread.currentThread().getContextClassLoader().getResource(res);
-        if (url == null) {
-            version = "SS";
-        } else {
-            Properties props = new Properties();
-            try {
-                props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(res));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            version = props.getProperty("version");
-        }
-
-        return version;
-    }
 
     public boolean isActive() {
         return this.isActive.get();
