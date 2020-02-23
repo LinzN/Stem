@@ -82,7 +82,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.logger("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.debug("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId);
         long times = this.getTimerTime(days, hours, minutes);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
@@ -111,7 +111,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.logger("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.debug("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
                 this.pushCoreRunner(azTask, task);
@@ -135,7 +135,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.logger("Task from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.debug("Task from " + plugin.getPluginName() + " id:" + azTask.taskId);
 
         tasks.remove(azTask);
         if (!azTask.isCanceled) {
@@ -152,7 +152,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.logger("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId, false, true);
+        AppLogger.debug("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId);
         Runnable runnableContainer = () -> {
             tasks.remove(azTask);
             if (!azTask.isCanceled) {
@@ -229,7 +229,7 @@ public class SchedulerService {
 
     private boolean checkIsValid() {
         if (this.tasks == null) {
-            AppLogger.logger(Color.RED + "Try to register task while shutdown!" + Color.RESET, false, false);
+            AppLogger.logger(Color.RED + "Try to register task while shutdown!" + Color.RESET, false);
         }
         return this.tasks != null;
     }

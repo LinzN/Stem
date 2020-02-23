@@ -40,7 +40,7 @@ public class NotificationModule extends AbstractModule {
     }
 
     public void pushNotification(NotificationContainer notificationContainer) {
-        AppLogger.logger("Push Notification for profiles", false, false);
+        AppLogger.logger("Push Notification for profiles", false);
         this.azCoreRuntime.getScheduler().runTask(this.getModulePlugin(), () -> notificationQueue.add(notificationContainer));
     }
 

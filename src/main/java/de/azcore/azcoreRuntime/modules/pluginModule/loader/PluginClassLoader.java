@@ -31,7 +31,7 @@ public class PluginClassLoader extends URLClassLoader {
     }
 
     private AZPlugin initPlugin(String pluginName, String classPath, String version) {
-        AppLogger.logger("Load plugin: " + pluginName, true, false);
+        AppLogger.logger("Load plugin: " + pluginName, true);
         try {
             Class<?> jarClass;
             try {

@@ -31,7 +31,7 @@ public class PushCommand implements ICommand {
             NotificationContainer notificationContainer = new NotificationContainer(message.toString(), NotificationPriority.DEFAULT);
             AZCoreRuntimeApp.getInstance().getNotificationModule().pushNotification(notificationContainer);
         } else {
-            AppLogger.logger("Not enough input to chat send", false, false);
+            AppLogger.logger("Not enough input to chat send", false);
         }
         return true;
     }

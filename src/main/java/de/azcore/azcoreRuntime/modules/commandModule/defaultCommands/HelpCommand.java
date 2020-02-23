@@ -32,7 +32,7 @@ public class HelpCommand implements ICommand {
             }
         }
 
-        AppLogger.logger(stringBuilder.toString(), false, false);
+        AppLogger.logger(stringBuilder.toString(), false);
         return true;
     }
 

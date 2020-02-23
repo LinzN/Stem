@@ -51,7 +51,7 @@ public class DatabaseModule extends AbstractModule {
             if (AppLogger.getVerbose()) {
                 e.printStackTrace();
             }
-            AppLogger.logger(Color.RED + "MySQL connection is invalid!" + Color.RESET, false, false);
+            AppLogger.logger(Color.RED + "MySQL connection is invalid!" + Color.RESET, false);
         }
         return null;
     }

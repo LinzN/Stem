@@ -66,7 +66,7 @@ public class PluginModule extends AbstractModule {
     }
 
     public void unloadPlugin(String pluginName) {
-        AppLogger.logger("Unload plugin: " + pluginName, false, false);
+        AppLogger.logger("Unload plugin: " + pluginName, false);
         if (disablePlugin(pluginName)) {
             this.pluginList.remove(pluginName);
         }
@@ -77,7 +77,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AppLogger.logger("Enable plugin: " + plugin.getDescription(), true, false);
+        AppLogger.logger("Enable plugin: " + plugin.getDescription(), true);
 
         try {
             plugin.onEnable();
@@ -93,7 +93,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AppLogger.logger("Disable plugin: " + plugin.getDescription(), true, false);
+        AppLogger.logger("Disable plugin: " + plugin.getDescription(), true);
         try {
             plugin.onDisable();
             this.azCoreRuntime.getCallBackService().unregisterCallbackListeners(plugin);
@@ -128,7 +128,7 @@ public class PluginModule extends AbstractModule {
                     URLClassLoader child = new URLClassLoader(new URL[]{jarFile.toURL()}, this.getClass().getClassLoader());
 
                     if (child.getResource(pluginFileName) == null) {
-                        AppLogger.logger("No " + pluginFileName + " file found for " + jarFile.getName(), true, false);
+                        AppLogger.logger("No " + pluginFileName + " file found for " + jarFile.getName(), true);
                         continue;
                     }
 
@@ -156,7 +156,7 @@ public class PluginModule extends AbstractModule {
             int maxValue = pluginsWithDependencies.size() * pluginsWithDependencies.size();
 
             if (i > maxValue) { //todo fix this
-                AppLogger.logger("Some plugins could not be loaded!", true, false);
+                AppLogger.logger("Some plugins could not be loaded!", true);
                 break;
             }
 

@@ -29,7 +29,7 @@ public class AZTask {
 
     public void cancel() {
         if (!this.isCanceled) {
-            AppLogger.logger("Cancel taskId " + taskId + " from plugin " + owner.getPluginName(), false, true);
+            AppLogger.debug("Cancel taskId " + taskId + " from plugin " + owner.getPluginName());
         }
         this.isCanceled = true;
     }

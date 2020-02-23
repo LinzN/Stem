@@ -22,12 +22,12 @@ public class ConnectionListener implements IListener {
 
     @EventHandler
     public void onConnectEvent(ConnectEvent event) {
-        AppLogger.logger("Register new communication device: " + event.getClientUUID(), true, false);
+        AppLogger.logger("Register new communication device: " + event.getClientUUID(), true);
 
     }
 
     @EventHandler
     public void onDisconnectEvent(DisconnectEvent event) {
-        AppLogger.logger("Unregister communication device: " + event.getClientUUID(), true, false);
+        AppLogger.logger("Unregister communication device: " + event.getClientUUID(), true);
     }
 }

@@ -61,17 +61,22 @@ public class AppLogger {
         }
     }
 
-    public static synchronized void logger(String log, boolean writeToFile, boolean debugInfo) {
+    public static synchronized void logger(String log, boolean writeToFile) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        if (!debugInfo || verbose.get()) {
-            System.out.print(dateFormat.format(new Date().getTime()) + (debugInfo ? Color.YELLOW : "") + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
-            System.out.flush();
-            if (writeToFile) {
-                fileLogger.info(dateFormat.format(new Date().getTime()) + "[" + Thread.currentThread().getName() + "] " + log);
-            }
+        System.out.print(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log + "\n");
+        System.out.flush();
+        if (writeToFile) {
+            fileLogger.info(dateFormat.format(new Date().getTime()) + "[" + Thread.currentThread().getName() + "] " + log);
         }
     }
 
+    public static synchronized void debug(String log) {
+        if (verbose.get()) {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            System.out.print(dateFormat.format(new Date().getTime()) + Color.YELLOW + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
+            System.out.flush();
+        }
+    }
 
     public static boolean getVerbose() {
         return verbose.get();

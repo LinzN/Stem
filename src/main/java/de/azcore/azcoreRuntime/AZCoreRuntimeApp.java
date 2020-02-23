@@ -58,7 +58,7 @@ public class AZCoreRuntimeApp {
     }
 
     public static void main(String[] args) {
-        AppLogger.logger(AZCoreRuntimeApp.class.getSimpleName() + " load mainframe...", false, false);
+        AppLogger.logger(AZCoreRuntimeApp.class.getSimpleName() + " load mainframe...", false);
         new AZCoreRuntimeApp(args);
     }
 
@@ -78,7 +78,7 @@ public class AZCoreRuntimeApp {
     }
 
     private void finishStartup() {
-        Runnable finish = () -> AppLogger.logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true, false);
+        Runnable finish = () -> AppLogger.logger("AZCore-Runtime startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true);
         this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), finish);
     }
 
@@ -114,7 +114,7 @@ public class AZCoreRuntimeApp {
 
         this.coreRunner.endCore();
         this.isActive.set(false);
-        AppLogger.logger("Shutdown complete!", true, false);
+        AppLogger.logger("Shutdown complete!", true);
         System.exit(0);
     }
 

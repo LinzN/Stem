@@ -33,7 +33,7 @@ public class CommandSetup {
                 if (this.terminalExecutes.containsKey(command.toLowerCase())) {
                     this.terminalExecutes.get(command.toLowerCase()).executeTerminal(args);
                 } else {
-                    AppLogger.logger("Error on command", false, false);
+                    AppLogger.logger("Error on command", false);
                 }
             } catch (Exception e) {
                 System.err.println(e);
@@ -52,7 +52,7 @@ public class CommandSetup {
     }
 
     private void registerCommand(String command, ICommand ICommand) {
-        AppLogger.logger("Register internal command #" + command, true, false);
+        AppLogger.logger("Register internal command #" + command, true);
         terminalExecutes.put(command, ICommand);
     }
 }

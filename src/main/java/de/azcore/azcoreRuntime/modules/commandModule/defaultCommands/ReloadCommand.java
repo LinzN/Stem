@@ -21,9 +21,9 @@ public class ReloadCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        AppLogger.logger(Color.GREEN + "Reloading plugins ..." + Color.RESET, false, false);
+        AppLogger.logger(Color.GREEN + "Reloading plugins ..." + Color.RESET, false);
         AZCoreRuntimeApp.getInstance().getPluginModule().reloadPlugins();
-        AppLogger.logger(Color.GREEN + "Plugins reloaded!" + Color.RESET, false, false);
+        AppLogger.logger(Color.GREEN + "Plugins reloaded!" + Color.RESET, false);
         return true;
     }
 

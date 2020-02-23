@@ -35,7 +35,7 @@ public class CallbackService {
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
         this.callbackListeners.remove(abstractCallback);
-        AppLogger.logger("Callback unregister: " + abstractCallback.getClass().getSimpleName(), false, true);
+        AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName());
     }
 
     public void unregisterCallbackListeners(AZPlugin azPlugin) {
@@ -45,7 +45,7 @@ public class CallbackService {
             if (azPlugin == azPlugin1) {
                 AZCoreRuntimeApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
                 this.callbackListeners.remove(abstractCallback);
-                AppLogger.logger("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + azPlugin.getPluginName(), false, true);
+                AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + azPlugin.getPluginName());
             }
         }
     }
@@ -60,7 +60,7 @@ public class CallbackService {
         } else {
             azTask = AZCoreRuntimeApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
         }
-        AppLogger.logger("Callback register for " + plugin.getPluginName() + " with taskId :" + azTask.taskId, false, true);
+        AppLogger.debug("Callback register for " + plugin.getPluginName() + " with taskId :" + azTask.taskId);
         abstractCallback.setIDs(azTask.getTaskId());
     }
 
@@ -68,7 +68,7 @@ public class CallbackService {
         abstractCallback.operation();
 
         while (!abstractCallback.operationData.isEmpty()) {
-            AppLogger.logger("Callback operation for " + plugin.getPluginName(), false, true);
+            AppLogger.debug("Callback operation for " + plugin.getPluginName());
             Pair<TaskOperation, Object> pair = abstractCallback.operationData.removeFirst();
 
             AZCoreRuntimeApp.getInstance().getScheduler().runTask(plugin, () -> {
@@ -76,7 +76,7 @@ public class CallbackService {
                 abstractCallback.callback(object);
                 if (!AZCoreRuntimeApp.getInstance().getScheduler().isTask(abstractCallback.taskId)) {
                     this.callbackListeners.remove(abstractCallback);
-                    AppLogger.logger("Disable Callback from " + plugin.getPluginName() + " with taskId " + abstractCallback.taskId, false, true);
+                    AppLogger.debug("Disable Callback from " + plugin.getPluginName() + " with taskId " + abstractCallback.taskId);
                 }
             });
         }

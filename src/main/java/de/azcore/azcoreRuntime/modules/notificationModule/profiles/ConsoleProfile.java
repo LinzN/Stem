@@ -20,7 +20,7 @@ public class ConsoleProfile implements INotificationProfile {
     @Override
     public void push(NotificationContainer notificationContainer) {
         if (notificationContainer.notificationPriority.hasPriority(NotificationPriority.LOW)) {
-            AppLogger.logger("Console -> " + notificationContainer.notification, true, false);
+            AppLogger.logger("Console -> " + notificationContainer.notification, true);
         }
     }
 }

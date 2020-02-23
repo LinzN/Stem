@@ -23,7 +23,7 @@ public abstract class AbstractModule {
 
     public AbstractModule() {
         this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
-        AppLogger.logger("Load module " + this.modulePlugin.getPluginName(), true, false);
+        AppLogger.logger("Load module " + this.modulePlugin.getPluginName(), true);
     }
 
     public AZPlugin getModulePlugin() {
@@ -31,7 +31,7 @@ public abstract class AbstractModule {
     }
 
     public void shutdownModule() {
-        AppLogger.logger("Unload module " + this.modulePlugin.getPluginName(), true, false);
+        AppLogger.logger("Unload module " + this.modulePlugin.getPluginName(), true);
         this.onShutdown();
         AZCoreRuntimeApp.getInstance().getCallBackService().unregisterCallbackListeners(this.modulePlugin);
         AZCoreRuntimeApp.getInstance().getScheduler().cancelTasks(this.modulePlugin);

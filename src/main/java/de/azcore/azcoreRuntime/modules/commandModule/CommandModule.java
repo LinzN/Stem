@@ -46,7 +46,7 @@ public class CommandModule extends AbstractModule implements Runnable {
     }
 
     public void registerCommand(String command, ICommand ICommand) {
-        AppLogger.logger("Register new command #" + command, true, false);
+        AppLogger.logger("Register new command #" + command, true);
         commandSetup.terminalExecutes.put(command, ICommand);
     }
 

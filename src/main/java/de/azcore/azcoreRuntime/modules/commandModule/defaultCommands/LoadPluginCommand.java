@@ -35,7 +35,7 @@ public class LoadPluginCommand implements ICommand {
                     e.printStackTrace();
                 }
             } else {
-                AppLogger.logger("No plugin file found!", false, false);
+                AppLogger.logger("No plugin file found!", false);
             }
         }
         return true;
