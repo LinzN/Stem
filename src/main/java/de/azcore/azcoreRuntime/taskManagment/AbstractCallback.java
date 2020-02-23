@@ -31,7 +31,7 @@ public abstract class AbstractCallback {
         this.taskId = taskId;
     }
 
-    public abstract void methodToCall();
+    public abstract void operation();
 
     public abstract void callback(Object object);
 

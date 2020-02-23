@@ -65,7 +65,7 @@ public class CallbackService {
     }
 
     private void callMethod(AbstractCallback abstractCallback, AZPlugin plugin) {
-        abstractCallback.methodToCall();
+        abstractCallback.operation();
 
         while (!abstractCallback.operationData.isEmpty()) {
             Pair<TaskOperation, Object> pair = abstractCallback.operationData.removeFirst();
