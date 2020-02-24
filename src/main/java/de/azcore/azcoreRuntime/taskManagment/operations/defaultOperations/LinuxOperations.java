@@ -11,63 +11,58 @@
 
 package de.azcore.azcoreRuntime.taskManagment.operations.defaultOperations;
 
+import de.azcore.azcoreRuntime.taskManagment.operations.OperationSettings;
 import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 public class LinuxOperations {
 
-    public static TaskOperation run_linux_shell = object -> {
-        JSONObject answerObject = new JSONObject();
-        answerObject.put("requestData", object);
+    public static TaskOperation run_linux_shell = operationSettings -> {
+        OperationSettings returnData = new OperationSettings();
+        returnData.addSetting("input.settings", operationSettings);
         try {
-            JSONObject jsonObject = (JSONObject) object;
+
             StringBuilder command = new StringBuilder();
-            boolean useSSH = jsonObject.getJSONObject("ssh").getBoolean("useSSH");
+            boolean useSSH = operationSettings.getBooleanSetting("ssh.use");
             if (useSSH) {
-                String sshUser = jsonObject.getJSONObject("ssh").getString("user");
-                String host = jsonObject.getJSONObject("ssh").getString("host");
-                int port = jsonObject.getJSONObject("ssh").getInt("port");
+                String sshUser = operationSettings.getStringSetting("ssh.user");
+                String host = operationSettings.getStringSetting("ssh.host");
+                int port = operationSettings.getIntSetting("ssh.port");
                 command.append("ssh ").append(sshUser).append("@").append(host).append(" -p ").append(port).append(" -C '");
             }
 
-            boolean isScript = jsonObject.getJSONObject("command").getBoolean("isScript");
+            String script = operationSettings.getStringSetting("command.script");
+            command.append(script);
 
-            if (isScript) {
-                //String[] script = (String[]) jsonObject.getJSONObject("command").get("script");
-                //command.append(script);
-            } else {
-                String script = jsonObject.getJSONObject("command").getString("script");
-                command.append(script);
-            }
             if (useSSH) {
                 command.append("'");
             }
 
-            boolean withOutput = jsonObject.getBoolean("useOutput");
+            boolean withOutput = operationSettings.getBooleanSetting("output.use");
 
             String[] cmd = {"/bin/sh", "-c", command.toString()};
             Process p = Runtime.getRuntime().exec(cmd);
             p.waitFor(60, TimeUnit.MINUTES);
             if (withOutput) {
-                JSONArray jsonArray = new JSONArray();
+                List<String> lines = new ArrayList<>();
                 BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
                 String line;
                 while ((line = b.readLine()) != null) {
-                    jsonArray.put(line);
+                    lines.add(line);
                 }
-                answerObject.put("output", jsonArray);
+                returnData.addSetting("output", lines);
             }
-            answerObject.put("exitcode", p.exitValue());
+            returnData.addSetting("exit", p.exitValue());
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            answerObject.put("exitcode", -1);
+            returnData.addSetting("exit", -1);
         }
-        return answerObject;
+        return returnData;
     };
 }

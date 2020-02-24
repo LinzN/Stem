@@ -11,15 +11,15 @@
 
 package de.azcore.azcoreRuntime.taskManagment;
 
+import de.azcore.azcoreRuntime.taskManagment.operations.OperationSettings;
 import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
 import de.linzn.openJL.pairs.Pair;
-import org.json.JSONObject;
 
 import java.util.LinkedList;
 
 public abstract class AbstractCallback {
 
-    LinkedList<Pair<TaskOperation, Object>> operationData;
+    LinkedList<Pair<TaskOperation, OperationSettings>> operationData;
     public long taskId;
 
     public AbstractCallback() {
@@ -34,7 +34,7 @@ public abstract class AbstractCallback {
 
     public abstract void callback(Object object);
 
-    public void addOperationData(TaskOperation taskOperation, JSONObject data) {
+    public void addOperationData(TaskOperation taskOperation, OperationSettings data) {
         this.operationData.add(new Pair<>(taskOperation, data));
     }
 

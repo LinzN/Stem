@@ -14,6 +14,7 @@ package de.azcore.azcoreRuntime.taskManagment;
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
 import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
+import de.azcore.azcoreRuntime.taskManagment.operations.OperationSettings;
 import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
 import de.linzn.openJL.pairs.Pair;
 
@@ -73,7 +74,7 @@ public class CallbackService {
 
         while (!abstractCallback.operationData.isEmpty()) {
             AppLogger.debug("Callback operation for " + plugin.getPluginName());
-            Pair<TaskOperation, Object> pair = abstractCallback.operationData.removeFirst();
+            Pair<TaskOperation, OperationSettings> pair = abstractCallback.operationData.removeFirst();
 
             AZCoreRuntimeApp.getInstance().getScheduler().runTask(plugin, () -> {
                 Object object = pair.getKey().runOperation(pair.getValue());
