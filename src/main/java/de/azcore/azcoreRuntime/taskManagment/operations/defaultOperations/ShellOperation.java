@@ -88,4 +88,28 @@ public class ShellOperation extends AbstractOperation {
     public void setSshUser(String sshUser) {
         this.sshUser = sshUser;
     }
+
+    public boolean isUseOutput() {
+        return useOutput;
+    }
+
+    public boolean isUseSSH() {
+        return useSSH;
+    }
+
+    public int getSshPort() {
+        return sshPort;
+    }
+
+    public String getSshHost() {
+        return sshHost;
+    }
+
+    public String getSshUser() {
+        return sshUser;
+    }
+
+    public String getScriptCommand() {
+        return scriptCommand;
+    }
 }
