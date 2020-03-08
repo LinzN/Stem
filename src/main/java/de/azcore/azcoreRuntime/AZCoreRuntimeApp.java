@@ -39,7 +39,6 @@ public class AZCoreRuntimeApp {
     private long start_time;
 
 
-
     public AZCoreRuntimeApp(String[] args) {
         instance = this;
         AppLogger.logger("AZCore-Runtime version " + JavaUtils.getVersion(), true);

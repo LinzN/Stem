@@ -11,23 +11,28 @@
 
 package de.azcore.azcoreRuntime.taskManagment.operations.defaultOperations;
 
-import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
+import de.azcore.azcoreRuntime.taskManagment.operations.AbstractOperation;
+import de.azcore.azcoreRuntime.taskManagment.operations.OperationOutput;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-public class AZCoreOperations {
+public class AZCoreRestartOperation extends AbstractOperation {
 
-    public static TaskOperation azCore_restart = object -> {
+    @Override
+    public OperationOutput runOperation() {
+        OperationOutput operationOutput = new OperationOutput(this);
         try {
             String command = "service azcore restart";
             String[] cmd = {"/bin/sh", "-c", command};
             Process p = Runtime.getRuntime().exec(cmd);
             p.waitFor(5, TimeUnit.SECONDS);
+            operationOutput.setExit(p.exitValue());
 
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+            operationOutput.setExit(-1);
         }
-        return null;
-    };
+        return operationOutput;
+    }
 }

@@ -14,9 +14,8 @@ package de.azcore.azcoreRuntime.taskManagment;
 import de.azcore.azcoreRuntime.AZCoreRuntimeApp;
 import de.azcore.azcoreRuntime.AppLogger;
 import de.azcore.azcoreRuntime.modules.pluginModule.AZPlugin;
-import de.azcore.azcoreRuntime.taskManagment.operations.OperationSettings;
-import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
-import de.linzn.openJL.pairs.Pair;
+import de.azcore.azcoreRuntime.taskManagment.operations.AbstractOperation;
+import de.azcore.azcoreRuntime.taskManagment.operations.OperationOutput;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -74,11 +73,11 @@ public class CallbackService {
 
         while (!abstractCallback.operationData.isEmpty()) {
             AppLogger.debug("Callback operation for " + plugin.getPluginName());
-            Pair<TaskOperation, OperationSettings> pair = abstractCallback.operationData.removeFirst();
+            AbstractOperation abstractOperation = abstractCallback.operationData.removeFirst();
 
             AZCoreRuntimeApp.getInstance().getScheduler().runTask(plugin, () -> {
-                Object object = pair.getKey().runOperation(pair.getValue());
-                abstractCallback.callback(object);
+                OperationOutput operationOutput = abstractOperation.runOperation();
+                abstractCallback.callback(operationOutput);
                 if (!AZCoreRuntimeApp.getInstance().getScheduler().isTask(abstractCallback.taskId)) {
                     this.callbackListeners.remove(abstractCallback);
                     AppLogger.debug("Disable Callback from " + plugin.getPluginName() + " with taskId " + abstractCallback.taskId);

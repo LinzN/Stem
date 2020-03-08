@@ -11,16 +11,15 @@
 
 package de.azcore.azcoreRuntime.taskManagment;
 
-import de.azcore.azcoreRuntime.taskManagment.operations.OperationSettings;
-import de.azcore.azcoreRuntime.taskManagment.operations.TaskOperation;
-import de.linzn.openJL.pairs.Pair;
+import de.azcore.azcoreRuntime.taskManagment.operations.AbstractOperation;
+import de.azcore.azcoreRuntime.taskManagment.operations.OperationOutput;
 
 import java.util.LinkedList;
 
 public abstract class AbstractCallback {
 
-    LinkedList<Pair<TaskOperation, OperationSettings>> operationData;
     public long taskId;
+    LinkedList<AbstractOperation> operationData;
 
     public AbstractCallback() {
         this.operationData = new LinkedList<>();
@@ -32,10 +31,10 @@ public abstract class AbstractCallback {
 
     public abstract void operation();
 
-    public abstract void callback(Object object);
+    public abstract void callback(OperationOutput operationOutput);
 
-    public void addOperationData(TaskOperation taskOperation, OperationSettings data) {
-        this.operationData.add(new Pair<>(taskOperation, data));
+    public void addOperationData(AbstractOperation abstractOperation) {
+        this.operationData.add(abstractOperation);
     }
 
     public abstract CallbackTime getTime();

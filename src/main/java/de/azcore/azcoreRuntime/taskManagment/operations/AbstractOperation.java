@@ -11,7 +11,13 @@
 
 package de.azcore.azcoreRuntime.taskManagment.operations;
 
+public abstract class AbstractOperation implements Runnable {
 
-public interface TaskOperation {
-    Object runOperation(OperationSettings operationSettings);
+    public abstract OperationOutput runOperation();
+
+
+    @Override
+    public void run() {
+        OperationOutput operationOutput = runOperation();
+    }
 }
