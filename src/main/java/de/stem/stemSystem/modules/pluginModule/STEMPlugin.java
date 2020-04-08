@@ -16,7 +16,7 @@ import de.linzn.simplyConfiguration.provider.YamlConfiguration;
 
 import java.io.File;
 
-public abstract class AZPlugin {
+public abstract class STEMPlugin {
     private String pluginName;
     private String version;
     private String classPath;

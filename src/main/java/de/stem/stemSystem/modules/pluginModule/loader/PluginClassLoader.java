@@ -12,7 +12,7 @@
 package de.stem.stemSystem.modules.pluginModule.loader;
 
 import de.stem.stemSystem.AppLogger;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -25,12 +25,12 @@ public class PluginClassLoader extends URLClassLoader {
         super(new URL[]{}, ClassLoader.getSystemClassLoader());
     }
 
-    public synchronized AZPlugin addPluginFile(String pluginName, String classPath, String version, File jarFile) throws MalformedURLException {
+    public synchronized STEMPlugin addPluginFile(String pluginName, String classPath, String version, File jarFile) throws MalformedURLException {
         super.addURL(jarFile.toURI().toURL());
         return initPlugin(pluginName, classPath, version);
     }
 
-    private AZPlugin initPlugin(String pluginName, String classPath, String version) {
+    private STEMPlugin initPlugin(String pluginName, String classPath, String version) {
         AppLogger.logger("Load plugin: " + pluginName, true);
         try {
             Class<?> jarClass;
@@ -40,13 +40,13 @@ public class PluginClassLoader extends URLClassLoader {
                 throw new InvalidPluginException("Cannot find main class " + classPath + "'");
             }
 
-            Class<? extends AZPlugin> pluginClass;
+            Class<? extends STEMPlugin> pluginClass;
             try {
-                pluginClass = jarClass.asSubclass(AZPlugin.class);
+                pluginClass = jarClass.asSubclass(STEMPlugin.class);
             } catch (ClassCastException ex) {
                 throw new InvalidPluginException("main class `" + classPath + "' does not extend Plugin");
             }
-            AZPlugin plugin = pluginClass.newInstance();
+            STEMPlugin plugin = pluginClass.newInstance();
             plugin.setUp(pluginName, version, classPath);
             return plugin;
         } catch (IllegalAccessException ex) {

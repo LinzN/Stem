@@ -15,7 +15,7 @@ package de.stem.stemSystem.modules.commandModule.defaultCommands;
 import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.utils.Color;
 
 import java.util.ArrayList;
@@ -24,10 +24,10 @@ public class PluginsCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        ArrayList<AZPlugin> plugins = STEMSystemApp.getInstance().getPluginModule().getLoadedPlugins();
+        ArrayList<STEMPlugin> plugins = STEMSystemApp.getInstance().getPluginModule().getLoadedPlugins();
         StringBuilder stringBuilder = new StringBuilder("Loaded plugins (" + plugins.size() + "): ");
         for (int i = 0; i < plugins.size(); i++) {
-            AZPlugin plugin = plugins.get(i);
+            STEMPlugin plugin = plugins.get(i);
             stringBuilder.append(Color.GREEN).append(plugin.getPluginName()).append(":").append(plugin.getVersion()).append(Color.RESET);
             if (i < plugins.size() - 1) {
                 stringBuilder.append(", ");

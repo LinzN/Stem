@@ -12,15 +12,15 @@
 package de.stem.stemSystem.taskManagment;
 
 import de.stem.stemSystem.AppLogger;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 public class AZTask {
     long taskId;
     boolean isCanceled;
     boolean runInCore;
-    AZPlugin owner;
+    STEMPlugin owner;
 
-    public AZTask(AZPlugin owner, boolean runInCore) {
+    public AZTask(STEMPlugin owner, boolean runInCore) {
         this.owner = owner;
         this.runInCore = runInCore;
         this.taskId = System.nanoTime();
@@ -46,7 +46,7 @@ public class AZTask {
         return runInCore;
     }
 
-    public AZPlugin getOwner() {
+    public STEMPlugin getOwner() {
         return owner;
     }
 }

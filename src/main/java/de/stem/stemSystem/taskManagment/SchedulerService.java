@@ -14,7 +14,7 @@ package de.stem.stemSystem.taskManagment;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.stem.stemSystem.AppLogger;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.utils.Color;
 import de.stem.stemSystem.utils.JavaUtils;
 
@@ -30,52 +30,52 @@ public class SchedulerService {
     private ScheduledExecutorService scheduledExecutorService;
     private ExecutorService executorService;
     private HashSet<AZTask> tasks;
-    private DefaultAZPlugin defaultAZPlugin;
+    private DefaultSTEMPlugin defaultAZPlugin;
 
     SchedulerService(CoreRunner coreRunner) {
         this.coreRunner = coreRunner;
         this.scheduledExecutorService = new ScheduledThreadPoolExecutor(50);
         this.executorService = new ThreadPoolExecutor(30, 30, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         this.tasks = new HashSet<>();
-        this.defaultAZPlugin = new DefaultAZPlugin();
+        this.defaultAZPlugin = new DefaultSTEMPlugin();
     }
 
-    public AZTask runTaskInCore(AZPlugin plugin, Runnable task) {
+    public AZTask runTaskInCore(STEMPlugin plugin, Runnable task) {
         return execTask(plugin, task, true);
     }
 
-    public AZTask runTask(AZPlugin plugin, Runnable task) {
+    public AZTask runTask(STEMPlugin plugin, Runnable task) {
         return execTask(plugin, task, false);
     }
 
 
-    public AZTask runTaskLaterInCore(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
+    public AZTask runTaskLaterInCore(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return this.execTaskDelay(plugin, task, delay, timeUnit, true);
     }
 
-    public AZTask runTaskLater(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
+    public AZTask runTaskLater(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return this.execTaskDelay(plugin, task, delay, timeUnit, false);
     }
 
 
-    public AZTask runRepeatSchedulerInCore(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
+    public AZTask runRepeatSchedulerInCore(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return this.execRepeatTask(plugin, task, delay, period, timeUnit, true);
     }
 
-    public AZTask runRepeatScheduler(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
+    public AZTask runRepeatScheduler(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return this.execRepeatTask(plugin, task, delay, period, timeUnit, false);
     }
 
-    public AZTask runFixedSchedulerInCore(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
+    public AZTask runFixedSchedulerInCore(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
         return this.execFixedTask(plugin, task, days, hours, minutes, daily, true);
     }
 
-    public AZTask runFixedScheduler(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
+    public AZTask runFixedScheduler(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
         return this.execFixedTask(plugin, task, days, hours, minutes, daily, false);
     }
 
 
-    private AZTask execFixedTask(AZPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
+    private AZTask execFixedTask(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
@@ -104,7 +104,7 @@ public class SchedulerService {
         return azTask;
     }
 
-    private AZTask execRepeatTask(AZPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
+    private AZTask execRepeatTask(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
@@ -128,7 +128,7 @@ public class SchedulerService {
         return azTask;
     }
 
-    private AZTask execTask(AZPlugin plugin, Runnable task, boolean runInCore) {
+    private AZTask execTask(STEMPlugin plugin, Runnable task, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
@@ -145,7 +145,7 @@ public class SchedulerService {
         return azTask;
     }
 
-    private AZTask execTaskDelay(AZPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean runInCore) {
+    private AZTask execTaskDelay(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
@@ -191,9 +191,9 @@ public class SchedulerService {
         }
     }
 
-    public void cancelTasks(AZPlugin azPlugin) {
+    public void cancelTasks(STEMPlugin stemPlugin) {
         for (AZTask azTask : this.tasks) {
-            if (azTask.owner == azPlugin) {
+            if (azTask.owner == stemPlugin) {
                 azTask.cancel();
             }
         }
@@ -238,12 +238,12 @@ public class SchedulerService {
         return this.tasks != null;
     }
 
-    public DefaultAZPlugin getDefaultAZPlugin() {
+    public DefaultSTEMPlugin getDefaultAZPlugin() {
         return defaultAZPlugin;
     }
 
 
-    private class DefaultAZPlugin extends AZPlugin {
+    private class DefaultSTEMPlugin extends STEMPlugin {
 
         @Override
         public void onEnable() {

@@ -14,7 +14,7 @@ package de.stem.stemSystem.modules.commandModule.defaultCommands;
 import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.taskManagment.AZTask;
 import de.stem.stemSystem.taskManagment.AbstractCallback;
 import de.stem.stemSystem.utils.JavaUtils;
@@ -27,7 +27,7 @@ public class StatusCommand implements ICommand {
     @Override
     public boolean executeTerminal(String[] args) {
         AppLogger.logger("Version: " + JavaUtils.getVersion(), false);
-        HashMap<AbstractCallback, AZPlugin> listener = STEMSystemApp.getInstance().getCallBackService().getCallbackListeners();
+        HashMap<AbstractCallback, STEMPlugin> listener = STEMSystemApp.getInstance().getCallBackService().getCallbackListeners();
         AppLogger.logger("Active Callbacks: (" + listener.size() + ")", false);
         for (AbstractCallback abstractCallback : listener.keySet()) {
             AppLogger.logger("#Callback: " + abstractCallback.getClass().getSimpleName() + " from plugin: " + listener.get(abstractCallback).getPluginName() + " with taskId: " + abstractCallback.taskId, false);

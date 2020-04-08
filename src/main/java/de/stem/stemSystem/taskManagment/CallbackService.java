@@ -13,7 +13,7 @@ package de.stem.stemSystem.taskManagment;
 
 import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.taskManagment.operations.AbstractOperation;
 import de.stem.stemSystem.taskManagment.operations.OperationOutput;
 
@@ -21,15 +21,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class CallbackService {
-    private HashMap<AbstractCallback, AZPlugin> callbackListeners;
+    private HashMap<AbstractCallback, STEMPlugin> callbackListeners;
 
     CallbackService() {
         this.callbackListeners = new HashMap<>();
     }
 
-    public void registerCallbackListener(AbstractCallback abstractCallback, AZPlugin azPlugin) {
-        this.callbackListeners.put(abstractCallback, azPlugin);
-        this.enableCallbackListener(abstractCallback, azPlugin);
+    public void registerCallbackListener(AbstractCallback abstractCallback, STEMPlugin stemPlugin) {
+        this.callbackListeners.put(abstractCallback, stemPlugin);
+        this.enableCallbackListener(abstractCallback, stemPlugin);
     }
 
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
@@ -38,23 +38,23 @@ public class CallbackService {
         AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName());
     }
 
-    public void unregisterCallbackListeners(AZPlugin azPlugin) {
+    public void unregisterCallbackListeners(STEMPlugin stemPlugin) {
         for (Iterator<AbstractCallback> iterator = this.callbackListeners.keySet().iterator(); iterator.hasNext(); ) {
             AbstractCallback abstractCallback = iterator.next();
-            AZPlugin azPlugin1 = this.callbackListeners.get(abstractCallback);
-            if (azPlugin == azPlugin1) {
+            STEMPlugin stemPlugin1 = this.callbackListeners.get(abstractCallback);
+            if (stemPlugin == stemPlugin1) {
                 STEMSystemApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
                 this.callbackListeners.remove(abstractCallback);
-                AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + azPlugin.getPluginName());
+                AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + stemPlugin.getPluginName());
             }
         }
     }
 
-    public HashMap<AbstractCallback, AZPlugin> getCallbackListeners() {
+    public HashMap<AbstractCallback, STEMPlugin> getCallbackListeners() {
         return this.callbackListeners;
     }
 
-    private void enableCallbackListener(AbstractCallback abstractCallback, AZPlugin plugin) {
+    private void enableCallbackListener(AbstractCallback abstractCallback, STEMPlugin plugin) {
         CallbackTime callbackTime = abstractCallback.getTime();
         AZTask azTask;
 
@@ -68,7 +68,7 @@ public class CallbackService {
         abstractCallback.setIDs(azTask.getTaskId());
     }
 
-    private void callMethod(AbstractCallback abstractCallback, AZPlugin plugin) {
+    private void callMethod(AbstractCallback abstractCallback, STEMPlugin plugin) {
         abstractCallback.operation();
 
         while (!abstractCallback.operationData.isEmpty()) {

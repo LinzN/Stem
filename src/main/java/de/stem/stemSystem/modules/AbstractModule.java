@@ -14,20 +14,20 @@ package de.stem.stemSystem.modules;
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
-import de.stem.stemSystem.modules.pluginModule.AZPlugin;
+import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.utils.JavaUtils;
 
 import java.io.File;
 
 public abstract class AbstractModule {
-    private AZPlugin modulePlugin;
+    private STEMPlugin modulePlugin;
 
     public AbstractModule() {
         this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
         AppLogger.logger("Load module " + this.modulePlugin.getPluginName(), true);
     }
 
-    public AZPlugin getModulePlugin() {
+    public STEMPlugin getModulePlugin() {
         return this.modulePlugin;
     }
 
@@ -40,8 +40,8 @@ public abstract class AbstractModule {
 
     public abstract void onShutdown();
 
-    private AZPlugin setupModulePlugin(String moduleName) {
-        return this.modulePlugin = new AZPlugin() {
+    private STEMPlugin setupModulePlugin(String moduleName) {
+        return this.modulePlugin = new STEMPlugin() {
 
             @Override
             public void onEnable() {

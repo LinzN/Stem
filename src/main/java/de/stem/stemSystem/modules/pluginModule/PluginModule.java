@@ -28,7 +28,7 @@ public class PluginModule extends AbstractModule {
     public static File pluginDirectory = new File("plugins");
     private static String pluginFileName = "plugin.yml";
     private PluginClassLoader pluginClassLoader;
-    private LinkedHashMap<String, AZPlugin> pluginList;
+    private LinkedHashMap<String, STEMPlugin> pluginList;
     private STEMSystemApp stemSystemApp;
 
     public PluginModule(STEMSystemApp stemSystemApp) {
@@ -58,7 +58,7 @@ public class PluginModule extends AbstractModule {
     }
 
     private void loadPlugin(String pluginName, String classPath, String version, File jarFile, boolean enablePlugin) throws IOException {
-        AZPlugin plugin = pluginClassLoader.addPluginFile(pluginName, classPath, version, jarFile);
+        STEMPlugin plugin = pluginClassLoader.addPluginFile(pluginName, classPath, version, jarFile);
         this.pluginList.put(plugin.getPluginName(), plugin);
         if (enablePlugin) {
             enablePlugin(plugin.getPluginName());
@@ -73,7 +73,7 @@ public class PluginModule extends AbstractModule {
     }
 
     public boolean enablePlugin(String pluginName) {
-        AZPlugin plugin = this.pluginList.get(pluginName);
+        STEMPlugin plugin = this.pluginList.get(pluginName);
         if (plugin == null) {
             return false;
         }
@@ -89,7 +89,7 @@ public class PluginModule extends AbstractModule {
     }
 
     public boolean disablePlugin(String pluginName) {
-        AZPlugin plugin = this.pluginList.get(pluginName);
+        STEMPlugin plugin = this.pluginList.get(pluginName);
         if (plugin == null) {
             return false;
         }
@@ -189,7 +189,7 @@ public class PluginModule extends AbstractModule {
         }
     }
 
-    public ArrayList<AZPlugin> getLoadedPlugins() {
+    public ArrayList<STEMPlugin> getLoadedPlugins() {
         return new ArrayList<>(this.pluginList.values());
     }
 
