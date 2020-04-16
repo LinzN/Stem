@@ -13,8 +13,9 @@ package de.stem.stemSystem.taskManagment;
 
 
 import de.stem.stemSystem.AppLogger;
+import org.eclipse.jetty.util.BlockingArrayQueue;
 
-import java.util.LinkedList;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CoreRunner implements Runnable {
@@ -22,12 +23,12 @@ public class CoreRunner implements Runnable {
     private AtomicBoolean isAlive = new AtomicBoolean();
     private SchedulerService schedulerService;
     private CallbackService callbackService;
-    private LinkedList<Runnable> taskQueue;
+    private BlockingQueue<Runnable> taskQueue;
 
     public CoreRunner() {
         this.schedulerService = new SchedulerService(this);
         this.callbackService = new CallbackService();
-        this.taskQueue = new LinkedList<>();
+        this.taskQueue = new BlockingArrayQueue<>();
         isAlive.set(true);
     }
 
@@ -38,11 +39,16 @@ public class CoreRunner implements Runnable {
             }
 
             if (!this.taskQueue.isEmpty()) {
-                Runnable task = this.taskQueue.remove();
-                AppLogger.debug("Exec Task: " + task.getClass().getSimpleName());
                 try {
-                    task.run();
-                } catch (Exception e) {
+                    Runnable task = this.taskQueue.take();
+                    AppLogger.debug("Exec Task: " + task.getClass().getSimpleName());
+                    try {
+                        task.run();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
@@ -54,7 +60,7 @@ public class CoreRunner implements Runnable {
     }
 
     void queueTask(Runnable runnable) {
-        this.taskQueue.addLast(runnable);
+        this.taskQueue.add(runnable);
     }
 
 
