@@ -22,6 +22,7 @@ import de.stem.stemSystem.taskManagment.CoreRunner;
 import de.stem.stemSystem.taskManagment.SchedulerService;
 import de.stem.stemSystem.utils.JavaUtils;
 
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class STEMSystemApp {
@@ -36,6 +37,7 @@ public class STEMSystemApp {
     private NotificationModule notificationModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
+    private Date uptimeDate;
     private long start_time;
 
 
@@ -48,6 +50,7 @@ public class STEMSystemApp {
         Thread main = new Thread(this.coreRunner);
         main.setName("STEM");
         main.start();
+        this.uptimeDate = new Date();
         this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), () -> {
             loadModules();
             AppLogger.logger("STEM-System startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true);
@@ -122,6 +125,11 @@ public class STEMSystemApp {
 
     public PluginModule getPluginModule() {
         return pluginModule;
+    }
+
+
+    public Date getUptimeDate() {
+        return this.uptimeDate;
     }
 
 }

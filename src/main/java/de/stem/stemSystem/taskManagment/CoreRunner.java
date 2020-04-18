@@ -77,4 +77,5 @@ public class CoreRunner implements Runnable {
     public CallbackService getCallbackService() {
         return this.callbackService;
     }
+
 }

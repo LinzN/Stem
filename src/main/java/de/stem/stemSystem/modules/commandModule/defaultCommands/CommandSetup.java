@@ -50,6 +50,7 @@ public class CommandSetup {
         registerCommand("help", new HelpCommand());
         registerCommand("verbose", new VerboseCommand());
         registerCommand("status", new StatusCommand());
+        registerCommand("uptime", new UptimeCommand());
     }
 
     private void registerCommand(String command, ICommand ICommand) {
