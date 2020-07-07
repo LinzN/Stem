@@ -13,21 +13,27 @@ package de.stem.stemSystem.modules.databaseModule;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
-import de.stem.stemSystem.AppLogger;
+import de.linzn.simplyDatabase.DatabaseProvider;
+import de.linzn.simplyDatabase.provider.SQLiteProvider;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
-import de.stem.stemSystem.utils.Color;
 
 import java.io.File;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DatabaseModule extends AbstractModule {
     // Define variables
-    private STEMSystemApp stemSystemApp;
+    private final STEMSystemApp stemSystemApp;
+    private final DatabaseProvider databaseProvider;
 
     private FileConfiguration fileConfiguration;
 
-    private String url;
+    private String hostname;
+    private int port;
+    private String database;
     private String username;
     private String password;
 
@@ -35,6 +41,8 @@ public class DatabaseModule extends AbstractModule {
     /* Create class instance */
     public DatabaseModule(STEMSystemApp stemSystemApp) {
         this.initConfig();
+        //this.databaseProvider = new MySQLProvider(hostname, port, username, password, database);
+        this.databaseProvider = new SQLiteProvider("STEM.db");
         this.stemSystemApp = stemSystemApp;
         Connection connection = getConnection();
         if (connection != null) {
@@ -45,24 +53,12 @@ public class DatabaseModule extends AbstractModule {
 
     /* Return a new mysql connection */
     public Connection getConnection() {
-        try {
-            return DriverManager.getConnection(this.url, this.username, this.password);
-        } catch (SQLException e) {
-            if (AppLogger.getVerbose()) {
-                e.printStackTrace();
-            }
-            AppLogger.logger(Color.RED + "MySQL connection is invalid!" + Color.RESET, false);
-        }
-        return null;
+        return this.databaseProvider.getConnection();
     }
 
     /* Clear an mysql connection*/
     public void releaseConnection(Connection connection) {
-        try {
-            connection.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        this.databaseProvider.releaseConnection(connection);
     }
 
 
@@ -103,9 +99,9 @@ public class DatabaseModule extends AbstractModule {
 
     private void initConfig() {
         this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_database.yml"));
-
-        this.url = "jdbc:mysql://" + this.fileConfiguration.getString("sqlHostname", "127.0.0.1") + ":" + this.fileConfiguration.getInt("sqlPort", 3306) + "/"
-                + this.fileConfiguration.getString("sqlDatabaseName", "stem_db");
+        this.hostname = this.fileConfiguration.getString("sqlHostname", "127.0.0.1");
+        this.port = this.fileConfiguration.getInt("sqlPort", 3306);
+        this.database = this.fileConfiguration.getString("sqlDatabaseName", "stem_db");
         this.username = this.fileConfiguration.getString("sqlUserName", "stem");
         this.password = this.fileConfiguration.getString("sqlPassword", "test123");
 

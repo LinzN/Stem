@@ -156,8 +156,21 @@
             <type>jar</type>
         </dependency>
         <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.15.1
+            </version>
+        </dependency>
+        <dependency>
             <groupId>de.linzn</groupId>
             <artifactId>simplyConfiguration</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>simplyDatabase</artifactId>
             <version>1.0</version>
             <scope>compile</scope>
             <type>jar</type>
