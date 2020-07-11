@@ -18,7 +18,7 @@ import de.stem.stemSystem.modules.zSocketModule.ZSocketModule;
 
 public class SocketMask implements IZMask {
 
-    private ZSocketModule zSocketModule;
+    private final ZSocketModule zSocketModule;
 
     public SocketMask(ZSocketModule zSocketModule) {
         this.zSocketModule = zSocketModule;
@@ -32,5 +32,10 @@ public class SocketMask implements IZMask {
     @Override
     public boolean isDebugging() {
         return AppLogger.getVerbose();
+    }
+
+    @Override
+    public void log(String s) {
+        AppLogger.logger(s, true);
     }
 }
