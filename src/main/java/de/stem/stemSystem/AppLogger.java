@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.FileHandler;
 import java.util.logging.LogRecord;
@@ -24,13 +26,15 @@ import java.util.logging.SimpleFormatter;
 
 public class AppLogger {
 
-    private static java.util.logging.Logger fileLogger;
-    private static AtomicBoolean verbose;
+    private static final java.util.logging.Logger fileLogger;
+    private static final AtomicBoolean verbose;
+    private static final LinkedList<String> logEntries;
 
     static {
         verbose = new AtomicBoolean(false);
         fileLogger = java.util.logging.Logger.getLogger("STEM");
         fileLogger.setUseParentHandlers(false);
+        logEntries = new LinkedList<>();
         FileHandler fh;
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy-HH.mm.ss");
 
@@ -63,6 +67,7 @@ public class AppLogger {
 
     public static synchronized void logger(String log, boolean writeToFile) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
         System.out.print(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log + "\n");
         System.out.flush();
         if (writeToFile) {
@@ -73,6 +78,7 @@ public class AppLogger {
     public static synchronized void debug(String log) {
         if (verbose.get()) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
             System.out.print("\n" + dateFormat.format(new Date().getTime()) + Color.YELLOW + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
             System.out.flush();
         }
@@ -84,6 +90,17 @@ public class AppLogger {
 
     public static void setVerbose(boolean value) {
         verbose.set(value);
+    }
+
+    private static synchronized void addToLogList(String data) {
+        if (logEntries.size() >= 1000) {
+            logEntries.removeFirst();
+        }
+        logEntries.addLast(data);
+    }
+
+    public static List<String> getLastEntries(int max) {
+        return logEntries.subList(logEntries.size() - max, logEntries.size());
     }
 
 }
