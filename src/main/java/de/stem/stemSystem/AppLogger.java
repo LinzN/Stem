@@ -47,7 +47,7 @@ public class AppLogger {
 
     @Deprecated
     public static void setVerbose(boolean value) {
-        STEMSystemApp.logSystem.setLogLevel(LOGLEVEL.DEBUG);
+        STEMSystemApp.logSystem.setLogLevel(value ? LOGLEVEL.DEBUG : LOGLEVEL.INFO);
     }
 
 
