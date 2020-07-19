@@ -11,6 +11,8 @@
 
 package de.stem.stemSystem;
 
+import de.linzn.simplyLogger.LogSystem;
+import de.linzn.simplyLogger.Logger;
 import de.stem.stemSystem.configuration.AppConfiguration;
 import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
@@ -22,28 +24,31 @@ import de.stem.stemSystem.taskManagment.CoreRunner;
 import de.stem.stemSystem.taskManagment.SchedulerService;
 import de.stem.stemSystem.utils.JavaUtils;
 
+import java.io.File;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class STEMSystemApp {
 
     private static STEMSystemApp instance;
-    private AtomicBoolean isActive;
+    public static Logger LOGGER;
+    static LogSystem logSystem;
+    private final AtomicBoolean isActive;
 
-    private CoreRunner coreRunner;
+    private final CoreRunner coreRunner;
     private AppConfiguration appConfiguration;
     private ZSocketModule zSocketModule;
     private CommandModule commandModule;
     private NotificationModule notificationModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
-    private Date uptimeDate;
-    private long start_time;
+    private final Date uptimeDate;
+    private final long start_time;
 
 
     public STEMSystemApp(String[] args) {
         instance = this;
-        AppLogger.logger("STEM version " + JavaUtils.getVersion(), true);
+        STEMSystemApp.LOGGER.INFO("STEM version " + JavaUtils.getVersion());
         this.start_time = System.nanoTime();
         this.isActive = new AtomicBoolean(true);
         this.coreRunner = new CoreRunner();
@@ -53,12 +58,15 @@ public class STEMSystemApp {
         this.uptimeDate = new Date();
         this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), () -> {
             loadModules();
-            AppLogger.logger("STEM-System startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.", true);
+            STEMSystemApp.LOGGER.INFO("STEM-System startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.");
         });
     }
 
     public static void main(String[] args) {
-        AppLogger.logger(STEMSystemApp.class.getSimpleName() + " load mainframe...", false);
+        logSystem = new LogSystem();
+        logSystem.setFileLogger("STEM", new File("logs"));
+        LOGGER = logSystem.getLogger();
+        STEMSystemApp.LOGGER.INFO(STEMSystemApp.class.getSimpleName() + " load mainframe...");
         new STEMSystemApp(args);
     }
 
@@ -90,7 +98,7 @@ public class STEMSystemApp {
 
         this.coreRunner.endCore();
         this.isActive.set(false);
-        AppLogger.logger("Shutdown complete!", true);
+        STEMSystemApp.LOGGER.INFO("Shutdown complete!");
         System.exit(0);
     }
 

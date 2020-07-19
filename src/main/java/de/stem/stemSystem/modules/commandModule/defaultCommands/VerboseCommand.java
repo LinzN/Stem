@@ -12,6 +12,7 @@
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 
 public class VerboseCommand implements ICommand {
@@ -20,7 +21,7 @@ public class VerboseCommand implements ICommand {
     public boolean executeTerminal(String[] args) {
         boolean value = AppLogger.getVerbose();
         value = !value;
-        System.out.println("Set verbose to " + value);
+        STEMSystemApp.LOGGER.LIVE("Set verbose to " + value);
         AppLogger.setVerbose(value);
         return true;
     }

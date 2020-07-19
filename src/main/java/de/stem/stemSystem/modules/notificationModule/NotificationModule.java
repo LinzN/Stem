@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.modules.notificationModule;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.notificationModule.profiles.ConsoleProfile;
@@ -24,9 +23,9 @@ import java.util.List;
 public class NotificationModule extends AbstractModule {
     private boolean moduleAlive;
 
-    private STEMSystemApp stemSystemApp;
-    private LinkedList<NotificationContainer> notificationQueue;
-    private List<INotificationProfile> notificationProfiles;
+    private final STEMSystemApp stemSystemApp;
+    private final LinkedList<NotificationContainer> notificationQueue;
+    private final List<INotificationProfile> notificationProfiles;
 
 
     public NotificationModule(STEMSystemApp stemSystemApp) {
@@ -40,7 +39,7 @@ public class NotificationModule extends AbstractModule {
     }
 
     public void pushNotification(NotificationContainer notificationContainer) {
-        AppLogger.logger("Push Notification for profiles", false);
+        STEMSystemApp.LOGGER.WARNING("Push Notification for profiles");
         this.stemSystemApp.getScheduler().runTask(this.getModulePlugin(), () -> notificationQueue.add(notificationContainer));
     }
 

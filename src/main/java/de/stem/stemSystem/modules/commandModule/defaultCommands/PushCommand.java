@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 import de.stem.stemSystem.modules.notificationModule.NotificationContainer;
@@ -31,7 +30,7 @@ public class PushCommand implements ICommand {
             NotificationContainer notificationContainer = new NotificationContainer(message.toString(), NotificationPriority.DEFAULT);
             STEMSystemApp.getInstance().getNotificationModule().pushNotification(notificationContainer);
         } else {
-            AppLogger.logger("Not enough input to chat send", false);
+            STEMSystemApp.LOGGER.LIVE("Not enough input to chat send");
         }
         return true;
     }

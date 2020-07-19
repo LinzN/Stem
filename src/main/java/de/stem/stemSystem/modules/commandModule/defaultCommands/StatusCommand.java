@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
@@ -26,17 +25,17 @@ public class StatusCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        AppLogger.logger("Version: " + JavaUtils.getVersion(), false);
+        STEMSystemApp.LOGGER.LIVE("Version: " + JavaUtils.getVersion());
         HashMap<AbstractCallback, STEMPlugin> listener = STEMSystemApp.getInstance().getCallBackService().getCallbackListeners();
-        AppLogger.logger("Active Callbacks: (" + listener.size() + ")", false);
+        STEMSystemApp.LOGGER.LIVE("Active Callbacks: (" + listener.size() + ")");
         for (AbstractCallback abstractCallback : listener.keySet()) {
-            AppLogger.logger("#Callback: " + abstractCallback.getClass().getSimpleName() + " from plugin: " + listener.get(abstractCallback).getPluginName() + " with taskId: " + abstractCallback.taskId, false);
+            STEMSystemApp.LOGGER.LIVE("#Callback: " + abstractCallback.getClass().getSimpleName() + " from plugin: " + listener.get(abstractCallback).getPluginName() + " with taskId: " + abstractCallback.taskId);
         }
 
         HashSet<AZTask> tasks = STEMSystemApp.getInstance().getScheduler().getTasks();
-        AppLogger.logger("Active Scheduled Tasks: (" + listener.size() + ")", false);
+        STEMSystemApp.LOGGER.LIVE("Active Scheduled Tasks: (" + listener.size() + ")");
         for (AZTask task : tasks) {
-            AppLogger.logger("#TaskId: " + task.getTaskId() + " from owner: " + task.getOwner().getPluginName(), false);
+            STEMSystemApp.LOGGER.LIVE("#TaskId: " + task.getTaskId() + " from owner: " + task.getOwner().getPluginName());
         }
         return true;
     }

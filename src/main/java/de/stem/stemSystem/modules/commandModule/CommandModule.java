@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.modules.commandModule;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.commandModule.defaultCommands.CommandSetup;
@@ -21,8 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class CommandModule extends AbstractModule implements Runnable {
-    private STEMSystemApp stemSystemApp;
-    private CommandSetup commandSetup;
+    private final STEMSystemApp stemSystemApp;
+    private final CommandSetup commandSetup;
     private boolean moduleAlive;
 
     public CommandModule(STEMSystemApp stemSystemApp) {
@@ -46,7 +45,7 @@ public class CommandModule extends AbstractModule implements Runnable {
     }
 
     public void registerCommand(String command, ICommand ICommand) {
-        AppLogger.logger("Register new command #" + command, true);
+        STEMSystemApp.LOGGER.INFO("Register new command #" + command);
         commandSetup.terminalExecutes.put(command, ICommand);
     }
 

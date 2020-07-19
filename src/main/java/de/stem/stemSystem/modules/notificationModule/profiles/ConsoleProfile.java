@@ -11,7 +11,7 @@
 
 package de.stem.stemSystem.modules.notificationModule.profiles;
 
-import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.notificationModule.INotificationProfile;
 import de.stem.stemSystem.modules.notificationModule.NotificationContainer;
 import de.stem.stemSystem.modules.notificationModule.NotificationPriority;
@@ -20,7 +20,7 @@ public class ConsoleProfile implements INotificationProfile {
     @Override
     public void push(NotificationContainer notificationContainer) {
         if (notificationContainer.notificationPriority.hasPriority(NotificationPriority.LOW)) {
-            AppLogger.logger("Console -> " + notificationContainer.notification, true);
+            STEMSystemApp.LOGGER.WARNING("Console -> " + notificationContainer.notification);
         }
     }
 }

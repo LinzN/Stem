@@ -36,6 +36,6 @@ public class SocketMask implements IZMask {
 
     @Override
     public void log(String s) {
-        AppLogger.logger(s, true);
+        STEMSystemApp.LOGGER.INFO(s);
     }
 }

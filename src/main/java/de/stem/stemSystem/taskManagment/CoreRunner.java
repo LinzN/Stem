@@ -13,6 +13,7 @@ package de.stem.stemSystem.taskManagment;
 
 
 import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 
 import java.util.concurrent.BlockingQueue;
@@ -20,10 +21,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CoreRunner implements Runnable {
 
-    private AtomicBoolean isAlive = new AtomicBoolean();
-    private SchedulerService schedulerService;
-    private CallbackService callbackService;
-    private BlockingQueue<Runnable> taskQueue;
+    private final AtomicBoolean isAlive = new AtomicBoolean();
+    private final SchedulerService schedulerService;
+    private final CallbackService callbackService;
+    private final BlockingQueue<Runnable> taskQueue;
 
     public CoreRunner() {
         this.schedulerService = new SchedulerService(this);
@@ -41,7 +42,7 @@ public class CoreRunner implements Runnable {
             if (!this.taskQueue.isEmpty()) {
                 try {
                     Runnable task = this.taskQueue.take();
-                    AppLogger.debug("Exec Task: " + task.getClass().getSimpleName());
+                    STEMSystemApp.LOGGER.DEBUG("Exec Task: " + task.getClass().getSimpleName());
                     try {
                         task.run();
                     } catch (Exception e) {
@@ -69,7 +70,7 @@ public class CoreRunner implements Runnable {
     }
 
     public void endCore() {
-        AppLogger.logger("Stopping CoreRunner...", true);
+        STEMSystemApp.LOGGER.WARNING("Stopping CoreRunner...");
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
     }

@@ -175,5 +175,12 @@
             <scope>compile</scope>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>simplyLogger</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 </project>

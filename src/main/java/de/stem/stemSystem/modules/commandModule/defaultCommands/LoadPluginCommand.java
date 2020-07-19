@@ -12,7 +12,6 @@
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
@@ -35,7 +34,7 @@ public class LoadPluginCommand implements ICommand {
                     e.printStackTrace();
                 }
             } else {
-                AppLogger.logger("No plugin file found!", false);
+                STEMSystemApp.LOGGER.LIVE("No plugin file found!");
             }
         }
         return true;

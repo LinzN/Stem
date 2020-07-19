@@ -12,7 +12,6 @@
 package de.stem.stemSystem.modules;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.utils.JavaUtils;
@@ -24,7 +23,7 @@ public abstract class AbstractModule {
 
     public AbstractModule() {
         this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
-        AppLogger.logger("Load module " + this.modulePlugin.getPluginName(), true);
+        STEMSystemApp.LOGGER.INFO("Load module " + this.modulePlugin.getPluginName());
     }
 
     public STEMPlugin getModulePlugin() {
@@ -32,7 +31,7 @@ public abstract class AbstractModule {
     }
 
     public void shutdownModule() {
-        AppLogger.logger("Unload module " + this.modulePlugin.getPluginName(), true);
+        STEMSystemApp.LOGGER.INFO("Unload module " + this.modulePlugin.getPluginName());
         this.onShutdown();
         STEMSystemApp.getInstance().getCallBackService().unregisterCallbackListeners(this.modulePlugin);
         STEMSystemApp.getInstance().getScheduler().cancelTasks(this.modulePlugin);

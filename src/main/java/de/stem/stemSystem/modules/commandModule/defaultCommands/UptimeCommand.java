@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 
@@ -27,7 +26,7 @@ public class UptimeCommand implements ICommand {
         long diff = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime() - date.getTime());
 
         String uptime = String.format("%d days, %02d:%02d:%02d", (diff / (3600 * 24)), diff / 3600, (diff % 3600) / 60, (diff % 60));
-        AppLogger.logger("Uptime: " + uptime, false);
+        STEMSystemApp.LOGGER.LIVE("Uptime: " + uptime);
         return true;
     }
 

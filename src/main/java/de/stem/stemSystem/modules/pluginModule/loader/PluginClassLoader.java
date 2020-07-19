@@ -11,7 +11,7 @@
 
 package de.stem.stemSystem.modules.pluginModule.loader;
 
-import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 import java.io.File;
@@ -31,7 +31,7 @@ public class PluginClassLoader extends URLClassLoader {
     }
 
     private STEMPlugin initPlugin(String pluginName, String classPath, String version) {
-        AppLogger.logger("Load plugin: " + pluginName, true);
+        STEMSystemApp.LOGGER.INFO("Load plugin: " + pluginName);
         try {
             Class<?> jarClass;
             try {

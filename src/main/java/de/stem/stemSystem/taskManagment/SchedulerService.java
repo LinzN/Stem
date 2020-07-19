@@ -13,9 +13,8 @@ package de.stem.stemSystem.taskManagment;
 
 
 import de.linzn.simplyConfiguration.FileConfiguration;
-import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
-import de.stem.stemSystem.utils.Color;
 import de.stem.stemSystem.utils.JavaUtils;
 
 import java.io.File;
@@ -26,11 +25,11 @@ import java.util.TimeZone;
 import java.util.concurrent.*;
 
 public class SchedulerService {
-    private CoreRunner coreRunner;
-    private ScheduledExecutorService scheduledExecutorService;
-    private ExecutorService executorService;
+    private final CoreRunner coreRunner;
+    private final ScheduledExecutorService scheduledExecutorService;
+    private final ExecutorService executorService;
     private HashSet<AZTask> tasks;
-    private DefaultSTEMPlugin defaultAZPlugin;
+    private final DefaultSTEMPlugin defaultAZPlugin;
 
     SchedulerService(CoreRunner coreRunner) {
         this.coreRunner = coreRunner;
@@ -82,7 +81,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.debug("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        STEMSystemApp.LOGGER.DEBUG("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId);
         long times = this.getTimerTime(days, hours, minutes);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
@@ -111,7 +110,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.debug("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        STEMSystemApp.LOGGER.DEBUG("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId);
         Runnable runnableContainer = () -> {
             while (!azTask.isCanceled) {
                 this.pushCoreRunner(azTask, task);
@@ -135,7 +134,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.debug("Task from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        STEMSystemApp.LOGGER.DEBUG("Task from " + plugin.getPluginName() + " id:" + azTask.taskId);
 
         tasks.remove(azTask);
         if (!azTask.isCanceled) {
@@ -152,7 +151,7 @@ public class SchedulerService {
 
         AZTask azTask = new AZTask(plugin, runInCore);
         this.tasks.add(azTask);
-        AppLogger.debug("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        STEMSystemApp.LOGGER.DEBUG("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId);
         Runnable runnableContainer = () -> {
             tasks.remove(azTask);
             if (!azTask.isCanceled) {
@@ -233,7 +232,7 @@ public class SchedulerService {
 
     private boolean checkIsValid() {
         if (this.tasks == null) {
-            AppLogger.logger(Color.RED + "Try to register task while shutdown!" + Color.RESET, false);
+            STEMSystemApp.LOGGER.ERROR("Try to register task while shutdown!");
         }
         return this.tasks != null;
     }

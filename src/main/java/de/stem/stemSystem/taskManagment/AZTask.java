@@ -11,7 +11,7 @@
 
 package de.stem.stemSystem.taskManagment;
 
-import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 public class AZTask {
@@ -29,7 +29,7 @@ public class AZTask {
 
     public void cancel() {
         if (!this.isCanceled) {
-            AppLogger.debug("Cancel taskId " + taskId + " from plugin " + owner.getPluginName());
+            STEMSystemApp.LOGGER.DEBUG("Cancel taskId " + taskId + " from plugin " + owner.getPluginName());
         }
         this.isCanceled = true;
     }

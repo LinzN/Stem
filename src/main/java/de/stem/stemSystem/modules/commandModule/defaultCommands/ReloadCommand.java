@@ -12,7 +12,6 @@
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 import de.stem.stemSystem.utils.Color;
@@ -21,9 +20,9 @@ public class ReloadCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        AppLogger.logger(Color.GREEN + "Reloading plugins ..." + Color.RESET, false);
+        STEMSystemApp.LOGGER.LIVE(Color.GREEN + "Reloading plugins ..." + Color.RESET);
         STEMSystemApp.getInstance().getPluginModule().reloadPlugins();
-        AppLogger.logger(Color.GREEN + "Plugins reloaded!" + Color.RESET, false);
+        STEMSystemApp.LOGGER.LIVE(Color.GREEN + "Plugins reloaded!" + Color.RESET);
         return true;
     }
 

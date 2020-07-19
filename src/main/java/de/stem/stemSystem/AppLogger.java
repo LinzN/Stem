@@ -11,86 +11,45 @@
 
 package de.stem.stemSystem;
 
-import de.stem.stemSystem.utils.Color;
+import de.linzn.simplyLogger.LOGLEVEL;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.FileHandler;
-import java.util.logging.LogRecord;
-import java.util.logging.SimpleFormatter;
 
 public class AppLogger {
 
-    private static final java.util.logging.Logger fileLogger;
-    private static final AtomicBoolean verbose;
-    private static final LinkedList<String> logEntries;
+    private static final LinkedList<String> logEntries = new LinkedList<>();
 
-    static {
-        verbose = new AtomicBoolean(false);
-        fileLogger = java.util.logging.Logger.getLogger("STEM");
-        fileLogger.setUseParentHandlers(false);
-        logEntries = new LinkedList<>();
-        FileHandler fh;
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy-HH.mm.ss");
-
-        try {
-            File logsDir = new File("logs");
-            if (!logsDir.exists()) {
-                logsDir.mkdir();
-            }
-
-            fh = new FileHandler("logs/" + dateFormat.format(new Date().getTime()) + ".log");
-            fileLogger.addHandler(fh);
-            SimpleFormatter formatter = new SimpleFormatter() {
-                private static final String format = "[%1$tF %1$tT] [%2$-7s] %3$s %n";
-
-                @Override
-                public synchronized String format(LogRecord lr) {
-                    return String.format(format,
-                            new Date(lr.getMillis()),
-                            lr.getLevel().getLocalizedName(),
-                            lr.getMessage()
-                    );
-                }
-            };
-
-            fh.setFormatter(formatter);
-        } catch (SecurityException | IOException e) {
-            e.printStackTrace();
-        }
-    }
-
+    @Deprecated
     public static synchronized void logger(String log, boolean writeToFile) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
-        addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
-        System.out.print(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log + "\n");
-        System.out.flush();
         if (writeToFile) {
-            fileLogger.info(dateFormat.format(new Date().getTime()) + "[" + Thread.currentThread().getName() + "] " + log);
-        }
-    }
-
-    public static synchronized void debug(String log) {
-        if (verbose.get()) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+            STEMSystemApp.LOGGER.INFO(log);
             addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
-            System.out.print("\n" + dateFormat.format(new Date().getTime()) + Color.YELLOW + " [" + Thread.currentThread().getName() + "] " + log + Color.RESET + "\n");
-            System.out.flush();
+        } else {
+            STEMSystemApp.LOGGER.LIVE(log);
         }
     }
 
-    public static boolean getVerbose() {
-        return verbose.get();
+    @Deprecated
+    public static synchronized void debug(String log) {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        STEMSystemApp.LOGGER.DEBUG(log);
+        addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
     }
 
-    public static void setVerbose(boolean value) {
-        verbose.set(value);
+    @Deprecated
+    public static boolean getVerbose() {
+        return STEMSystemApp.logSystem.getLogLevel() == LOGLEVEL.DEBUG;
     }
+
+    @Deprecated
+    public static void setVerbose(boolean value) {
+        STEMSystemApp.logSystem.setLogLevel(LOGLEVEL.DEBUG);
+    }
+
 
     private static synchronized void addToLogList(String data) {
         if (logEntries.size() >= 1000) {
@@ -99,6 +58,7 @@ public class AppLogger {
         logEntries.addLast(data);
     }
 
+    @Deprecated
     public static List<String> getLastEntries(int max) {
         return logEntries.subList(logEntries.size() - max, logEntries.size());
     }

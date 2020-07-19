@@ -15,19 +15,19 @@ import de.linzn.zSocket.components.events.ConnectEvent;
 import de.linzn.zSocket.components.events.DisconnectEvent;
 import de.linzn.zSocket.components.events.IListener;
 import de.linzn.zSocket.components.events.handler.EventHandler;
-import de.stem.stemSystem.AppLogger;
+import de.stem.stemSystem.STEMSystemApp;
 
 public class ConnectionListener implements IListener {
 
 
     @EventHandler
     public void onConnectEvent(ConnectEvent event) {
-        AppLogger.logger("Register new communication device: " + event.getClientUUID(), true);
+        STEMSystemApp.LOGGER.WARNING("Register new communication device: " + event.getClientUUID());
 
     }
 
     @EventHandler
     public void onDisconnectEvent(DisconnectEvent event) {
-        AppLogger.logger("Unregister communication device: " + event.getClientUUID(), true);
+        STEMSystemApp.LOGGER.WARNING("Unregister communication device: " + event.getClientUUID());
     }
 }

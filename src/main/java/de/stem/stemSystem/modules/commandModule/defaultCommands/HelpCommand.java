@@ -12,7 +12,6 @@
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 
@@ -32,7 +31,7 @@ public class HelpCommand implements ICommand {
             }
         }
 
-        AppLogger.logger(stringBuilder.toString(), false);
+        STEMSystemApp.LOGGER.LIVE(stringBuilder.toString());
         return true;
     }
 

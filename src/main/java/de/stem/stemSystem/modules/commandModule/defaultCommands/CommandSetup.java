@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 
@@ -19,7 +18,7 @@ import java.util.TreeMap;
 
 public class CommandSetup {
     public TreeMap<String, ICommand> terminalExecutes;
-    private STEMSystemApp stemSystemApp;
+    private final STEMSystemApp stemSystemApp;
 
     public CommandSetup(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
@@ -33,7 +32,7 @@ public class CommandSetup {
                 if (this.terminalExecutes.containsKey(command.toLowerCase())) {
                     this.terminalExecutes.get(command.toLowerCase()).executeTerminal(args);
                 } else {
-                    AppLogger.logger("Error on command", false);
+                    STEMSystemApp.LOGGER.LIVE("Error on command");
                 }
             } catch (Exception e) {
                 System.err.println(e);
@@ -54,7 +53,7 @@ public class CommandSetup {
     }
 
     private void registerCommand(String command, ICommand ICommand) {
-        AppLogger.logger("Register internal command #" + command, true);
+        STEMSystemApp.LOGGER.INFO("Register internal command #" + command);
         terminalExecutes.put(command, ICommand);
     }
 }

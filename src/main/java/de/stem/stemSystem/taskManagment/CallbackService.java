@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.taskManagment;
 
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.taskManagment.operations.AbstractOperation;
@@ -21,7 +20,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class CallbackService {
-    private HashMap<AbstractCallback, STEMPlugin> callbackListeners;
+    private final HashMap<AbstractCallback, STEMPlugin> callbackListeners;
 
     CallbackService() {
         this.callbackListeners = new HashMap<>();
@@ -35,7 +34,7 @@ public class CallbackService {
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
         STEMSystemApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
         this.callbackListeners.remove(abstractCallback);
-        AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName());
+        STEMSystemApp.LOGGER.DEBUG("Callback unregister: " + abstractCallback.getClass().getSimpleName());
     }
 
     public void unregisterCallbackListeners(STEMPlugin stemPlugin) {
@@ -45,7 +44,7 @@ public class CallbackService {
             if (stemPlugin == stemPlugin1) {
                 STEMSystemApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
                 this.callbackListeners.remove(abstractCallback);
-                AppLogger.debug("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + stemPlugin.getPluginName());
+                STEMSystemApp.LOGGER.DEBUG("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + stemPlugin.getPluginName());
             }
         }
     }
@@ -64,7 +63,7 @@ public class CallbackService {
         } else {
             azTask = STEMSystemApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
         }
-        AppLogger.debug("Callback register for " + plugin.getPluginName() + " with taskId :" + azTask.taskId);
+        STEMSystemApp.LOGGER.DEBUG("Callback register for " + plugin.getPluginName() + " with taskId :" + azTask.taskId);
         abstractCallback.setIDs(azTask.getTaskId());
     }
 
@@ -72,7 +71,7 @@ public class CallbackService {
         abstractCallback.operation();
 
         while (!abstractCallback.operationData.isEmpty()) {
-            AppLogger.debug("Callback operation for " + plugin.getPluginName());
+            STEMSystemApp.LOGGER.DEBUG("Callback operation for " + plugin.getPluginName());
             AbstractOperation abstractOperation = abstractCallback.operationData.removeFirst();
 
             STEMSystemApp.getInstance().getScheduler().runTask(plugin, () -> {
@@ -80,7 +79,7 @@ public class CallbackService {
                 abstractCallback.callback(operationOutput);
                 if (!STEMSystemApp.getInstance().getScheduler().isTask(abstractCallback.taskId)) {
                     this.callbackListeners.remove(abstractCallback);
-                    AppLogger.debug("Disable Callback from " + plugin.getPluginName() + " with taskId " + abstractCallback.taskId);
+                    STEMSystemApp.LOGGER.DEBUG("Disable Callback from " + plugin.getPluginName() + " with taskId " + abstractCallback.taskId);
                 }
             });
         }

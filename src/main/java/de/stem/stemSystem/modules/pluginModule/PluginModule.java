@@ -11,7 +11,6 @@
 package de.stem.stemSystem.modules.pluginModule;
 
 import de.linzn.openJL.pairs.Pair;
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.pluginModule.loader.PluginClassLoader;
@@ -26,10 +25,10 @@ import java.util.*;
 
 public class PluginModule extends AbstractModule {
     public static File pluginDirectory = new File("plugins");
-    private static String pluginFileName = "plugin.yml";
+    private static final String pluginFileName = "plugin.yml";
     private PluginClassLoader pluginClassLoader;
     private LinkedHashMap<String, STEMPlugin> pluginList;
-    private STEMSystemApp stemSystemApp;
+    private final STEMSystemApp stemSystemApp;
 
     public PluginModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
@@ -66,7 +65,7 @@ public class PluginModule extends AbstractModule {
     }
 
     public void unloadPlugin(String pluginName) {
-        AppLogger.logger("Unload plugin: " + pluginName, false);
+        STEMSystemApp.LOGGER.INFO("Unload plugin: " + pluginName);
         if (disablePlugin(pluginName)) {
             this.pluginList.remove(pluginName);
         }
@@ -77,7 +76,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AppLogger.logger("Enable plugin: " + plugin.getDescription(), true);
+        STEMSystemApp.LOGGER.INFO("Enable plugin: " + plugin.getDescription());
 
         try {
             plugin.onEnable();
@@ -93,7 +92,7 @@ public class PluginModule extends AbstractModule {
         if (plugin == null) {
             return false;
         }
-        AppLogger.logger("Disable plugin: " + plugin.getDescription(), true);
+        STEMSystemApp.LOGGER.INFO("Disable plugin: " + plugin.getDescription());
         try {
             plugin.onDisable();
             this.stemSystemApp.getCallBackService().unregisterCallbackListeners(plugin);
@@ -128,7 +127,7 @@ public class PluginModule extends AbstractModule {
                     URLClassLoader child = new URLClassLoader(new URL[]{jarFile.toURL()}, this.getClass().getClassLoader());
 
                     if (child.getResource(pluginFileName) == null) {
-                        AppLogger.logger("No " + pluginFileName + " file found for " + jarFile.getName(), true);
+                        STEMSystemApp.LOGGER.ERROR("No " + pluginFileName + " file found for " + jarFile.getName());
                         continue;
                     }
 
@@ -156,7 +155,7 @@ public class PluginModule extends AbstractModule {
             int maxValue = pluginsWithDependencies.size() * pluginsWithDependencies.size();
 
             if (i > maxValue) { //todo fix this
-                AppLogger.logger("Some plugins could not be loaded!", true);
+                STEMSystemApp.LOGGER.ERROR("Some plugins could not be loaded!");
                 break;
             }
 
