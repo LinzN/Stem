@@ -13,8 +13,6 @@ package de.stem.stemSystem;
 
 import de.linzn.simplyLogger.LOGLEVEL;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,10 +22,8 @@ public class AppLogger {
 
     @Deprecated
     public static synchronized void logger(String log, boolean writeToFile) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         if (writeToFile) {
             STEMSystemApp.LOGGER.INFO(log);
-            addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
         } else {
             STEMSystemApp.LOGGER.LIVE(log);
         }
@@ -35,9 +31,7 @@ public class AppLogger {
 
     @Deprecated
     public static synchronized void debug(String log) {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         STEMSystemApp.LOGGER.DEBUG(log);
-        addToLogList(dateFormat.format(new Date().getTime()) + " [" + Thread.currentThread().getName() + "] " + log);
     }
 
     @Deprecated
@@ -51,16 +45,10 @@ public class AppLogger {
     }
 
 
-    private static synchronized void addToLogList(String data) {
-        if (logEntries.size() >= 1000) {
-            logEntries.removeFirst();
-        }
-        logEntries.addLast(data);
-    }
 
     @Deprecated
     public static List<String> getLastEntries(int max) {
-        return logEntries.subList(logEntries.size() - max, logEntries.size());
+        return STEMSystemApp.logSystem.getLastEntries(max);
     }
 
 }
