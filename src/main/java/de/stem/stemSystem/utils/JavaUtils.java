@@ -12,6 +12,8 @@
 package de.stem.stemSystem.utils;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.net.URL;
 import java.util.Properties;
 
@@ -34,5 +36,10 @@ public class JavaUtils {
         }
 
         return version;
+    }
+
+    public static double getSystemLoad() {
+        OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+        return operatingSystemMXBean.getSystemLoadAverage();
     }
 }
