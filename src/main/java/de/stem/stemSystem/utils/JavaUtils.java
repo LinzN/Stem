@@ -42,4 +42,9 @@ public class JavaUtils {
         OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
         return operatingSystemMXBean.getSystemLoadAverage();
     }
+
+    public static int getCoreAmount() {
+        OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
+        return operatingSystemMXBean.getAvailableProcessors();
+    }
 }
