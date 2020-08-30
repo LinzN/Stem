@@ -13,6 +13,7 @@ package de.stem.stemSystem.utils;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.URL;
 import java.util.Properties;
@@ -46,5 +47,15 @@ public class JavaUtils {
     public static int getCoreAmount() {
         OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
         return operatingSystemMXBean.getAvailableProcessors();
+    }
+
+    public static double getUsedMemory() {
+        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+        return (memoryMXBean.getHeapMemoryUsage().getUsed() / (1000 * 1000));
+    }
+
+    public static double getMaxMemory() {
+        MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+        return (memoryMXBean.getHeapMemoryUsage().getMax() / (1000 * 1000));
     }
 }
