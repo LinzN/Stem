@@ -30,6 +30,10 @@
             <id>enigmar-repo</id>
             <url>https://repository.enigmar.de/</url>
         </repository>
+        <repository>
+            <id>Eclipse Paho Repo</id>
+            <url>https://repo.eclipse.org/content/repositories/paho-releases/</url>
+        </repository>
     </repositories>
 
     <build>
@@ -181,6 +185,11 @@
             <version>1.0</version>
             <scope>compile</scope>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.0</version>
         </dependency>
     </dependencies>
 </project>

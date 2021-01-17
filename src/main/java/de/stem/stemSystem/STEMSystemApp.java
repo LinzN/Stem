@@ -16,6 +16,7 @@ import de.linzn.simplyLogger.Logger;
 import de.stem.stemSystem.configuration.AppConfiguration;
 import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
+import de.stem.stemSystem.modules.mqttModule.MqttModule;
 import de.stem.stemSystem.modules.notificationModule.NotificationModule;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
 import de.stem.stemSystem.modules.zSocketModule.ZSocketModule;
@@ -38,6 +39,7 @@ public class STEMSystemApp {
     private final CoreRunner coreRunner;
     private AppConfiguration appConfiguration;
     private ZSocketModule zSocketModule;
+    private MqttModule mqttModule;
     private CommandModule commandModule;
     private NotificationModule notificationModule;
     private DatabaseModule databaseModule;
@@ -79,6 +81,7 @@ public class STEMSystemApp {
         appConfiguration = new AppConfiguration(instance);
         databaseModule = new DatabaseModule(instance);
         zSocketModule = new ZSocketModule(instance);
+        mqttModule = new MqttModule(instance);
         notificationModule = new NotificationModule(instance);
         commandModule = new CommandModule(instance);
         pluginModule = new PluginModule(instance);
@@ -93,6 +96,7 @@ public class STEMSystemApp {
         this.commandModule.shutdownModule();
         this.pluginModule.shutdownModule();
         this.zSocketModule.shutdownModule();
+        this.mqttModule.shutdownModule();
         this.notificationModule.shutdownModule();
         this.databaseModule.shutdownModule();
 
@@ -117,6 +121,10 @@ public class STEMSystemApp {
 
     public ZSocketModule getZSocketModule() {
         return zSocketModule;
+    }
+
+    public MqttModule getMqttModule() {
+        return mqttModule;
     }
 
     public CommandModule getCommandModule() {
