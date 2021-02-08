@@ -47,6 +47,7 @@ public class MqttModule extends AbstractModule {
             connOpts.setUserName(user);
             connOpts.setPassword(password.toCharArray());
             connOpts.setCleanSession(true);
+            connOpts.setAutomaticReconnect(true);
             STEMSystemApp.LOGGER.INFO("Connecting to IOBroker " + broker + "...");
             mqttClient.connect(connOpts);
             STEMSystemApp.LOGGER.INFO("Connection to IOBroker is valid!");
