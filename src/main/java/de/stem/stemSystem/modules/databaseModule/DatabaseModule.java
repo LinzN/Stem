@@ -76,7 +76,7 @@ public class DatabaseModule extends AbstractModule {
             }
             this.releaseConnection(con);
         } catch (SQLException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
         }
         return dataContainer;
     }
@@ -93,7 +93,7 @@ public class DatabaseModule extends AbstractModule {
             }
             this.releaseConnection(con);
         } catch (SQLException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
         }
     }
 

@@ -35,7 +35,7 @@ public class CommandSetup {
                     STEMSystemApp.LOGGER.LIVE("Error on command");
                 }
             } catch (Exception e) {
-                System.err.println(e);
+                STEMSystemApp.LOGGER.ERROR(e);
             }
         });
     }

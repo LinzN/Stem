@@ -33,7 +33,7 @@ public class STEMSystemApp {
 
     private static STEMSystemApp instance;
     public static Logger LOGGER;
-    static LogSystem logSystem;
+    public static LogSystem logSystem;
     private final AtomicBoolean isActive;
 
     private final CoreRunner coreRunner;

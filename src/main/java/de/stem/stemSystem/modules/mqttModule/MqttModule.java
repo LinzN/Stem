@@ -57,7 +57,7 @@ public class MqttModule extends AbstractModule {
             mqttClient.publish("stem-system/test", mqttMessage);
 
         } catch (MqttException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
         }
     }
 
@@ -82,7 +82,7 @@ public class MqttModule extends AbstractModule {
             STEMSystemApp.LOGGER.INFO("Disconnected from IOBroker!");
             this.mqttClient.close();
         } catch (MqttException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
         }
     }
 
@@ -91,7 +91,7 @@ public class MqttModule extends AbstractModule {
             this.mqttClient.publish(topic, mqttMessage);
             return true;
         } catch (MqttException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
             return false;
         }
     }
@@ -101,7 +101,7 @@ public class MqttModule extends AbstractModule {
             this.mqttClient.subscribe(topic, iMqttMessageListener);
             return true;
         } catch (MqttException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
             return false;
         }
     }

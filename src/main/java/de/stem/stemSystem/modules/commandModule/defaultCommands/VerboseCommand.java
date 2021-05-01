@@ -11,7 +11,7 @@
 
 package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
-import de.stem.stemSystem.AppLogger;
+import de.linzn.simplyLogger.LOGLEVEL;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 
@@ -19,10 +19,10 @@ public class VerboseCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        boolean value = AppLogger.getVerbose();
+        boolean value = STEMSystemApp.logSystem.getLogLevel() == LOGLEVEL.DEBUG;
         value = !value;
         STEMSystemApp.LOGGER.LIVE("Set verbose to " + value);
-        AppLogger.setVerbose(value);
+        STEMSystemApp.logSystem.setLogLevel(value ? LOGLEVEL.DEBUG : LOGLEVEL.INFO);
         return true;
     }
 

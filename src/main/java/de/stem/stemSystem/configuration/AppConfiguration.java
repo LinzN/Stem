@@ -13,7 +13,7 @@ package de.stem.stemSystem.configuration;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
-import de.stem.stemSystem.AppLogger;
+import de.linzn.simplyLogger.LOGLEVEL;
 import de.stem.stemSystem.STEMSystemApp;
 
 import java.io.File;
@@ -23,9 +23,11 @@ public class AppConfiguration {
     /* Variables */
     FileConfiguration configFile;
     private String fileName = "STEM-Settings.yml";
+    private STEMSystemApp stemSystemApp;
 
     /* Create class instance */
-    public AppConfiguration(STEMSystemApp stemSystem) {
+    public AppConfiguration(STEMSystemApp stemSystemApp) {
+        this.stemSystemApp = stemSystemApp;
         this.init();
     }
 
@@ -39,7 +41,7 @@ public class AppConfiguration {
 
     /* Load the file in memory */
     public void load() {
-        AppLogger.setVerbose(this.configFile.getBoolean("system.verbose", false));
+        STEMSystemApp.logSystem.setLogLevel(LOGLEVEL.valueOf(this.configFile.getString("system.logLevel", LOGLEVEL.DEBUG.name())));
     }
 
 }

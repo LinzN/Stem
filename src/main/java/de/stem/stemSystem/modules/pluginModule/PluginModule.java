@@ -80,8 +80,8 @@ public class PluginModule extends AbstractModule {
 
         try {
             plugin.onEnable();
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (Exception e) {
+            STEMSystemApp.LOGGER.ERROR(e);
             return false;
         }
         return true;
@@ -97,8 +97,8 @@ public class PluginModule extends AbstractModule {
             plugin.onDisable();
             this.stemSystemApp.getCallBackService().unregisterCallbackListeners(plugin);
             this.stemSystemApp.getScheduler().cancelTasks(plugin);
-        } catch (Exception exception) {
-            exception.printStackTrace();
+        } catch (Exception e) {
+            STEMSystemApp.LOGGER.ERROR(e);
             return false;
         }
 
@@ -144,8 +144,8 @@ public class PluginModule extends AbstractModule {
                         pluginsWithDependencies.add(new Pair<>(pluginName, jarFile));
                     }
                     child.close();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
+                } catch (Exception e) {
+                    STEMSystemApp.LOGGER.ERROR(e);
                 }
             }
         }
@@ -177,8 +177,8 @@ public class PluginModule extends AbstractModule {
                     loadPlugin(pluginPair.getValue(), false);
                     i = 0;
                 }
-            } catch (Exception exception) {
-                exception.printStackTrace();
+            } catch (Exception e) {
+                STEMSystemApp.LOGGER.ERROR(e);
             }
             i++;
         }

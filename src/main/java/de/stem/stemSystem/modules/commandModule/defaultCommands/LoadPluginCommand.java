@@ -31,7 +31,7 @@ public class LoadPluginCommand implements ICommand {
                 try {
                     STEMSystemApp.getInstance().getPluginModule().loadPlugin(file, true);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    STEMSystemApp.LOGGER.ERROR(e);
                 }
             } else {
                 STEMSystemApp.LOGGER.LIVE("No plugin file found!");

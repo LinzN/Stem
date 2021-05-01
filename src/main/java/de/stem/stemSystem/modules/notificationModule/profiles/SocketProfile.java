@@ -29,7 +29,7 @@ public class SocketProfile implements INotificationProfile {
             try {
                 dataOutputStream.writeUTF(notificationContainer.notification);
             } catch (IOException e) {
-                e.printStackTrace();
+                STEMSystemApp.LOGGER.ERROR(e);
             }
             STEMSystemApp.getInstance().getZSocketModule().getzServer().getClients().values().forEach(serverConnection -> serverConnection.writeOutput("notification", byteArrayOutputStream.toByteArray()));
         }

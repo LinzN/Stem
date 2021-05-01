@@ -65,7 +65,7 @@ public class NotificationModule extends AbstractModule {
                                 try {
                                     profile.push(notificationContainer);
                                 } catch (Exception e1) {
-                                    e1.printStackTrace();
+                                    STEMSystemApp.LOGGER.ERROR(e1);
                                 }
                             }
                         }

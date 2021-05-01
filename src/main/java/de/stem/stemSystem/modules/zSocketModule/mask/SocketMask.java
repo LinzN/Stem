@@ -11,8 +11,8 @@
 
 package de.stem.stemSystem.modules.zSocketModule.mask;
 
+import de.linzn.simplyLogger.LOGLEVEL;
 import de.linzn.zSocket.components.IZMask;
-import de.stem.stemSystem.AppLogger;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.zSocketModule.ZSocketModule;
 
@@ -31,7 +31,7 @@ public class SocketMask implements IZMask {
 
     @Override
     public boolean isDebugging() {
-        return AppLogger.getVerbose();
+        return STEMSystemApp.logSystem.getLogLevel() == LOGLEVEL.DEBUG;
     }
 
     @Override

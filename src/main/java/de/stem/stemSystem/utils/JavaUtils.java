@@ -11,6 +11,8 @@
 
 package de.stem.stemSystem.utils;
 
+import de.stem.stemSystem.STEMSystemApp;
+
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -31,7 +33,7 @@ public class JavaUtils {
             try {
                 props.load(Thread.currentThread().getContextClassLoader().getResourceAsStream(res));
             } catch (IOException e) {
-                e.printStackTrace();
+                STEMSystemApp.LOGGER.ERROR(e);
             }
             version = props.getProperty("version");
         }

@@ -14,6 +14,7 @@ package de.stem.stemSystem.modules.zSocketModule.listener;
 import de.linzn.zSocket.components.events.IListener;
 import de.linzn.zSocket.components.events.ReceiveDataEvent;
 import de.linzn.zSocket.components.events.handler.EventHandler;
+import de.stem.stemSystem.STEMSystemApp;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -28,8 +29,7 @@ public class DataListener implements IListener {
         try {
             values = in.readUTF();
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
         }
 
     }

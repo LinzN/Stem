@@ -11,6 +11,7 @@
 
 package de.stem.stemSystem.taskManagment.operations.defaultOperations;
 
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.taskManagment.operations.AbstractOperation;
 import de.stem.stemSystem.taskManagment.operations.OperationOutput;
 
@@ -59,7 +60,7 @@ public class ShellOperation extends AbstractOperation {
             }
             operationOutput.setExit(p.exitValue());
         } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
+            STEMSystemApp.LOGGER.ERROR(e);
             operationOutput.setExit(-1);
         }
         return operationOutput;
