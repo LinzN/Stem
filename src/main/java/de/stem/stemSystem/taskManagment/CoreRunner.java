@@ -12,7 +12,6 @@
 package de.stem.stemSystem.taskManagment;
 
 
-import de.linzn.simplyLogger.LOGLEVEL;
 import de.stem.stemSystem.STEMSystemApp;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 
@@ -35,10 +34,6 @@ public class CoreRunner implements Runnable {
 
     public void run() {
         while (isAlive.get()) {
-            if (STEMSystemApp.logSystem.getLogLevel() == LOGLEVEL.DEBUG) {
-                System.out.print("|");
-            }
-
             if (!this.taskQueue.isEmpty()) {
                 try {
                     Runnable task = this.taskQueue.take();

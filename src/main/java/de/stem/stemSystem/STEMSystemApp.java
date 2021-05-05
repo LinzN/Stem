@@ -65,8 +65,8 @@ public class STEMSystemApp {
     }
 
     public static void main(String[] args) {
-        logSystem = new LogSystem();
-        logSystem.setFileLogger("STEM", new File("logs"));
+        logSystem = new LogSystem("STEM");
+        logSystem.setFileLogger(new File("logs"));
         LOGGER = logSystem.getLogger();
         STEMSystemApp.LOGGER.INFO(STEMSystemApp.class.getSimpleName() + " load mainframe...");
         new STEMSystemApp(args);

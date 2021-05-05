@@ -13,10 +13,10 @@ package de.stem.stemSystem.configuration;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
-import de.linzn.simplyLogger.LOGLEVEL;
 import de.stem.stemSystem.STEMSystemApp;
 
 import java.io.File;
+import java.util.logging.Level;
 
 public class AppConfiguration {
 
@@ -41,7 +41,7 @@ public class AppConfiguration {
 
     /* Load the file in memory */
     public void load() {
-        STEMSystemApp.logSystem.setLogLevel(LOGLEVEL.valueOf(this.configFile.getString("system.logLevel", LOGLEVEL.DEBUG.name())));
+        STEMSystemApp.logSystem.setLogLevel(Level.parse(this.configFile.getString("system.logLevel", Level.ALL.getName())));
     }
 
 }
