@@ -24,6 +24,7 @@ public class AppConfiguration {
     FileConfiguration configFile;
     private String fileName = "STEM-Settings.yml";
     private STEMSystemApp stemSystemApp;
+    public Level logLevel;
 
     /* Create class instance */
     public AppConfiguration(STEMSystemApp stemSystemApp) {
@@ -41,7 +42,8 @@ public class AppConfiguration {
 
     /* Load the file in memory */
     public void load() {
-        STEMSystemApp.logSystem.setLogLevel(Level.parse(this.configFile.getString("system.logLevel", Level.ALL.getName())));
+        this.logLevel = Level.parse(this.configFile.getString("system.logLevel", Level.ALL.getName()));
+        STEMSystemApp.logSystem.setLogLevel(logLevel);
     }
 
 }
