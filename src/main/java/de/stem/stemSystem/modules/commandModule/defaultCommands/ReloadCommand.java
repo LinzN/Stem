@@ -14,15 +14,14 @@ package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
-import de.stem.stemSystem.utils.Color;
 
 public class ReloadCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        STEMSystemApp.LOGGER.LIVE(Color.GREEN + "Reloading plugins ..." + Color.RESET);
+        STEMSystemApp.LOGGER.LIVE("Reloading plugins ...");
         STEMSystemApp.getInstance().getPluginModule().reloadPlugins();
-        STEMSystemApp.LOGGER.LIVE(Color.GREEN + "Plugins reloaded!" + Color.RESET);
+        STEMSystemApp.LOGGER.LIVE("Plugins reloaded!");
         return true;
     }
 
