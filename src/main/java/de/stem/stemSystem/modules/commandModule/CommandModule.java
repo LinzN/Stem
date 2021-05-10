@@ -11,6 +11,7 @@
 
 package de.stem.stemSystem.modules.commandModule;
 
+import de.linzn.simplyLogger.input.InputHandler;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.commandModule.defaultCommands.CommandSetup;
@@ -19,29 +20,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class CommandModule extends AbstractModule implements Runnable {
+public class CommandModule extends AbstractModule implements InputHandler {
     private final STEMSystemApp stemSystemApp;
     private final CommandSetup commandSetup;
-    private boolean moduleAlive;
 
     public CommandModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
-        this.moduleAlive = true;
+        STEMSystemApp.logSystem.registerInputHandler(this);
         this.commandSetup = new CommandSetup(this.stemSystemApp);
-        this.stemSystemApp.getScheduler().runTask(this.getModulePlugin(), this);
     }
 
     @Override
-    public void run() {
-        while (moduleAlive) {
-            String input = System.console().readLine();
-
-            String[] inputArray = input.split(" ");
-            String command = inputArray[0];
-
-            String[] args = Arrays.copyOfRange(inputArray, 1, inputArray.length);
-            this.commandSetup.runCommand(command, args);
-        }
+    public void onConsoleInput(String s, String[] strings) {
+        this.commandSetup.runCommand(s, strings);
     }
 
     public void registerCommand(String command, ICommand ICommand) {
@@ -59,6 +50,9 @@ public class CommandModule extends AbstractModule implements Runnable {
 
     @Override
     public void onShutdown() {
-        this.moduleAlive = false;
+        STEMSystemApp.logSystem.unregisterInputHandler();
+
     }
+
+
 }
