@@ -9,7 +9,7 @@
  *
  */
 
-package de.stem.stemSystem.modules.pluginModule.loader;
+package de.stem.stemSystem.modules.pluginModule;
 
 public class InvalidPluginException extends RuntimeException {
 

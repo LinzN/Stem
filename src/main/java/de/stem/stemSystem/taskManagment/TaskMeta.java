@@ -14,13 +14,13 @@ package de.stem.stemSystem.taskManagment;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
-public class AZTask {
+public class TaskMeta {
     long taskId;
     boolean isCanceled;
     boolean runInCore;
     STEMPlugin owner;
 
-    public AZTask(STEMPlugin owner, boolean runInCore) {
+    public TaskMeta(STEMPlugin owner, boolean runInCore) {
         this.owner = owner;
         this.runInCore = runInCore;
         this.taskId = System.nanoTime();

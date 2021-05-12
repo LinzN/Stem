@@ -14,7 +14,7 @@ package de.stem.stemSystem.modules.commandModule.defaultCommands;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
-import de.stem.stemSystem.taskManagment.AZTask;
+import de.stem.stemSystem.taskManagment.TaskMeta;
 import de.stem.stemSystem.taskManagment.AbstractCallback;
 import de.stem.stemSystem.utils.JavaUtils;
 
@@ -32,9 +32,9 @@ public class StatusCommand implements ICommand {
             STEMSystemApp.LOGGER.LIVE("#Callback: " + abstractCallback.getClass().getSimpleName() + " from plugin: " + listener.get(abstractCallback).getPluginName() + " with taskId: " + abstractCallback.taskId);
         }
 
-        HashSet<AZTask> tasks = STEMSystemApp.getInstance().getScheduler().getTasks();
+        HashSet<TaskMeta> tasks = STEMSystemApp.getInstance().getScheduler().getTasks();
         STEMSystemApp.LOGGER.LIVE("Active Scheduled Tasks: (" + listener.size() + ")");
-        for (AZTask task : tasks) {
+        for (TaskMeta task : tasks) {
             STEMSystemApp.LOGGER.LIVE("#TaskId: " + task.getTaskId() + " from owner: " + task.getOwner().getPluginName());
         }
         return true;

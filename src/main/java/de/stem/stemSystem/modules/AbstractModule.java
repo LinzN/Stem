@@ -79,11 +79,6 @@ public abstract class AbstractModule {
             public FileConfiguration getDefaultConfig() {
                 return null;
             }
-
-            @Override
-            public void setUp(String pluginName, String version, String classPath) {
-
-            }
         };
     }
 }

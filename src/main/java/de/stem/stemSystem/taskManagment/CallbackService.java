@@ -55,16 +55,16 @@ public class CallbackService {
 
     private void enableCallbackListener(AbstractCallback abstractCallback, STEMPlugin plugin) {
         CallbackTime callbackTime = abstractCallback.getTime();
-        AZTask azTask;
+        TaskMeta taskMeta;
 
         Runnable runnable = () -> callMethod(abstractCallback, plugin);
         if (callbackTime.fixedTask) {
-            azTask = STEMSystemApp.getInstance().getScheduler().runFixedScheduler(plugin, runnable, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
+            taskMeta = STEMSystemApp.getInstance().getScheduler().runFixedScheduler(plugin, runnable, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
         } else {
-            azTask = STEMSystemApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
+            taskMeta = STEMSystemApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
         }
-        STEMSystemApp.LOGGER.DEBUG("Callback register for " + plugin.getPluginName() + " with taskId :" + azTask.taskId);
-        abstractCallback.setIDs(azTask.getTaskId());
+        STEMSystemApp.LOGGER.DEBUG("Callback register for " + plugin.getPluginName() + " with taskId :" + taskMeta.taskId);
+        abstractCallback.setIDs(taskMeta.getTaskId());
     }
 
     private void callMethod(AbstractCallback abstractCallback, STEMPlugin plugin) {

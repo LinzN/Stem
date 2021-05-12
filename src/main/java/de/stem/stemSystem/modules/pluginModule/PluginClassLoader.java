@@ -9,10 +9,9 @@
  *
  */
 
-package de.stem.stemSystem.modules.pluginModule.loader;
+package de.stem.stemSystem.modules.pluginModule;
 
 import de.stem.stemSystem.STEMSystemApp;
-import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 import java.io.File;
 import java.net.MalformedURLException;

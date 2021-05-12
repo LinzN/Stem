@@ -23,7 +23,7 @@ public abstract class STEMPlugin {
     private File dataFolder;
     private FileConfiguration defaultConfig;
 
-    public void setUp(String pluginName, String version, String classPath) {
+    void setUp(String pluginName, String version, String classPath) {
         this.pluginName = pluginName;
         this.version = version;
         this.classPath = classPath;

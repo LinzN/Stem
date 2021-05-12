@@ -13,7 +13,6 @@ package de.stem.stemSystem.modules.pluginModule;
 import de.linzn.openJL.pairs.Pair;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
-import de.stem.stemSystem.modules.pluginModule.loader.PluginClassLoader;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.File;

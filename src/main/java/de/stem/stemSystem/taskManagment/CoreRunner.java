@@ -12,6 +12,7 @@
 package de.stem.stemSystem.taskManagment;
 
 
+import de.linzn.openJL.pairs.Pair;
 import de.stem.stemSystem.STEMSystemApp;
 import org.eclipse.jetty.util.BlockingArrayQueue;
 
@@ -23,7 +24,7 @@ public class CoreRunner implements Runnable {
     private final AtomicBoolean isAlive = new AtomicBoolean();
     private final SchedulerService schedulerService;
     private final CallbackService callbackService;
-    private final BlockingQueue<Runnable> taskQueue;
+    private final BlockingQueue<Pair<TaskMeta, Runnable>> taskQueue;
 
     public CoreRunner() {
         this.schedulerService = new SchedulerService(this);
@@ -36,10 +37,10 @@ public class CoreRunner implements Runnable {
         while (isAlive.get()) {
             if (!this.taskQueue.isEmpty()) {
                 try {
-                    Runnable task = this.taskQueue.take();
-                    STEMSystemApp.LOGGER.DEBUG("Execute Task: " + task.getClass().getSimpleName());
+                    Pair<TaskMeta, Runnable> metaPair = this.taskQueue.take();
+                    STEMSystemApp.LOGGER.DEBUG("Run task from source: " + metaPair.getKey().owner.getPluginName() + " CoreTask: " + metaPair.getKey().runInCore + " taskId: " + metaPair.getKey().taskId);
                     try {
-                        task.run();
+                        metaPair.getValue().run();
                     } catch (Exception e) {
                         STEMSystemApp.LOGGER.ERROR(e);
                     }
@@ -55,8 +56,8 @@ public class CoreRunner implements Runnable {
         }
     }
 
-    void queueTask(Runnable runnable) {
-        this.taskQueue.add(runnable);
+    void queueTask(Pair<TaskMeta, Runnable> metaPair) {
+        this.taskQueue.add(metaPair);
     }
 
 

@@ -12,6 +12,7 @@
 package de.stem.stemSystem.taskManagment;
 
 
+import de.linzn.openJL.pairs.Pair;
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
@@ -28,7 +29,7 @@ public class SchedulerService {
     private final CoreRunner coreRunner;
     private final ScheduledExecutorService scheduledExecutorService;
     private final ExecutorService executorService;
-    private HashSet<AZTask> tasks;
+    private HashSet<TaskMeta> tasks;
     private final DefaultSTEMPlugin defaultAZPlugin;
 
     SchedulerService(CoreRunner coreRunner) {
@@ -39,53 +40,53 @@ public class SchedulerService {
         this.defaultAZPlugin = new DefaultSTEMPlugin();
     }
 
-    public AZTask runTaskInCore(STEMPlugin plugin, Runnable task) {
+    public TaskMeta runTaskInCore(STEMPlugin plugin, Runnable task) {
         return execTask(plugin, task, true);
     }
 
-    public AZTask runTask(STEMPlugin plugin, Runnable task) {
+    public TaskMeta runTask(STEMPlugin plugin, Runnable task) {
         return execTask(plugin, task, false);
     }
 
 
-    public AZTask runTaskLaterInCore(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
+    public TaskMeta runTaskLaterInCore(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return this.execTaskDelay(plugin, task, delay, timeUnit, true);
     }
 
-    public AZTask runTaskLater(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
+    public TaskMeta runTaskLater(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return this.execTaskDelay(plugin, task, delay, timeUnit, false);
     }
 
 
-    public AZTask runRepeatSchedulerInCore(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
+    public TaskMeta runRepeatSchedulerInCore(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return this.execRepeatTask(plugin, task, delay, period, timeUnit, true);
     }
 
-    public AZTask runRepeatScheduler(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
+    public TaskMeta runRepeatScheduler(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return this.execRepeatTask(plugin, task, delay, period, timeUnit, false);
     }
 
-    public AZTask runFixedSchedulerInCore(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
+    public TaskMeta runFixedSchedulerInCore(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
         return this.execFixedTask(plugin, task, days, hours, minutes, daily, true);
     }
 
-    public AZTask runFixedScheduler(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
+    public TaskMeta runFixedScheduler(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily) {
         return this.execFixedTask(plugin, task, days, hours, minutes, daily, false);
     }
 
 
-    private AZTask execFixedTask(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
+    private TaskMeta execFixedTask(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, runInCore);
-        this.tasks.add(azTask);
-        STEMSystemApp.LOGGER.DEBUG("Fixed from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
+        this.tasks.add(taskMeta);
+        STEMSystemApp.LOGGER.DEBUG("Fixed from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
         long times = this.getTimerTime(days, hours, minutes);
         Runnable runnableContainer = () -> {
-            while (!azTask.isCanceled) {
-                this.pushCoreRunner(azTask, task);
+            while (!taskMeta.isCanceled) {
+                this.pushCoreRunner(taskMeta, task);
 
                 if (daily) {
                     try {
@@ -93,88 +94,88 @@ public class SchedulerService {
                     } catch (InterruptedException ignored) {
                     }
                 } else {
-                    azTask.cancel();
+                    taskMeta.cancel();
                 }
             }
-            tasks.remove(azTask);
+            tasks.remove(taskMeta);
         };
 
         this.scheduledExecutorService.schedule(runnableContainer, times, TimeUnit.MILLISECONDS);
-        return azTask;
+        return taskMeta;
     }
 
-    private AZTask execRepeatTask(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
+    private TaskMeta execRepeatTask(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, runInCore);
-        this.tasks.add(azTask);
-        STEMSystemApp.LOGGER.DEBUG("Repeat from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
+        this.tasks.add(taskMeta);
+        STEMSystemApp.LOGGER.DEBUG("Repeat from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
         Runnable runnableContainer = () -> {
-            while (!azTask.isCanceled) {
-                this.pushCoreRunner(azTask, task);
+            while (!taskMeta.isCanceled) {
+                this.pushCoreRunner(taskMeta, task);
 
                 try {
                     Thread.sleep(timeUnit.toMillis(period));
                 } catch (InterruptedException ignored) {
                 }
             }
-            tasks.remove(azTask);
+            tasks.remove(taskMeta);
         };
 
         this.scheduledExecutorService.schedule(runnableContainer, delay, timeUnit);
-        return azTask;
+        return taskMeta;
     }
 
-    private AZTask execTask(STEMPlugin plugin, Runnable task, boolean runInCore) {
+    private TaskMeta execTask(STEMPlugin plugin, Runnable task, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, runInCore);
-        this.tasks.add(azTask);
-        STEMSystemApp.LOGGER.DEBUG("Task from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
+        this.tasks.add(taskMeta);
+        STEMSystemApp.LOGGER.DEBUG("Task from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
 
-        tasks.remove(azTask);
-        if (!azTask.isCanceled) {
-            this.pushCoreRunner(azTask, task);
+        tasks.remove(taskMeta);
+        if (!taskMeta.isCanceled) {
+            this.pushCoreRunner(taskMeta, task);
         }
 
-        return azTask;
+        return taskMeta;
     }
 
-    private AZTask execTaskDelay(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean runInCore) {
+    private TaskMeta execTaskDelay(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean runInCore) {
         if (!this.checkIsValid()) {
             return null;
         }
 
-        AZTask azTask = new AZTask(plugin, runInCore);
-        this.tasks.add(azTask);
-        STEMSystemApp.LOGGER.DEBUG("Delay from " + plugin.getPluginName() + " id:" + azTask.taskId);
+        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
+        this.tasks.add(taskMeta);
+        STEMSystemApp.LOGGER.DEBUG("Delay from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
         Runnable runnableContainer = () -> {
-            tasks.remove(azTask);
-            if (!azTask.isCanceled) {
-                this.pushCoreRunner(azTask, task);
+            tasks.remove(taskMeta);
+            if (!taskMeta.isCanceled) {
+                this.pushCoreRunner(taskMeta, task);
             }
         };
 
         this.scheduledExecutorService.schedule(runnableContainer, delay, timeUnit);
-        return azTask;
+        return taskMeta;
     }
 
-    private void pushCoreRunner(AZTask azTask, Runnable task) {
-        if (azTask.runInCore) {
-            this.coreRunner.queueTask(task);
+    private void pushCoreRunner(TaskMeta taskMeta, Runnable task) {
+        if (taskMeta.runInCore) {
+            this.coreRunner.queueTask(new Pair<>(taskMeta, task));
         } else {
             Runnable asyncTask = () -> executorService.submit(task);
-            this.coreRunner.queueTask(asyncTask);
+            this.coreRunner.queueTask(new Pair<>(taskMeta, asyncTask));
         }
     }
 
     public boolean isTask(long taskId) {
-        for (AZTask azTask : this.tasks) {
-            if (azTask.getTaskId() == taskId) {
+        for (TaskMeta taskMeta : this.tasks) {
+            if (taskMeta.getTaskId() == taskId) {
                 return true;
             }
         }
@@ -182,31 +183,31 @@ public class SchedulerService {
     }
 
     public void cancelTask(long taskId) {
-        for (AZTask azTask : this.tasks) {
-            if (azTask.getTaskId() == taskId) {
-                azTask.cancel();
+        for (TaskMeta taskMeta : this.tasks) {
+            if (taskMeta.getTaskId() == taskId) {
+                taskMeta.cancel();
                 break;
             }
         }
     }
 
     public void cancelTasks(STEMPlugin stemPlugin) {
-        for (AZTask azTask : this.tasks) {
-            if (azTask.owner == stemPlugin) {
-                azTask.cancel();
+        for (TaskMeta taskMeta : this.tasks) {
+            if (taskMeta.owner == stemPlugin) {
+                taskMeta.cancel();
             }
         }
     }
 
     void cancelAll() {
-        for (AZTask azTask : this.tasks) {
-            azTask.cancel();
+        for (TaskMeta taskMeta : this.tasks) {
+            taskMeta.cancel();
         }
         this.tasks.clear();
         this.tasks = null;
     }
 
-    public HashSet<AZTask> getTasks() {
+    public HashSet<TaskMeta> getTasks() {
         return this.tasks;
     }
 
@@ -280,11 +281,6 @@ public class SchedulerService {
         @Override
         public FileConfiguration getDefaultConfig() {
             return null;
-        }
-
-        @Override
-        public void setUp(String pluginName, String version, String classPath) {
-
         }
     }
 
