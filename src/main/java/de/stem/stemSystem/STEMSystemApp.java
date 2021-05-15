@@ -30,6 +30,7 @@ import de.stem.stemSystem.utils.JavaUtils;
 import java.io.File;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
 
 public class STEMSystemApp {
 
@@ -37,7 +38,7 @@ public class STEMSystemApp {
     public static Logger LOGGER;
     public static LogSystem logSystem;
     private final AtomicBoolean isActive;
-    private final StemClassLoader stemClassLoader;
+    private StemClassLoader stemClassLoader;
 
     private final CoreRunner coreRunner;
     private AppConfiguration appConfiguration;
@@ -54,7 +55,6 @@ public class STEMSystemApp {
 
     public STEMSystemApp(String[] args) {
         instance = this;
-        stemClassLoader = new StemClassLoader();
         STEMSystemApp.LOGGER.INFO("STEM version " + JavaUtils.getVersion());
         this.start_time = System.nanoTime();
         this.isActive = new AtomicBoolean(true);
@@ -65,6 +65,7 @@ public class STEMSystemApp {
         this.uptimeDate = new Date();
         this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), () -> {
             loadModules();
+            logSystem.setLogLevel(this.appConfiguration.logLevel);
             STEMSystemApp.LOGGER.INFO("STEM-System startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.");
         });
     }
@@ -72,6 +73,7 @@ public class STEMSystemApp {
     public static void main(String[] args) {
         logSystem = new LogSystem("STEM");
         logSystem.setFileLogger(new File("logs"));
+        logSystem.setLogLevel(Level.ALL);
         LOGGER = logSystem.getLogger();
         STEMSystemApp.LOGGER.INFO(STEMSystemApp.class.getSimpleName() + " load mainframe...");
         new STEMSystemApp(args);
@@ -112,6 +114,10 @@ public class STEMSystemApp {
         System.exit(0);
     }
 
+    public void setClassLoader(StemClassLoader stemClassLoader) {
+        this.stemClassLoader = stemClassLoader;
+    }
+
     public AppConfiguration getConfiguration() {
         return appConfiguration;
     }
@@ -149,7 +155,7 @@ public class STEMSystemApp {
         return pluginModule;
     }
 
-    public StemClassLoader getStemClassLoader(){
+    public StemClassLoader getStemClassLoader() {
         return stemClassLoader;
     }
 

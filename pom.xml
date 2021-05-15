@@ -46,7 +46,7 @@
                         <manifest>
                             <addClasspath>true</addClasspath>
                             <mainClass>de.stem.stemSystem.STEMSystemApp</mainClass>
-                            <classpathPrefix>lib/rt</classpathPrefix>
+                            <classpathPrefix>core/dependencies</classpathPrefix>
                         </manifest>
                     </archive>
                 </configuration>
@@ -71,7 +71,7 @@
                         </goals>
 
                         <configuration>
-                            <outputDirectory>target/lib/rt</outputDirectory>
+                            <outputDirectory>target/core/dependencies</outputDirectory>
                         </configuration>
                     </execution>
                 </executions>

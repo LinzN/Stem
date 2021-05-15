@@ -27,6 +27,7 @@ public class LibraryModule extends AbstractModule {
     /* Create class instance */
     public LibraryModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
+        this.stemSystemApp.setClassLoader(new StemClassLoader());
 
         try {
             loadJarFiles();
@@ -36,7 +37,7 @@ public class LibraryModule extends AbstractModule {
     }
 
     private void loadJarFiles() throws IOException, InvocationTargetException, NoSuchMethodException, IllegalAccessException {
-        File dependencyDirectory = new File("lib/custom/");
+        File dependencyDirectory = new File("libraries");
         if (!dependencyDirectory.exists()) {
             dependencyDirectory.mkdirs();
         }
@@ -58,6 +59,6 @@ public class LibraryModule extends AbstractModule {
 
     @Override
     public void onShutdown() {
-
+        this.stemSystemApp.setClassLoader(null);
     }
 }
