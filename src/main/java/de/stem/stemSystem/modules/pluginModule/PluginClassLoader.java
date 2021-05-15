@@ -43,7 +43,7 @@ public class PluginClassLoader extends URLClassLoader {
             try {
                 pluginClass = jarClass.asSubclass(STEMPlugin.class);
             } catch (ClassCastException ex) {
-                throw new InvalidPluginException("main class `" + classPath + "' does not extend Plugin");
+                throw new InvalidPluginException("Main class `" + classPath + "' does not extend Plugin");
             }
             STEMPlugin plugin = pluginClass.newInstance();
             plugin.setUp(pluginName, version, classPath);

@@ -43,7 +43,6 @@ public class AppConfiguration {
     /* Load the file in memory */
     public void load() {
         this.logLevel = Level.parse(this.configFile.getString("system.logLevel", Level.ALL.getName()));
-        STEMSystemApp.logSystem.setLogLevel(logLevel);
     }
 
 }

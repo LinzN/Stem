@@ -11,12 +11,15 @@
 
 package de.stem.stemSystem.modules.libraryModule;
 
+import de.stem.stemSystem.STEMSystemApp;
+
 import java.net.URL;
 import java.net.URLClassLoader;
 
 public class StemClassLoader extends URLClassLoader {
     public StemClassLoader() {
         super(new URL[]{}, ClassLoader.getSystemClassLoader());
+        STEMSystemApp.LOGGER.CORE("Loading custom classloader for library and plugin support");
     }
 
     @Override

@@ -23,7 +23,7 @@ public abstract class AbstractModule {
 
     public AbstractModule() {
         this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
-        STEMSystemApp.LOGGER.INFO("Load module " + this.modulePlugin.getPluginName());
+        STEMSystemApp.LOGGER.CORE("Load module " + this.modulePlugin.getPluginName());
     }
 
     public STEMPlugin getModulePlugin() {
@@ -31,7 +31,7 @@ public abstract class AbstractModule {
     }
 
     public void shutdownModule() {
-        STEMSystemApp.LOGGER.INFO("Unload module " + this.modulePlugin.getPluginName());
+        STEMSystemApp.LOGGER.CORE("Unload module " + this.modulePlugin.getPluginName());
         this.onShutdown();
         STEMSystemApp.getInstance().getCallBackService().unregisterCallbackListeners(this.modulePlugin);
         STEMSystemApp.getInstance().getScheduler().cancelTasks(this.modulePlugin);
