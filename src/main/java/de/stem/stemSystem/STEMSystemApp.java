@@ -16,6 +16,8 @@ import de.linzn.simplyLogger.Logger;
 import de.stem.stemSystem.configuration.AppConfiguration;
 import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
+import de.stem.stemSystem.modules.libraryModule.LibraryModule;
+import de.stem.stemSystem.modules.libraryModule.StemClassLoader;
 import de.stem.stemSystem.modules.mqttModule.MqttModule;
 import de.stem.stemSystem.modules.notificationModule.NotificationModule;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
@@ -35,10 +37,12 @@ public class STEMSystemApp {
     public static Logger LOGGER;
     public static LogSystem logSystem;
     private final AtomicBoolean isActive;
+    private final StemClassLoader stemClassLoader;
 
     private final CoreRunner coreRunner;
     private AppConfiguration appConfiguration;
     private ZSocketModule zSocketModule;
+    private LibraryModule libraryModule;
     private MqttModule mqttModule;
     private CommandModule commandModule;
     private NotificationModule notificationModule;
@@ -50,6 +54,7 @@ public class STEMSystemApp {
 
     public STEMSystemApp(String[] args) {
         instance = this;
+        stemClassLoader = new StemClassLoader();
         STEMSystemApp.LOGGER.INFO("STEM version " + JavaUtils.getVersion());
         this.start_time = System.nanoTime();
         this.isActive = new AtomicBoolean(true);
@@ -84,6 +89,7 @@ public class STEMSystemApp {
         mqttModule = new MqttModule(instance);
         notificationModule = new NotificationModule(instance);
         commandModule = new CommandModule(instance);
+        libraryModule = new LibraryModule(instance);
         pluginModule = new PluginModule(instance);
     }
 
@@ -99,7 +105,7 @@ public class STEMSystemApp {
         this.mqttModule.shutdownModule();
         this.notificationModule.shutdownModule();
         this.databaseModule.shutdownModule();
-
+        this.libraryModule.shutdownModule();
         this.coreRunner.endCore();
         this.isActive.set(false);
         STEMSystemApp.LOGGER.INFO("Shutdown complete!");
@@ -143,6 +149,9 @@ public class STEMSystemApp {
         return pluginModule;
     }
 
+    public StemClassLoader getStemClassLoader(){
+        return stemClassLoader;
+    }
 
     public Date getUptimeDate() {
         return this.uptimeDate;

@@ -20,8 +20,8 @@ import java.net.URLClassLoader;
 
 public class PluginClassLoader extends URLClassLoader {
 
-    public PluginClassLoader() {
-        super(new URL[]{}, ClassLoader.getSystemClassLoader());
+    public PluginClassLoader(ClassLoader parentClassLoader) {
+        super(new URL[]{}, parentClassLoader);
     }
 
     public synchronized STEMPlugin addPluginFile(String pluginName, String classPath, String version, File jarFile) throws MalformedURLException {

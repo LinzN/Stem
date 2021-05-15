@@ -37,7 +37,7 @@ public class PluginModule extends AbstractModule {
 
     private void init() {
         this.pluginList = new LinkedHashMap<>();
-        this.pluginClassLoader = new PluginClassLoader();
+        this.pluginClassLoader = new PluginClassLoader(STEMSystemApp.getInstance().getStemClassLoader());
 
         if (!pluginDirectory.exists()) {
             pluginDirectory.mkdir();
