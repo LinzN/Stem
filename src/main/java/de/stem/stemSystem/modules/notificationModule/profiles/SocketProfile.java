@@ -31,7 +31,7 @@ public class SocketProfile implements INotificationProfile {
             } catch (IOException e) {
                 STEMSystemApp.LOGGER.ERROR(e);
             }
-            STEMSystemApp.getInstance().getZSocketModule().getStemLinkServer().getClients().values().forEach(serverConnection -> serverConnection.writeOutput("notification", byteArrayOutputStream.toByteArray()));
+            STEMSystemApp.getInstance().getStemLinkModule().getStemLinkServer().getClients().values().forEach(serverConnection -> serverConnection.writeOutput("notification", byteArrayOutputStream.toByteArray()));
         }
     }
 }

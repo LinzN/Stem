@@ -130,7 +130,7 @@ public class STEMSystemApp {
     }
 
 
-    public StemLinkModule getZSocketModule() {
+    public StemLinkModule getStemLinkModule() {
         return stemLinkModule;
     }
 
