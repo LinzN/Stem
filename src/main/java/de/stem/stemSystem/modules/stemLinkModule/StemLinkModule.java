@@ -19,7 +19,7 @@ import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.stemLinkModule.listener.ConnectionListener;
 import de.stem.stemSystem.modules.stemLinkModule.listener.DataListener;
-import de.stem.stemSystem.modules.stemLinkModule.mask.StemLinkMask;
+import de.stem.stemSystem.modules.stemLinkModule.mask.StemLinkWrapper;
 
 import java.io.File;
 import java.util.Arrays;
@@ -38,7 +38,7 @@ public class StemLinkModule extends AbstractModule {
     public StemLinkModule(STEMSystemApp stemSystemApp) {
         this.initConfig();
         CryptContainer cryptContainer = new CryptContainer(this.cryptAESKey, this.vector16B);
-        this.stemLinkServer = new StemLinkServer(this.socketHost, this.socketPort, new StemLinkMask(this), cryptContainer);
+        this.stemLinkServer = new StemLinkServer(this.socketHost, this.socketPort, new StemLinkWrapper(this), cryptContainer);
         this.registerEvents();
         this.createNetwork();
     }

@@ -11,17 +11,17 @@
 
 package de.stem.stemSystem.modules.stemLinkModule.mask;
 
-import de.linzn.stemLink.components.ILinkMask;
+import de.linzn.stemLink.components.IStemLinkWrapper;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.stemLinkModule.StemLinkModule;
 
 import java.util.logging.Level;
 
-public class StemLinkMask implements ILinkMask {
+public class StemLinkWrapper implements IStemLinkWrapper {
 
     private final StemLinkModule stemLinkModule;
 
-    public StemLinkMask(StemLinkModule stemLinkModule) {
+    public StemLinkWrapper(StemLinkModule stemLinkModule) {
         this.stemLinkModule = stemLinkModule;
     }
 
@@ -31,7 +31,7 @@ public class StemLinkMask implements ILinkMask {
     }
 
     @Override
-    public void log(String s, Level level) {
+    public void log(Object s, Level level) {
         if (level == Level.INFO) {
             STEMSystemApp.LOGGER.INFO(s);
         } else if (level == Level.FINE) {
