@@ -9,15 +9,14 @@
  *
  */
 
-package de.stem.stemSystem.modules.zSocketModule.listener;
+package de.stem.stemSystem.modules.stemLinkModule.listener;
 
-import de.linzn.zSocket.components.events.ConnectEvent;
-import de.linzn.zSocket.components.events.DisconnectEvent;
-import de.linzn.zSocket.components.events.IListener;
-import de.linzn.zSocket.components.events.handler.EventHandler;
+import de.linzn.stemLink.components.events.ConnectEvent;
+import de.linzn.stemLink.components.events.DisconnectEvent;
+import de.linzn.stemLink.components.events.handler.EventHandler;
 import de.stem.stemSystem.STEMSystemApp;
 
-public class ConnectionListener implements IListener {
+public class ConnectionListener {
 
 
     @EventHandler

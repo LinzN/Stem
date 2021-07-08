@@ -23,11 +23,11 @@ import java.net.URLClassLoader;
 import java.util.*;
 
 public class PluginModule extends AbstractModule {
-    public static File pluginDirectory = new File("plugins");
     private static final String pluginFileName = "plugin.yml";
+    public static File pluginDirectory = new File("plugins");
+    private final STEMSystemApp stemSystemApp;
     private PluginClassLoader pluginClassLoader;
     private LinkedHashMap<String, STEMPlugin> pluginList;
-    private final STEMSystemApp stemSystemApp;
 
     public PluginModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;

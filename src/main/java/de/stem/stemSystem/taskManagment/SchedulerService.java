@@ -29,8 +29,8 @@ public class SchedulerService {
     private final CoreRunner coreRunner;
     private final ScheduledExecutorService scheduledExecutorService;
     private final ExecutorService executorService;
-    private HashSet<TaskMeta> tasks;
     private final DefaultSTEMPlugin defaultAZPlugin;
+    private HashSet<TaskMeta> tasks;
 
     SchedulerService(CoreRunner coreRunner) {
         this.coreRunner = coreRunner;

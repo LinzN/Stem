@@ -17,7 +17,6 @@ import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.commandModule.defaultCommands.CommandSetup;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class CommandModule extends AbstractModule implements InputHandler {

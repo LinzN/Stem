@@ -23,8 +23,8 @@ import java.io.File;
 
 public class MqttModule extends AbstractModule {
 
-    private FileConfiguration fileConfiguration;
     STEMSystemApp stemSystemApp;
+    private FileConfiguration fileConfiguration;
     private String broker;
     private String clientId;
     private String user;

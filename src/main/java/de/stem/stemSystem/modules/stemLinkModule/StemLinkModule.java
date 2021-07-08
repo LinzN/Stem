@@ -9,24 +9,24 @@
  *
  */
 
-package de.stem.stemSystem.modules.zSocketModule;
+package de.stem.stemSystem.modules.stemLinkModule;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
-import de.linzn.zSocket.components.encryption.CryptContainer;
-import de.linzn.zSocket.connections.server.ZServer;
+import de.linzn.stemLink.components.encryption.CryptContainer;
+import de.linzn.stemLink.connections.server.StemLinkServer;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
-import de.stem.stemSystem.modules.zSocketModule.listener.ConnectionListener;
-import de.stem.stemSystem.modules.zSocketModule.listener.DataListener;
-import de.stem.stemSystem.modules.zSocketModule.mask.SocketMask;
+import de.stem.stemSystem.modules.stemLinkModule.listener.ConnectionListener;
+import de.stem.stemSystem.modules.stemLinkModule.listener.DataListener;
+import de.stem.stemSystem.modules.stemLinkModule.mask.StemLinkMask;
 
 import java.io.File;
 import java.util.Arrays;
 
 
-public class ZSocketModule extends AbstractModule {
-    private ZServer zServer;
+public class StemLinkModule extends AbstractModule {
+    private final StemLinkServer stemLinkServer;
 
     private FileConfiguration fileConfiguration;
 
@@ -35,10 +35,10 @@ public class ZSocketModule extends AbstractModule {
     private String cryptAESKey;
     private byte[] vector16B;
 
-    public ZSocketModule(STEMSystemApp stemSystemApp) {
+    public StemLinkModule(STEMSystemApp stemSystemApp) {
         this.initConfig();
         CryptContainer cryptContainer = new CryptContainer(this.cryptAESKey, this.vector16B);
-        this.zServer = new ZServer(this.socketHost, this.socketPort, new SocketMask(this), cryptContainer);
+        this.stemLinkServer = new StemLinkServer(this.socketHost, this.socketPort, new StemLinkMask(this), cryptContainer);
         this.registerEvents();
         this.createNetwork();
     }
@@ -53,24 +53,24 @@ public class ZSocketModule extends AbstractModule {
     }
 
     private void registerEvents() {
-        this.zServer.registerEvents(new ConnectionListener());
-        this.zServer.registerEvents(new DataListener());
+        this.stemLinkServer.registerEvents(new ConnectionListener());
+        this.stemLinkServer.registerEvents(new DataListener());
     }
 
     public void createNetwork() {
-        this.zServer.openServer();
+        this.stemLinkServer.openServer();
     }
 
     public void deleteNetwork() {
-        this.zServer.closeServer();
+        this.stemLinkServer.closeServer();
     }
 
-    public ZServer getzServer() {
-        return this.zServer;
+    public StemLinkServer getStemLinkServer() {
+        return this.stemLinkServer;
     }
 
     private void initConfig() {
-        this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_zSocket.yml"));
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_stemLink.yml"));
 
         this.socketHost = this.fileConfiguration.getString("socketHost", "0.0.0.0");
         this.socketPort = this.fileConfiguration.getInt("socketPort", 11102);

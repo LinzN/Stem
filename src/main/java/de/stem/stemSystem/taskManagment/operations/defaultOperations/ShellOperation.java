@@ -66,51 +66,51 @@ public class ShellOperation extends AbstractOperation {
         return operationOutput;
     }
 
-    public void setUseSSH(boolean useSSH) {
-        this.useSSH = useSSH;
-    }
-
-    public void setSshHost(String sshHost) {
-        this.sshHost = sshHost;
-    }
-
-    public void setSshPort(int sshPort) {
-        this.sshPort = sshPort;
-    }
-
-    public void setScriptCommand(String scriptCommand) {
-        this.scriptCommand = scriptCommand;
+    public boolean isUseOutput() {
+        return useOutput;
     }
 
     public void setUseOutput(boolean useOutput) {
         this.useOutput = useOutput;
     }
 
-    public void setSshUser(String sshUser) {
-        this.sshUser = sshUser;
-    }
-
-    public boolean isUseOutput() {
-        return useOutput;
-    }
-
     public boolean isUseSSH() {
         return useSSH;
+    }
+
+    public void setUseSSH(boolean useSSH) {
+        this.useSSH = useSSH;
     }
 
     public int getSshPort() {
         return sshPort;
     }
 
+    public void setSshPort(int sshPort) {
+        this.sshPort = sshPort;
+    }
+
     public String getSshHost() {
         return sshHost;
+    }
+
+    public void setSshHost(String sshHost) {
+        this.sshHost = sshHost;
     }
 
     public String getSshUser() {
         return sshUser;
     }
 
+    public void setSshUser(String sshUser) {
+        this.sshUser = sshUser;
+    }
+
     public String getScriptCommand() {
         return scriptCommand;
+    }
+
+    public void setScriptCommand(String scriptCommand) {
+        this.scriptCommand = scriptCommand;
     }
 }

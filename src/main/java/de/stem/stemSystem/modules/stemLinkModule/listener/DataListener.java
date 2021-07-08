@@ -9,18 +9,18 @@
  *
  */
 
-package de.stem.stemSystem.modules.zSocketModule.listener;
+package de.stem.stemSystem.modules.stemLinkModule.listener;
 
-import de.linzn.zSocket.components.events.IListener;
-import de.linzn.zSocket.components.events.ReceiveDataEvent;
-import de.linzn.zSocket.components.events.handler.EventHandler;
+
+import de.linzn.stemLink.components.events.ReceiveDataEvent;
+import de.linzn.stemLink.components.events.handler.EventHandler;
 import de.stem.stemSystem.STEMSystemApp;
 
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 
-public class DataListener implements IListener {
+public class DataListener {
 
     @EventHandler(channel = "default_stream")
     public void onReceiveEvent(ReceiveDataEvent event) {

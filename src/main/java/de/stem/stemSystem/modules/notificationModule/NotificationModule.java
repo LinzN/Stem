@@ -24,12 +24,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class NotificationModule extends AbstractModule {
-    private boolean moduleAlive;
-
     private final STEMSystemApp stemSystemApp;
     private final LinkedList<NotificationContainer> notificationQueue;
     private final List<INotificationProfile> notificationProfiles;
     private final NotificationArchive notificationArchive;
+    private boolean moduleAlive;
 
 
     public NotificationModule(STEMSystemApp stemSystemApp) {

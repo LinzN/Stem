@@ -20,11 +20,11 @@ import java.util.logging.Level;
 
 public class AppConfiguration {
 
+    public Level logLevel;
     /* Variables */
     FileConfiguration configFile;
     private String fileName = "STEM-Settings.yml";
     private STEMSystemApp stemSystemApp;
-    public Level logLevel;
 
     /* Create class instance */
     public AppConfiguration(STEMSystemApp stemSystemApp) {

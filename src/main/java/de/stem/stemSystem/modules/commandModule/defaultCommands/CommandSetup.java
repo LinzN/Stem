@@ -17,8 +17,8 @@ import de.stem.stemSystem.modules.commandModule.ICommand;
 import java.util.TreeMap;
 
 public class CommandSetup {
-    public TreeMap<String, ICommand> terminalExecutes;
     private final STEMSystemApp stemSystemApp;
+    public TreeMap<String, ICommand> terminalExecutes;
 
     public CommandSetup(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;

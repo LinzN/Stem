@@ -21,7 +21,7 @@ import de.stem.stemSystem.modules.libraryModule.StemClassLoader;
 import de.stem.stemSystem.modules.mqttModule.MqttModule;
 import de.stem.stemSystem.modules.notificationModule.NotificationModule;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
-import de.stem.stemSystem.modules.zSocketModule.ZSocketModule;
+import de.stem.stemSystem.modules.stemLinkModule.StemLinkModule;
 import de.stem.stemSystem.taskManagment.CallbackService;
 import de.stem.stemSystem.taskManagment.CoreRunner;
 import de.stem.stemSystem.taskManagment.SchedulerService;
@@ -34,23 +34,22 @@ import java.util.logging.Level;
 
 public class STEMSystemApp {
 
-    private static STEMSystemApp instance;
     public static Logger LOGGER;
     public static LogSystem logSystem;
+    private static STEMSystemApp instance;
     private final AtomicBoolean isActive;
-    private StemClassLoader stemClassLoader;
-
     private final CoreRunner coreRunner;
+    private final Date uptimeDate;
+    private final long start_time;
+    private StemClassLoader stemClassLoader;
     private AppConfiguration appConfiguration;
-    private ZSocketModule zSocketModule;
+    private StemLinkModule stemLinkModule;
     private LibraryModule libraryModule;
     private MqttModule mqttModule;
     private CommandModule commandModule;
     private NotificationModule notificationModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
-    private final Date uptimeDate;
-    private final long start_time;
 
 
     public STEMSystemApp(String[] args) {
@@ -87,7 +86,7 @@ public class STEMSystemApp {
     private void loadModules() {
         appConfiguration = new AppConfiguration(instance);
         databaseModule = new DatabaseModule(instance);
-        zSocketModule = new ZSocketModule(instance);
+        stemLinkModule = new StemLinkModule(instance);
         mqttModule = new MqttModule(instance);
         notificationModule = new NotificationModule(instance);
         commandModule = new CommandModule(instance);
@@ -103,7 +102,7 @@ public class STEMSystemApp {
     public void shutdown() {
         this.commandModule.shutdownModule();
         this.pluginModule.shutdownModule();
-        this.zSocketModule.shutdownModule();
+        this.stemLinkModule.shutdownModule();
         this.mqttModule.shutdownModule();
         this.notificationModule.shutdownModule();
         this.databaseModule.shutdownModule();
@@ -131,8 +130,8 @@ public class STEMSystemApp {
     }
 
 
-    public ZSocketModule getZSocketModule() {
-        return zSocketModule;
+    public StemLinkModule getZSocketModule() {
+        return stemLinkModule;
     }
 
     public MqttModule getMqttModule() {
