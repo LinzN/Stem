@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020. Niklas Linz - All Rights Reserved
+ * Copyright (C) 2021. Niklas Linz - All Rights Reserved
  * You may use, distribute and modify this code under the
  * terms of the LGPLv3 license, which unfortunately won't be
  * written for another century.
@@ -16,6 +16,8 @@ import de.linzn.simplyLogger.Logger;
 import de.stem.stemSystem.configuration.AppConfiguration;
 import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
+import de.stem.stemSystem.modules.eventModule.EventModule;
+import de.stem.stemSystem.modules.eventModule.events.StemStartupEvent;
 import de.stem.stemSystem.modules.libraryModule.LibraryModule;
 import de.stem.stemSystem.modules.libraryModule.StemClassLoader;
 import de.stem.stemSystem.modules.mqttModule.MqttModule;
@@ -43,6 +45,7 @@ public class STEMSystemApp {
     private final long start_time;
     private StemClassLoader stemClassLoader;
     private AppConfiguration appConfiguration;
+    private EventModule eventModule;
     private StemLinkModule stemLinkModule;
     private LibraryModule libraryModule;
     private MqttModule mqttModule;
@@ -65,7 +68,10 @@ public class STEMSystemApp {
         this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), () -> {
             loadModules();
             logSystem.setLogLevel(this.appConfiguration.logLevel);
-            STEMSystemApp.LOGGER.CORE("STEM-System startup finished in " + (int) ((System.nanoTime() - start_time) / 1e6) + " ms.");
+            int startupTime = (int) ((System.nanoTime() - start_time) / 1e6);
+            STEMSystemApp.LOGGER.CORE("STEM-System startup finished in " + startupTime + " ms.");
+            StemStartupEvent stemStartupEvent = new StemStartupEvent(startupTime);
+            this.eventModule.getStemEventBus().fireEvent(stemStartupEvent);
         });
     }
 
@@ -85,6 +91,7 @@ public class STEMSystemApp {
 
     private void loadModules() {
         appConfiguration = new AppConfiguration(instance);
+        eventModule = new EventModule(instance);
         databaseModule = new DatabaseModule(instance);
         stemLinkModule = new StemLinkModule(instance);
         mqttModule = new MqttModule(instance);

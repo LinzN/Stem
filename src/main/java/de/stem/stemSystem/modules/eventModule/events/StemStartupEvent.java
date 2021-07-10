@@ -9,15 +9,21 @@
  *
  */
 
-package de.stem.stemSystem.taskManagment.operations;
-
-public abstract class AbstractOperation implements Runnable {
-
-    public abstract OperationOutput runOperation();
+package de.stem.stemSystem.modules.eventModule.events;
 
 
-    @Override
-    public void run() {
-        OperationOutput operationOutput = runOperation();
+import de.stem.stemSystem.modules.eventModule.StemEvent;
+
+public class StemStartupEvent implements StemEvent {
+
+    private long startupTime;
+
+    public StemStartupEvent(long startupTime) {
+        this.startupTime = startupTime;
     }
+
+    public long getStartupTime() {
+        return startupTime;
+    }
+
 }
