@@ -69,7 +69,6 @@ public class STEMSystemApp {
             loadModules();
             logSystem.setLogLevel(this.appConfiguration.logLevel);
             int startupTime = (int) ((System.nanoTime() - start_time) / 1e6);
-            STEMSystemApp.LOGGER.CORE("STEM-System startup finished in " + startupTime + " ms.");
             StemStartupEvent stemStartupEvent = new StemStartupEvent(startupTime);
             this.eventModule.getStemEventBus().fireEvent(stemStartupEvent);
         });

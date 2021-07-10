@@ -19,7 +19,6 @@ public class StemStartupListener {
 
     @StemEventHandler()
     public void onStartup(StemStartupEvent event){
-        STEMSystemApp.LOGGER.WARNING("StemStartupEvent fired with value " + event.getStartupTime());
-        event.cancel();
+        STEMSystemApp.LOGGER.CORE("STEM-System startup finished in " + event.getStartupTime() + " ms.");
     }
 }
