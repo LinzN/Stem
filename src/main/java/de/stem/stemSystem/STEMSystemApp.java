@@ -65,7 +65,7 @@ public class STEMSystemApp {
         main.setName("STEM");
         main.start();
         this.uptimeDate = new Date();
-        this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultAZPlugin(), () -> {
+        this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultSystemPlugin(), () -> {
             loadModules();
             logSystem.setLogLevel(this.appConfiguration.logLevel);
             int startupTime = (int) ((System.nanoTime() - start_time) / 1e6);
@@ -135,9 +135,12 @@ public class STEMSystemApp {
         return this.coreRunner.getCallbackService();
     }
 
-
     public StemLinkModule getStemLinkModule() {
         return stemLinkModule;
+    }
+
+    public EventModule getEventModule() {
+        return eventModule;
     }
 
     public MqttModule getMqttModule() {

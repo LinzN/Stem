@@ -96,13 +96,13 @@ public class StemEventBus {
      */
     public void fireEvent(final StemEvent event) {
         STEMSystemApp.LOGGER.DEBUG("Fire event " + event.getName());
-        if(!event.isCanceled()) {
+        if (!event.isCanceled()) {
             fireEventPriority(event, StemEventPriority.HIGH);
         }
-        if(!event.isCanceled()) {
+        if (!event.isCanceled()) {
             fireEventPriority(event, StemEventPriority.NORMAL);
         }
-        if(!event.isCanceled()) {
+        if (!event.isCanceled()) {
             fireEventPriority(event, StemEventPriority.LOW);
         }
         fireEventPriority(event, StemEventPriority.CANCELED);

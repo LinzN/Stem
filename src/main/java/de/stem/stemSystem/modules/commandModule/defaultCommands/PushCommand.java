@@ -13,7 +13,6 @@ package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
-import de.stem.stemSystem.modules.notificationModule.NotificationContainer;
 import de.stem.stemSystem.modules.notificationModule.NotificationPriority;
 
 public class PushCommand implements ICommand {
@@ -27,8 +26,7 @@ public class PushCommand implements ICommand {
                 message.append(arg).append(" ");
             }
 
-            NotificationContainer notificationContainer = new NotificationContainer(message.toString(), NotificationPriority.DEFAULT);
-            STEMSystemApp.getInstance().getNotificationModule().pushNotification(notificationContainer);
+            STEMSystemApp.getInstance().getNotificationModule().pushNotification(message.toString(), NotificationPriority.DEFAULT);
         } else {
             STEMSystemApp.LOGGER.LIVE("Not enough input to chat send");
         }
