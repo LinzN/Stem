@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class StemEventBus {
-    private final Map<Object, Map<Class<StemEvent>, Method>> activeListener;
+    private final Map<Object, Map<Method, Class<StemEvent>>> activeListener;
 
 
     public StemEventBus() {
@@ -34,8 +34,8 @@ public class StemEventBus {
      * @param listener Listener to check if a method has an annotation
      * @return Map with event class and methods for this listener
      */
-    private Map<Class<StemEvent>, Method> findHandlers(Object listener) {
-        Map<Class<StemEvent>, Method> methods = new HashMap<>();
+    private Map<Method, Class<StemEvent>> findHandlers(Object listener) {
+        Map<Method, Class<StemEvent>> methods = new HashMap<>();
 
         for (Method m : listener.getClass().getDeclaredMethods()) {
             StemEventHandler annotation = m.getAnnotation(StemEventHandler.class);
@@ -46,7 +46,7 @@ public class StemEventBus {
                     continue;
                 }
                 Class<StemEvent> iEvent = (Class<StemEvent>) params[0];
-                methods.put(iEvent, m);
+                methods.put(m, iEvent);
             }
         }
         return methods;
@@ -75,7 +75,7 @@ public class StemEventBus {
      * @param classInstance Event listener classInstance to register
      */
     public void register(Object classInstance) {
-        Map<Class<StemEvent>, Method> handler = findHandlers(classInstance);
+        Map<Method, Class<StemEvent>> handler = findHandlers(classInstance);
         this.activeListener.put(classInstance, handler);
     }
 
@@ -96,12 +96,33 @@ public class StemEventBus {
      */
     public void fireEvent(final StemEvent event) {
         STEMSystemApp.LOGGER.DEBUG("Fire event " + event.getName());
+        if(!event.isCanceled()) {
+            fireEventPriority(event, StemEventPriority.HIGH);
+        }
+        if(!event.isCanceled()) {
+            fireEventPriority(event, StemEventPriority.NORMAL);
+        }
+        if(!event.isCanceled()) {
+            fireEventPriority(event, StemEventPriority.LOW);
+        }
+        fireEventPriority(event, StemEventPriority.CANCELED);
+    }
+
+    private void fireEventPriority(StemEvent event, StemEventPriority stemEventPriority) {
         for (Object classInstance : this.activeListener.keySet()) {
-            Map<Class<StemEvent>, Method> handler = this.activeListener.get(classInstance);
-            for (Class<StemEvent> stemEventClass : handler.keySet()) {
+            Map<Method, Class<StemEvent>> handler = this.activeListener.get(classInstance);
+            for (Method method : handler.keySet()) {
+                Class<StemEvent> stemEventClass = handler.get(method);
                 if (stemEventClass.equals(event.getClass())) {
-                    /* do some stuff */
-                    callMethod(event, handler.get(stemEventClass), classInstance);
+                    StemEventHandler annotation = method.getAnnotation(StemEventHandler.class);
+                    StemEventPriority priority = annotation.priority();
+                    if (priority == stemEventPriority) {
+                        try {
+                            callMethod(event, method, classInstance);
+                        } catch (Exception e) {
+                            STEMSystemApp.LOGGER.ERROR(e);
+                        }
+                    }
                 }
             }
         }

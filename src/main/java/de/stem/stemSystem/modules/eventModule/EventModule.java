@@ -27,7 +27,7 @@ public class EventModule extends AbstractModule {
         this.stemEventBus.register(new StemStartupListener());
     }
 
-    public StemEventBus getStemEventBus(){
+    public StemEventBus getStemEventBus() {
         return this.stemEventBus;
     }
 

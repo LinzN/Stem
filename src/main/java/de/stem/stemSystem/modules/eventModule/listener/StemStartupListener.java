@@ -14,11 +14,12 @@ package de.stem.stemSystem.modules.eventModule.listener;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.eventModule.events.StemStartupEvent;
 import de.stem.stemSystem.modules.eventModule.handler.StemEventHandler;
+import de.stem.stemSystem.modules.eventModule.handler.StemEventPriority;
 
 public class StemStartupListener {
 
-    @StemEventHandler()
-    public void onStartup(StemStartupEvent event){
+    @StemEventHandler(priority = StemEventPriority.NORMAL)
+    public void onStartupTree(StemStartupEvent event) {
         STEMSystemApp.LOGGER.CORE("STEM-System startup finished in " + event.getStartupTime() + " ms.");
     }
 }

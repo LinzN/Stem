@@ -25,7 +25,7 @@ public interface StemEvent {
         return false;
     }
 
-    default String getName(){
+    default String getName() {
         return this.getClass().getSimpleName();
     }
 }
