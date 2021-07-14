@@ -11,21 +11,24 @@
 
 package de.stem.stemSystem.modules.eventModule;
 
+public class CancelableEvent implements StemEvent {
 
-public interface StemEvent {
-    default boolean isCanceled() {
-        return false;
+    private boolean isCanceled;
+
+
+    @Override
+    public boolean isCancelable() {
+        return true;
     }
 
-    default void setCanceled(boolean isCanceled) {
-        throw new IllegalArgumentException("Event cancel not supported");
+    @Override
+    public boolean isCanceled() {
+        return isCanceled;
     }
 
-    default boolean isCancelable() {
-        return false;
+    @Override
+    public void setCanceled(boolean isCanceled) {
+        this.isCanceled = isCanceled;
     }
 
-    default String getName() {
-        return this.getClass().getSimpleName();
-    }
 }
