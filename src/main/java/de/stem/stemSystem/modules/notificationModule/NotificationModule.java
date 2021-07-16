@@ -49,13 +49,13 @@ public class NotificationModule extends AbstractModule {
 
     public void pushNotification(String message, NotificationPriority notificationPriority) {
         STEMPlugin stemPlugin = this.stemSystemApp.getScheduler().getDefaultSystemPlugin();
-        pushNotification(message, NotificationPriority.DEFAULT, stemPlugin);
+        pushNotification(message, notificationPriority, stemPlugin);
     }
 
     public void pushNotification(String message, NotificationPriority notificationPriority, STEMPlugin stemPlugin) {
         NotificationContainer notificationContainer = new NotificationContainer(message, notificationPriority);
         notificationQueue.add(notificationContainer);
-        this.notificationArchive.addToArchive(new NotificationArchiveObject("SYSTEM", notificationContainer.notification, new Date()));
+        this.notificationArchive.addToArchive(new NotificationArchiveObject(stemPlugin.getPluginName(), notificationContainer.notification, new Date()));
     }
 
     public NotificationArchive getNotificationArchive() {
