@@ -21,12 +21,16 @@ public class ConnectionListener {
 
     @EventHandler
     public void onConnectEvent(ConnectEvent event) {
-        STEMSystemApp.LOGGER.WARNING("Register new communication device: " + event.getClientUUID());
+        STEMSystemApp.LOGGER.SUPER("New stemLink client connected");
+        STEMSystemApp.LOGGER.SUPER("UUID: " + event.getClientUUID());
+        STEMSystemApp.LOGGER.SUPER("ClientType: " + event.getConnection().getClientType().name());
 
     }
 
     @EventHandler
     public void onDisconnectEvent(DisconnectEvent event) {
-        STEMSystemApp.LOGGER.WARNING("Unregister communication device: " + event.getClientUUID());
+        STEMSystemApp.LOGGER.SUPER("StemLink client disconnected");
+        STEMSystemApp.LOGGER.SUPER("UUID: " + event.getClientUUID());
+        STEMSystemApp.LOGGER.SUPER("ClientType: " + event.getConnection().getClientType().name());
     }
 }
