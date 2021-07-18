@@ -13,13 +13,13 @@ package de.stem.stemSystem.modules.notificationModule.archive;
 
 import java.util.Date;
 
-public class NotificationArchiveObject {
+public class ArchivedNotification {
 
     public String source;
     public String notification;
     public Date date;
 
-    public NotificationArchiveObject(String source, String notification, Date date) {
+    public ArchivedNotification(String source, String notification, Date date) {
         this.source = source;
         this.notification = notification;
         this.date = date;

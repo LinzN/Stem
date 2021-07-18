@@ -66,7 +66,7 @@ public class CoreRunner implements Runnable {
     }
 
     public void endCore() {
-        STEMSystemApp.LOGGER.WARNING("Stopping CoreRunner...");
+        STEMSystemApp.LOGGER.CORE("Stopping CoreRunner...");
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
     }

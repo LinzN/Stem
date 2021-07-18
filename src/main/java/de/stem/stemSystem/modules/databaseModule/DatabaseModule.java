@@ -41,7 +41,6 @@ public class DatabaseModule extends AbstractModule {
     /* Create class instance */
     public DatabaseModule(STEMSystemApp stemSystemApp) {
         this.initConfig();
-        //this.databaseProvider = new MySQLProvider(hostname, port, username, password, database);
         this.databaseProvider = new SQLiteProvider("STEM.db");
         this.stemSystemApp = stemSystemApp;
         Connection connection = getConnection();

@@ -16,18 +16,18 @@ import java.util.List;
 
 public class NotificationArchive {
 
-    private final List<NotificationArchiveObject> archiv;
+    private final List<ArchivedNotification> archive;
     private final int max = 10;
 
     public NotificationArchive() {
-        this.archiv = new ArrayList<>();
+        this.archive = new ArrayList<>();
     }
 
-    public void addToArchive(NotificationArchiveObject notificationArchiveObject) {
-        this.archiv.add(notificationArchiveObject);
+    public void addToArchive(ArchivedNotification archivedNotification) {
+        this.archive.add(archivedNotification);
     }
 
-    public List<NotificationArchiveObject> getLastNotifications() {
-        return this.archiv.size() <= max ? this.archiv : this.archiv.subList(this.archiv.size() - max, this.archiv.size());
+    public List<ArchivedNotification> getLastNotifications() {
+        return this.archive.size() <= max ? this.archive : this.archive.subList(this.archive.size() - max, this.archive.size());
     }
 }

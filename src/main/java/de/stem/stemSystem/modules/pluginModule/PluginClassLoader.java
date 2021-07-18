@@ -14,6 +14,7 @@ package de.stem.stemSystem.modules.pluginModule;
 import de.stem.stemSystem.STEMSystemApp;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -45,10 +46,10 @@ public class PluginClassLoader extends URLClassLoader {
             } catch (ClassCastException ex) {
                 throw new InvalidPluginException("Main class `" + classPath + "' does not extend Plugin");
             }
-            STEMPlugin plugin = pluginClass.newInstance();
+            STEMPlugin plugin = pluginClass.getDeclaredConstructor().newInstance();
             plugin.setUp(pluginName, version, classPath);
             return plugin;
-        } catch (IllegalAccessException ex) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new InvalidPluginException("No public constructor");
         } catch (InstantiationException ex) {
             throw new InvalidPluginException("Abnormal plugin type");

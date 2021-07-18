@@ -14,7 +14,7 @@ package de.stem.stemSystem.modules.notificationModule;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.notificationModule.archive.NotificationArchive;
-import de.stem.stemSystem.modules.notificationModule.archive.NotificationArchiveObject;
+import de.stem.stemSystem.modules.notificationModule.archive.ArchivedNotification;
 import de.stem.stemSystem.modules.notificationModule.events.NotificationEvent;
 import de.stem.stemSystem.modules.notificationModule.listener.NotificationListener;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
@@ -55,7 +55,7 @@ public class NotificationModule extends AbstractModule {
     public void pushNotification(String message, NotificationPriority notificationPriority, STEMPlugin stemPlugin) {
         NotificationContainer notificationContainer = new NotificationContainer(message, notificationPriority);
         notificationQueue.add(notificationContainer);
-        this.notificationArchive.addToArchive(new NotificationArchiveObject(stemPlugin.getPluginName(), notificationContainer.notification, new Date()));
+        this.notificationArchive.addToArchive(new ArchivedNotification(stemPlugin.getPluginName(), notificationContainer.notification, new Date()));
     }
 
     public NotificationArchive getNotificationArchive() {
