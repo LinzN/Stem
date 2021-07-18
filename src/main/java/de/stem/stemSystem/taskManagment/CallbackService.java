@@ -17,7 +17,8 @@ import de.stem.stemSystem.taskManagment.operations.AbstractOperation;
 import de.stem.stemSystem.taskManagment.operations.OperationOutput;
 
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CallbackService {
     private final HashMap<AbstractCallback, STEMPlugin> callbackListeners;
@@ -38,8 +39,8 @@ public class CallbackService {
     }
 
     public void unregisterCallbackListeners(STEMPlugin stemPlugin) {
-        for (Iterator<AbstractCallback> iterator = this.callbackListeners.keySet().iterator(); iterator.hasNext(); ) {
-            AbstractCallback abstractCallback = iterator.next();
+        Set<AbstractCallback> setCopy = new HashSet<>(this.callbackListeners.keySet());
+        for (AbstractCallback abstractCallback : setCopy) {
             STEMPlugin stemPlugin1 = this.callbackListeners.get(abstractCallback);
             if (stemPlugin == stemPlugin1) {
                 STEMSystemApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
