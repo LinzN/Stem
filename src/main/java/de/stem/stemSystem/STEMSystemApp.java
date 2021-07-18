@@ -113,6 +113,7 @@ public class STEMSystemApp {
         this.notificationModule.shutdownModule();
         this.databaseModule.shutdownModule();
         this.libraryModule.shutdownModule();
+        this.eventModule.shutdownModule();
         this.coreRunner.endCore();
         this.isActive.set(false);
         STEMSystemApp.LOGGER.CORE("Shutdown complete!");
