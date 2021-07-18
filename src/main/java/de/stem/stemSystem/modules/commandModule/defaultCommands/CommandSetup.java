@@ -44,7 +44,6 @@ public class CommandSetup {
         registerCommand("stop", new StopCommand());
         registerCommand("loadplugin", new LoadPluginCommand());
         registerCommand("plugins", new PluginsCommand());
-        registerCommand("reload", new ReloadCommand());
         registerCommand("push", new PushCommand());
         registerCommand("help", new HelpCommand());
         registerCommand("verbose", new VerboseCommand());

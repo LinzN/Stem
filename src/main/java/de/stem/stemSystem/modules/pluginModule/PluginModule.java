@@ -111,12 +111,6 @@ public class PluginModule extends AbstractModule {
         }
     }
 
-    public void reloadPlugins() {
-        this.unloadPlugins();
-        this.init();
-        this.loadPlugins();
-    }
-
     private void loadPlugins() {
         LinkedList<Pair<String, File>> pluginsWithDependencies = new LinkedList<>();
 
