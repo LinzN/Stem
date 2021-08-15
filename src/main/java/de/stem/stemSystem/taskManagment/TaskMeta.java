@@ -29,7 +29,7 @@ public class TaskMeta {
 
     public void cancel() {
         if (!this.isCanceled) {
-            STEMSystemApp.LOGGER.DEBUG("Cancel taskId " + taskId + " from plugin " + owner.getPluginName());
+            STEMSystemApp.LOGGER.DEBUG("Cancel task " + taskId + " from plugin " + owner.getPluginName());
         }
         this.isCanceled = true;
     }

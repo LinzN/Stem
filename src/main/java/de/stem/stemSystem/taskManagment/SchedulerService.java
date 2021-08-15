@@ -82,7 +82,7 @@ public class SchedulerService {
 
         TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
         this.tasks.add(taskMeta);
-        STEMSystemApp.LOGGER.DEBUG("Fixed from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
+        STEMSystemApp.LOGGER.DEBUG("TaskMeta setup fixed task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
         long times = this.getTimerTime(days, hours, minutes);
         Runnable runnableContainer = () -> {
             while (!taskMeta.isCanceled) {
@@ -111,7 +111,7 @@ public class SchedulerService {
 
         TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
         this.tasks.add(taskMeta);
-        STEMSystemApp.LOGGER.DEBUG("Repeat from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
+        STEMSystemApp.LOGGER.DEBUG("TaskMeta setup repeat task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
         Runnable runnableContainer = () -> {
             while (!taskMeta.isCanceled) {
                 this.pushCoreRunner(taskMeta, task);
@@ -135,7 +135,7 @@ public class SchedulerService {
 
         TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
         this.tasks.add(taskMeta);
-        STEMSystemApp.LOGGER.DEBUG("Task from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
+        STEMSystemApp.LOGGER.DEBUG("TaskMeta setup task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
 
         tasks.remove(taskMeta);
         if (!taskMeta.isCanceled) {
@@ -152,7 +152,7 @@ public class SchedulerService {
 
         TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
         this.tasks.add(taskMeta);
-        STEMSystemApp.LOGGER.DEBUG("Delay from " + plugin.getPluginName() + " id:" + taskMeta.taskId);
+        STEMSystemApp.LOGGER.DEBUG("TaskMeta setup delayed task from owner: " + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
         Runnable runnableContainer = () -> {
             tasks.remove(taskMeta);
             if (!taskMeta.isCanceled) {

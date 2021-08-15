@@ -38,7 +38,7 @@ public class CoreRunner implements Runnable {
             if (!this.taskQueue.isEmpty()) {
                 try {
                     Pair<TaskMeta, Runnable> metaPair = this.taskQueue.take();
-                    STEMSystemApp.LOGGER.DEBUG("Run task from source: " + metaPair.getKey().owner.getPluginName() + " CoreTask: " + metaPair.getKey().runInCore + " taskId: " + metaPair.getKey().taskId);
+                    STEMSystemApp.LOGGER.DEBUG("Run task from owner: " + metaPair.getKey().owner.getPluginName() + " CoreTask: " + metaPair.getKey().runInCore + " taskId: " + metaPair.getKey().taskId);
                     try {
                         metaPair.getValue().run();
                     } catch (Exception e) {
