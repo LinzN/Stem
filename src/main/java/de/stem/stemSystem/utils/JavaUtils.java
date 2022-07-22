@@ -13,6 +13,7 @@ package de.stem.stemSystem.utils;
 
 import de.stem.stemSystem.STEMSystemApp;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
@@ -59,5 +60,13 @@ public class JavaUtils {
     public static double getMaxMemory() {
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         return (memoryMXBean.getHeapMemoryUsage().getMax() / (1000 * 1000));
+    }
+
+    public static long getUsableSpace(){
+        return new File("/").getUsableSpace();
+    }
+
+    public static long getTotalSpace(){
+        return new File("/").getTotalSpace();
     }
 }
