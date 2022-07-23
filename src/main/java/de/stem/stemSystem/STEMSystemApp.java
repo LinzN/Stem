@@ -18,6 +18,7 @@ import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
 import de.stem.stemSystem.modules.eventModule.EventModule;
 import de.stem.stemSystem.modules.eventModule.events.StemStartupEvent;
+import de.stem.stemSystem.modules.informationModule.InformationModule;
 import de.stem.stemSystem.modules.libraryModule.LibraryModule;
 import de.stem.stemSystem.modules.libraryModule.StemClassLoader;
 import de.stem.stemSystem.modules.mqttModule.MqttModule;
@@ -51,6 +52,7 @@ public class STEMSystemApp {
     private MqttModule mqttModule;
     private CommandModule commandModule;
     private NotificationModule notificationModule;
+    private InformationModule informationModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
 
@@ -95,6 +97,7 @@ public class STEMSystemApp {
         stemLinkModule = new StemLinkModule(instance);
         mqttModule = new MqttModule(instance);
         notificationModule = new NotificationModule(instance);
+        informationModule = new InformationModule(instance);
         commandModule = new CommandModule(instance);
         libraryModule = new LibraryModule(instance);
         pluginModule = new PluginModule(instance);
@@ -111,6 +114,7 @@ public class STEMSystemApp {
         this.stemLinkModule.shutdownModule();
         this.mqttModule.shutdownModule();
         this.notificationModule.shutdownModule();
+        this.informationModule.shutdownModule();
         this.databaseModule.shutdownModule();
         this.libraryModule.shutdownModule();
         this.eventModule.shutdownModule();
@@ -154,6 +158,10 @@ public class STEMSystemApp {
 
     public NotificationModule getNotificationModule() {
         return notificationModule;
+    }
+
+    public InformationModule getInformationModule() {
+        return informationModule;
     }
 
     public DatabaseModule getDatabaseModule() {
