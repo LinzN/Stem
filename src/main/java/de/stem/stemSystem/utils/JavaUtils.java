@@ -19,6 +19,9 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.OperatingSystemMXBean;
 import java.net.URL;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 
 public class JavaUtils {
@@ -68,5 +71,9 @@ public class JavaUtils {
 
     public static long getTotalSpace(){
         return new File("/").getTotalSpace();
+    }
+
+    public static Instant getTimeInstant(){
+        return Instant.now(Clock.systemDefaultZone());
     }
 }

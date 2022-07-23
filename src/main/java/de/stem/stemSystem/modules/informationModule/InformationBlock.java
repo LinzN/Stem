@@ -2,6 +2,7 @@ package de.stem.stemSystem.modules.informationModule;
 
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
+import java.time.Instant;
 import java.util.Date;
 
 public class InformationBlock {
@@ -19,6 +20,7 @@ public class InformationBlock {
         this.name = name;
         this.description = description;
         this.sourcePlugin = sourcePlugin;
+        this.expireTime = 0;
     }
 
     public STEMPlugin getSourcePlugin() {
@@ -35,6 +37,10 @@ public class InformationBlock {
 
     public void setExpireTime(long expireTime) {
         this.expireTime = expireTime;
+    }
+
+    public void setExpireTime(Instant expireTime) {
+        this.expireTime = expireTime.toEpochMilli();
     }
 
     public long getId() {
