@@ -7,15 +7,15 @@ import java.util.Date;
 
 public class InformationBlock {
 
-    private long creationTime;
     private final STEMPlugin sourcePlugin;
     private final String name;
     private final String description;
+    private long creationTime;
     private long expireTime;
 
     private long id;
 
-    public InformationBlock(String name, String description, STEMPlugin sourcePlugin){
+    public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
         this.creationTime = new Date().getTime();
         this.name = name;
         this.description = description;
@@ -46,6 +46,7 @@ public class InformationBlock {
     public long getId() {
         return id;
     }
+
     void setId(long id) {
         this.id = id;
     }
@@ -54,12 +55,12 @@ public class InformationBlock {
         return description;
     }
 
-    public boolean isActive(){
+    public boolean isActive() {
         long currentTime = new Date().getTime();
         return this.expireTime >= currentTime || this.expireTime == -1;
     }
 
-    public void expire(){
+    public void expire() {
         this.expireTime = 0;
     }
 

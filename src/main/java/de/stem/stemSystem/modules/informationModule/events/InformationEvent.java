@@ -7,7 +7,7 @@ public class InformationEvent implements StemEvent {
 
     private final InformationBlock informationBlock;
 
-    public InformationEvent(InformationBlock informationBlock){
+    public InformationEvent(InformationBlock informationBlock) {
         this.informationBlock = informationBlock;
     }
 

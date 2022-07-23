@@ -21,7 +21,6 @@ import java.lang.management.OperatingSystemMXBean;
 import java.net.URL;
 import java.time.Clock;
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Properties;
 
 public class JavaUtils {
@@ -65,15 +64,15 @@ public class JavaUtils {
         return (memoryMXBean.getHeapMemoryUsage().getMax() / (1000 * 1000));
     }
 
-    public static long getUsableSpace(){
+    public static long getUsableSpace() {
         return new File("/").getUsableSpace();
     }
 
-    public static long getTotalSpace(){
+    public static long getTotalSpace() {
         return new File("/").getTotalSpace();
     }
 
-    public static Instant getTimeInstant(){
+    public static Instant getTimeInstant() {
         return Instant.now(Clock.systemDefaultZone());
     }
 }

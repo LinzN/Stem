@@ -13,8 +13,8 @@ package de.stem.stemSystem.modules.notificationModule;
 
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
-import de.stem.stemSystem.modules.notificationModule.archive.NotificationArchive;
 import de.stem.stemSystem.modules.notificationModule.archive.ArchivedNotification;
+import de.stem.stemSystem.modules.notificationModule.archive.NotificationArchive;
 import de.stem.stemSystem.modules.notificationModule.events.NotificationEvent;
 import de.stem.stemSystem.modules.notificationModule.listener.NotificationListener;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;

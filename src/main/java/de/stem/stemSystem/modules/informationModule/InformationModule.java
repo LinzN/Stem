@@ -15,13 +15,8 @@ import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.informationModule.events.InformationEvent;
 import de.stem.stemSystem.modules.informationModule.listener.DefaultInformationBlockListener;
-import de.stem.stemSystem.modules.notificationModule.listener.NotificationListener;
-import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.*;
 
 public class InformationModule extends AbstractModule {
     private final STEMSystemApp stemSystemApp;
@@ -100,14 +95,28 @@ public class InformationModule extends AbstractModule {
     }
 
     public ArrayList<InformationBlock> getActiveInformationBlocks() {
-        return new ArrayList<>(this.activeInformationBlocks);
+        ArrayList<InformationBlock> list = new ArrayList<>(this.activeInformationBlocks);
+        list.sort(new BlockComparator());
+        return list;
     }
 
     public ArrayList<InformationBlock> getArchivedInformationBlocks() {
-        return new ArrayList<>(this.archivedInformationBlocks);
+        ArrayList<InformationBlock> list = new ArrayList<>(this.archivedInformationBlocks);
+        list.sort(new BlockComparator());
+        return list;
     }
 
     public InformationBlock getInformationBlockById(long id) {
         return this.allInformationBlocks.get(id);
+    }
+
+    private static class BlockComparator implements Comparator<InformationBlock> {
+
+        @Override
+        public int compare(InformationBlock o1, InformationBlock o2) {
+            Long io1 = o1.getId();
+            Long io2 = o2.getId();
+            return io2.compareTo(io1);
+        }
     }
 }
