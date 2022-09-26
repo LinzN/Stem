@@ -38,7 +38,7 @@ public class HealthModule extends AbstractModule {
     }
 
     private void run() {
-        InformationBlock informationBlock = new InformationBlock("HeathCheck", "Starting HealthCheck", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
+        InformationBlock informationBlock = new InformationBlock("System Heath Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
         informationBlock.setExpireTime(Instant.now().plus(1, ChronoUnit.HOURS));
         STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
 
