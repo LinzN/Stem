@@ -38,6 +38,7 @@ public class HealthModule extends AbstractModule {
     }
 
     private void run() {
+        STEMSystemApp.LOGGER.INFO("Starting system health check...");
         InformationBlock informationBlock = new InformationBlock("System Heath Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
         informationBlock.setExpireTime(Instant.now().plus(1, ChronoUnit.HOURS));
         STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
@@ -46,6 +47,7 @@ public class HealthModule extends AbstractModule {
         for (int i = 0; i < healthChecks.size(); i++) {
             HealthCheck healthCheck = healthChecks.get(i);
             informationBlock.setDescription("Running check " + (i + 1) + " of " + healthChecks.size());
+            STEMSystemApp.LOGGER.INFO("Running check " + (i + 1) + " of " + healthChecks.size());
             healthCheck.runCheckProgress();
 
         }
@@ -74,6 +76,7 @@ public class HealthModule extends AbstractModule {
             informationBlock.setExpireTime(Instant.now().plus(15, ChronoUnit.MINUTES));
         }
 
-        informationBlock.setDescription("Check done! Results -  Done:" + done + " Warnings:" + warning + " Errors: " + error);
+        informationBlock.setDescription("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
+        STEMSystemApp.LOGGER.INFO("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
     }
 }
