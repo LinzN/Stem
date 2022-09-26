@@ -9,7 +9,7 @@ public class InformationBlock {
 
     private final STEMPlugin sourcePlugin;
     private final String name;
-    private final String description;
+    private String description;
     private long creationTime;
     private long expireTime;
 
@@ -49,6 +49,10 @@ public class InformationBlock {
 
     void setId(long id) {
         this.id = id;
+    }
+
+    public void setDescription(String description){
+        this.description = description;
     }
 
     public String getDescription() {

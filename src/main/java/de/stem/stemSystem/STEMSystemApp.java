@@ -18,6 +18,7 @@ import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
 import de.stem.stemSystem.modules.eventModule.EventModule;
 import de.stem.stemSystem.modules.eventModule.events.StemStartupEvent;
+import de.stem.stemSystem.modules.healthModule.HealthModule;
 import de.stem.stemSystem.modules.informationModule.InformationModule;
 import de.stem.stemSystem.modules.libraryModule.LibraryModule;
 import de.stem.stemSystem.modules.libraryModule.StemClassLoader;
@@ -53,6 +54,8 @@ public class STEMSystemApp {
     private CommandModule commandModule;
     private NotificationModule notificationModule;
     private InformationModule informationModule;
+
+    private HealthModule healthModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
 
@@ -98,6 +101,7 @@ public class STEMSystemApp {
         mqttModule = new MqttModule(instance);
         notificationModule = new NotificationModule(instance);
         informationModule = new InformationModule(instance);
+        healthModule = new HealthModule(instance);
         commandModule = new CommandModule(instance);
         libraryModule = new LibraryModule(instance);
         pluginModule = new PluginModule(instance);
@@ -115,6 +119,7 @@ public class STEMSystemApp {
         this.mqttModule.shutdownModule();
         this.notificationModule.shutdownModule();
         this.informationModule.shutdownModule();
+        this.healthModule.shutdownModule();
         this.databaseModule.shutdownModule();
         this.libraryModule.shutdownModule();
         this.eventModule.shutdownModule();
@@ -162,6 +167,10 @@ public class STEMSystemApp {
 
     public InformationModule getInformationModule() {
         return informationModule;
+    }
+
+    public HealthModule getHealthModule() {
+        return healthModule;
     }
 
     public DatabaseModule getDatabaseModule() {
