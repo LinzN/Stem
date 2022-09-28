@@ -49,6 +49,7 @@ public class HealthModule extends AbstractModule {
         STEMSystemApp.LOGGER.INFO("Starting system health check...");
         informationBlock = new InformationBlock("System Heath Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
         informationBlock.setExpireTime(-1);
+        informationBlock.setIcon("PROGRESS");
         STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
 
 
@@ -77,10 +78,13 @@ public class HealthModule extends AbstractModule {
 
         if (error != 0) {
             informationBlock.setExpireTime(-1);
+            informationBlock.setIcon("ERROR");
         } else if (warning != 0) {
             informationBlock.setExpireTime(-1);
+            informationBlock.setIcon("WARNING");
         } else {
             informationBlock.setExpireTime(Instant.now().plus(20, ChronoUnit.MINUTES));
+            informationBlock.setIcon("SUCCESS");
         }
 
         informationBlock.setDescription("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
