@@ -23,6 +23,7 @@ public class InformationBlock {
         this.description = description;
         this.sourcePlugin = sourcePlugin;
         this.expireTime = 0;
+        this.icon = "NONE";
     }
 
     public STEMPlugin getSourcePlugin() {
