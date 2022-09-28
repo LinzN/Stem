@@ -13,6 +13,8 @@ public class InformationBlock {
     private long creationTime;
     private long expireTime;
 
+    private String icon;
+
     private long id;
 
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
@@ -49,6 +51,14 @@ public class InformationBlock {
 
     void setId(long id) {
         this.id = id;
+    }
+
+    public void setIcon(String icon) {
+        this.icon = icon;
+    }
+
+    public String getIcon() {
+        return icon;
     }
 
     public void setDescription(String description){

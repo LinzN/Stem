@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 
 public class HealthModule extends AbstractModule {
     private final STEMSystemApp stemSystemApp;
-
+    private InformationBlock informationBlock;
 
     private final LinkedList<HealthCheck> healthChecks;
 
@@ -29,7 +29,9 @@ public class HealthModule extends AbstractModule {
     }
 
     private void startHealthModule() {
-        this.stemSystemApp.getScheduler().runRepeatScheduler(this.getModulePlugin(), this::run, 2, 720, TimeUnit.MINUTES);
+        this.stemSystemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2 , TimeUnit.MINUTES);
+        this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 9, 30, true);
+        this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 19, 0, true);
     }
 
 
@@ -38,9 +40,15 @@ public class HealthModule extends AbstractModule {
     }
 
     private void run() {
+        if(this.informationBlock != null){
+            if(this.informationBlock.isActive()){
+                this.informationBlock.expire();
+            }
+        }
+
         STEMSystemApp.LOGGER.INFO("Starting system health check...");
-        InformationBlock informationBlock = new InformationBlock("System Heath Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
-        informationBlock.setExpireTime(Instant.now().plus(1, ChronoUnit.HOURS));
+        informationBlock = new InformationBlock("System Heath Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
+        informationBlock.setExpireTime(-1);
         STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
 
 
@@ -48,8 +56,7 @@ public class HealthModule extends AbstractModule {
             HealthCheck healthCheck = healthChecks.get(i);
             informationBlock.setDescription("Running check " + (i + 1) + " of " + healthChecks.size());
             STEMSystemApp.LOGGER.INFO("Running check " + (i + 1) + " of " + healthChecks.size());
-            healthCheck.runCheckProgress();
-
+            healthCheck.runCheck();
         }
 
         int warning = 0;
@@ -69,11 +76,11 @@ public class HealthModule extends AbstractModule {
         }
 
         if (error != 0) {
-            informationBlock.setExpireTime(Instant.now().plus(5, ChronoUnit.HOURS));
+            informationBlock.setExpireTime(-1);
         } else if (warning != 0) {
-            informationBlock.setExpireTime(Instant.now().plus(1, ChronoUnit.HOURS));
+            informationBlock.setExpireTime(-1);
         } else {
-            informationBlock.setExpireTime(Instant.now().plus(15, ChronoUnit.MINUTES));
+            informationBlock.setExpireTime(Instant.now().plus(20, ChronoUnit.MINUTES));
         }
 
         informationBlock.setDescription("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
