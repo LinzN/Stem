@@ -15,7 +15,7 @@
     <groupId>de.stem</groupId>
     <packaging>jar</packaging>
     <name>STEM-SYSTEM</name>
-    <version>1.0.1</version>
+    <version>1.0.1.${v}-SNAPSHOT</version>
     <artifactId>stem-system</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -112,7 +112,7 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
-            <version>1.32</version>
+            <version>1.33</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
@@ -122,7 +122,7 @@
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20220320</version>
+            <version>20220924</version>
         </dependency>
         <dependency>
             <groupId>org.xerial</groupId>
