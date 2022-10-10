@@ -15,7 +15,7 @@
     <groupId>de.stem</groupId>
     <packaging>jar</packaging>
     <name>STEM-SYSTEM</name>
-    <version>1.0.1.${v}</version>
+    <version>1.0.1-${v}</version>
     <artifactId>stem-system</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
