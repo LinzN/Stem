@@ -30,7 +30,9 @@ public class HealthModule extends AbstractModule {
 
     private void startHealthModule() {
         this.stemSystemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2 , TimeUnit.MINUTES);
-        this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 9, 30, true);
+        this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 1, 0, true);
+        this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 7, 0, true);
+        this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 13, 0, true);
         this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 19, 0, true);
     }
 
