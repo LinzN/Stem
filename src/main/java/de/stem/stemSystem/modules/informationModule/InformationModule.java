@@ -16,7 +16,10 @@ import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.informationModule.events.InformationEvent;
 import de.stem.stemSystem.modules.informationModule.listener.DefaultInformationBlockListener;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
 
 public class InformationModule extends AbstractModule {
     private final STEMSystemApp stemSystemApp;

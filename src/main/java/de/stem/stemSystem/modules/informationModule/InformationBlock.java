@@ -54,20 +54,20 @@ public class InformationBlock {
         this.id = id;
     }
 
-    public void setIcon(String icon) {
-        this.icon = icon;
-    }
-
     public String getIcon() {
         return icon;
     }
 
-    public void setDescription(String description){
-        this.description = description;
+    public void setIcon(String icon) {
+        this.icon = icon;
     }
 
     public String getDescription() {
         return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public boolean isActive() {

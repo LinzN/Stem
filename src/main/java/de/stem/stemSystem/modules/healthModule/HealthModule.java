@@ -12,9 +12,8 @@ import java.util.concurrent.TimeUnit;
 
 public class HealthModule extends AbstractModule {
     private final STEMSystemApp stemSystemApp;
-    private InformationBlock informationBlock;
-
     private final LinkedList<HealthCheck> healthChecks;
+    private InformationBlock informationBlock;
 
 
     public HealthModule(STEMSystemApp stemSystemApp) {
@@ -29,7 +28,7 @@ public class HealthModule extends AbstractModule {
     }
 
     private void startHealthModule() {
-        this.stemSystemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2 , TimeUnit.MINUTES);
+        this.stemSystemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2, TimeUnit.MINUTES);
         this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 1, 0, true);
         this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 7, 0, true);
         this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 13, 0, true);
@@ -42,8 +41,8 @@ public class HealthModule extends AbstractModule {
     }
 
     private void run() {
-        if(this.informationBlock != null){
-            if(this.informationBlock.isActive()){
+        if (this.informationBlock != null) {
+            if (this.informationBlock.isActive()) {
                 this.informationBlock.expire();
             }
         }

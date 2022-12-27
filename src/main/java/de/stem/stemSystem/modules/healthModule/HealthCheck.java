@@ -6,23 +6,25 @@ import java.util.LinkedList;
 
 public abstract class HealthCheck {
 
-    private LinkedList<HealthCheckFeedback> healthCheckFeedbacks;
     private final STEMPlugin stemPlugin;
+    private LinkedList<HealthCheckFeedback> healthCheckFeedbacks;
 
-    public HealthCheck(STEMPlugin stemPlugin){
+    public HealthCheck(STEMPlugin stemPlugin) {
         this.stemPlugin = stemPlugin;
         healthCheckFeedbacks = new LinkedList<>();
     }
 
-    public void runCheck(){
+    public void runCheck() {
         this.healthCheckFeedbacks = new LinkedList<>();
         this.runCheckProgress();
     }
-     protected abstract void runCheckProgress();
 
-    public void addHealthCheckFeedback(HealthCheckFeedback healthCheckFeedback){
+    protected abstract void runCheckProgress();
+
+    public void addHealthCheckFeedback(HealthCheckFeedback healthCheckFeedback) {
         this.healthCheckFeedbacks.add(healthCheckFeedback);
     }
+
     public LinkedList<HealthCheckFeedback> getHealthCheckFeedbacks() {
         return healthCheckFeedbacks;
     }

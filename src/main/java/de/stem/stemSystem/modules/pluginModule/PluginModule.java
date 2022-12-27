@@ -52,11 +52,21 @@ public class PluginModule extends AbstractModule {
         String pluginName = (String) obj.get("name");
         String classPath = (String) obj.get("main");
         String version = (String) obj.get("version");
-        loadPlugin(pluginName, classPath, version, jarFile, enablePlugin);
+        String buildJobName = "CUSTOM";
+        String buildNumber = "SNAPSHOT";
+
+        if (obj.containsKey("buildJobName")) {
+            buildJobName = (String) obj.get("buildJobName");
+        }
+        if (obj.containsKey("buildNumber")) {
+            buildNumber = (String) obj.get("buildNumber");
+        }
+
+        loadPlugin(pluginName, classPath, version, buildJobName, buildNumber, jarFile, enablePlugin);
     }
 
-    private void loadPlugin(String pluginName, String classPath, String version, File jarFile, boolean enablePlugin) throws IOException {
-        STEMPlugin plugin = pluginClassLoader.addPluginFile(pluginName, classPath, version, jarFile);
+    private void loadPlugin(String pluginName, String classPath, String version, String buildJobName, String buildNumber, File jarFile, boolean enablePlugin) throws IOException {
+        STEMPlugin plugin = pluginClassLoader.addPluginFile(pluginName, classPath, version, buildJobName, buildNumber, jarFile);
         this.pluginList.put(plugin.getPluginName(), plugin);
         if (enablePlugin) {
             enablePlugin(plugin.getPluginName());
@@ -130,9 +140,19 @@ public class PluginModule extends AbstractModule {
                     String pluginName = (String) obj.get("name");
                     String classPath = (String) obj.get("main");
                     String version = (String) obj.get("version");
+                    String buildJobName = "CUSTOM";
+                    String buildNumber = "SNAPSHOT";
+
+                    if (obj.containsKey("buildJobName")) {
+                        buildJobName = (String) obj.get("buildJobName");
+                    }
+                    if (obj.containsKey("buildNumber")) {
+                        buildNumber = (String) obj.get("buildNumber");
+                    }
+
                     List<String> dependencies = (List<String>) obj.get("depend");
                     if (dependencies == null || dependencies.size() == 0) {
-                        loadPlugin(pluginName, classPath, version, jarFile, false);
+                        loadPlugin(pluginName, classPath, version, buildJobName, buildNumber, jarFile, false);
                     } else {
                         pluginsWithDependencies.add(new Pair<>(pluginName, jarFile));
                     }

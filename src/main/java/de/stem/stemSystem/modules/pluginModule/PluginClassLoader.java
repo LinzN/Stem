@@ -25,12 +25,12 @@ public class PluginClassLoader extends URLClassLoader {
         super(new URL[]{}, parentClassLoader);
     }
 
-    public synchronized STEMPlugin addPluginFile(String pluginName, String classPath, String version, File jarFile) throws MalformedURLException {
+    public synchronized STEMPlugin addPluginFile(String pluginName, String classPath, String version, String buildJobName, String buildNumber, File jarFile) throws MalformedURLException {
         super.addURL(jarFile.toURI().toURL());
-        return initPlugin(pluginName, classPath, version);
+        return initPlugin(pluginName, classPath, version, buildJobName, buildNumber);
     }
 
-    private STEMPlugin initPlugin(String pluginName, String classPath, String version) {
+    private STEMPlugin initPlugin(String pluginName, String classPath, String version, String buildJobName, String buildNumber) {
         STEMSystemApp.LOGGER.INFO("Load plugin: " + pluginName);
         try {
             Class<?> jarClass;
@@ -47,7 +47,7 @@ public class PluginClassLoader extends URLClassLoader {
                 throw new InvalidPluginException("Main class `" + classPath + "' does not extend Plugin");
             }
             STEMPlugin plugin = pluginClass.getDeclaredConstructor().newInstance();
-            plugin.setUp(pluginName, version, classPath);
+            plugin.setUp(pluginName, version, buildJobName, buildNumber, classPath);
             return plugin;
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new InvalidPluginException("No public constructor");

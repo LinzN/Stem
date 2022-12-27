@@ -13,14 +13,8 @@ package de.stem.stemSystem.utils;
 
 import de.stem.stemSystem.STEMSystemApp;
 
-import java.io.File;
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.OperatingSystemMXBean;
 import java.net.URL;
-import java.time.Clock;
-import java.time.Instant;
 import java.util.Properties;
 
 public class JavaUtils {

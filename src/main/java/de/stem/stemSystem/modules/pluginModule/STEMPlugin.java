@@ -19,13 +19,17 @@ import java.io.File;
 public abstract class STEMPlugin {
     private String pluginName;
     private String version;
+    private String buildJobName;
+    private String buildNumber;
     private String classPath;
     private File dataFolder;
     private FileConfiguration defaultConfig;
 
-    void setUp(String pluginName, String version, String classPath) {
+    void setUp(String pluginName, String version, String buildJobName, String buildNumber, String classPath) {
         this.pluginName = pluginName;
         this.version = version;
+        this.buildJobName = buildJobName;
+        this.buildNumber = buildNumber;
         this.classPath = classPath;
         this.dataFolder = new File(PluginModule.pluginDirectory, pluginName);
         this.defaultConfig = YamlConfiguration.loadConfiguration(new File(dataFolder, "config.yml"));
@@ -48,7 +52,7 @@ public abstract class STEMPlugin {
     }
 
     public String getDescription() {
-        return this.pluginName + "::" + this.version;
+        return this.pluginName + "::" + this.version + "::" + this.buildJobName + "::" + this.buildNumber;
     }
 
     public File getDataFolder() {
@@ -57,5 +61,13 @@ public abstract class STEMPlugin {
 
     public FileConfiguration getDefaultConfig() {
         return defaultConfig;
+    }
+
+    public String getBuildJobName() {
+        return buildJobName;
+    }
+
+    public String getBuildNumber() {
+        return buildNumber;
     }
 }
