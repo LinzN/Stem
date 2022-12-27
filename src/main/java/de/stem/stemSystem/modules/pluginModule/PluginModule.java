@@ -56,10 +56,10 @@ public class PluginModule extends AbstractModule {
         String buildNumber = "SNAPSHOT";
 
         if (obj.containsKey("buildJobName")) {
-            buildJobName = (String) obj.get("buildJobName");
+            buildJobName = String.valueOf(obj.get("buildJobName"));
         }
         if (obj.containsKey("buildNumber")) {
-            buildNumber = (String) obj.get("buildNumber");
+            buildNumber = String.valueOf(obj.get("buildNumber"));
         }
 
         loadPlugin(pluginName, classPath, version, buildJobName, buildNumber, jarFile, enablePlugin);
@@ -144,10 +144,10 @@ public class PluginModule extends AbstractModule {
                     String buildNumber = "SNAPSHOT";
 
                     if (obj.containsKey("buildJobName")) {
-                        buildJobName = (String) obj.get("buildJobName");
+                        buildJobName = String.valueOf(obj.get("buildJobName"));
                     }
                     if (obj.containsKey("buildNumber")) {
-                        buildNumber = (String) obj.get("buildNumber");
+                        buildNumber = String.valueOf(obj.get("buildNumber"));
                     }
 
                     List<String> dependencies = (List<String>) obj.get("depend");
