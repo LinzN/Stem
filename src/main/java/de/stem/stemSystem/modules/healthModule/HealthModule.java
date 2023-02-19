@@ -48,7 +48,7 @@ public class HealthModule extends AbstractModule {
         }
 
         STEMSystemApp.LOGGER.INFO("Starting system health check...");
-        informationBlock = new InformationBlock("System Heath Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
+        informationBlock = new InformationBlock("System Health Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
         informationBlock.setExpireTime(-1);
         informationBlock.setIcon("PROGRESS");
         STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
