@@ -19,7 +19,7 @@ import java.net.URLClassLoader;
 public class StemClassLoader extends URLClassLoader {
     public StemClassLoader() {
         super(new URL[]{}, ClassLoader.getSystemClassLoader());
-        STEMSystemApp.LOGGER.CORE("Loading custom classloader for library and plugin support");
+        STEMSystemApp.LOGGER.CORE("Loading custom classloader for common jar libraries");
     }
 
     @Override

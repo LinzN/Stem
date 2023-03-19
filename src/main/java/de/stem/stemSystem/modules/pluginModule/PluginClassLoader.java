@@ -46,10 +46,10 @@ public class PluginClassLoader extends URLClassLoader {
             } catch (ClassCastException ex) {
                 throw new InvalidPluginException("Main class `" + classPath + "' does not extend Plugin");
             }
-            this.loadPluginLibraryFiles(pluginName);
 
             STEMPlugin plugin = pluginClass.getDeclaredConstructor().newInstance();
             plugin.setUp(pluginName, version, buildJobName, buildNumber, classPath);
+            this.loadPluginLibraryFiles(plugin);
             return plugin;
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new InvalidPluginException("No public constructor");
@@ -60,30 +60,24 @@ public class PluginClassLoader extends URLClassLoader {
         }
     }
 
-    public synchronized void loadPluginLibraryFiles(String pluginName) throws MalformedURLException {
-        File pluginDirectory = new File(PluginModule.pluginDirectory, pluginName);
+    public synchronized void loadPluginLibraryFiles(STEMPlugin plugin) throws MalformedURLException {
+        File pluginDirectory = plugin.getDataFolder();
         if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
             File dependencyDirectory = new File(pluginDirectory, "libraries");
             if (dependencyDirectory.exists() && dependencyDirectory.isDirectory()) {
                 if (dependencyDirectory.exists() && dependencyDirectory.isDirectory()) {
                     File[] files = dependencyDirectory.listFiles();
-                    STEMSystemApp.LOGGER.INFO("Library directory found for plugin: " + pluginName);
+                    STEMSystemApp.LOGGER.INFO("Library directory found for plugin: " + plugin.getPluginName());
                     for (File file : files) {
                         if (file.isFile()) {
                             if (file.getName().endsWith(".jar")) {
-                                STEMSystemApp.LOGGER.INFO("Loading library " + file.getName() + " for plugin: " + pluginName);
-                                this.addJarFileToPlugin(file);
+                                STEMSystemApp.LOGGER.INFO("Loading library " + file.getName() + " for plugin: " + plugin.getPluginName());
+                                this.addURL(file.toURI().toURL());
                             }
                         }
                     }
                 }
             }
         }
-    }
-
-
-    public synchronized void addJarFileToPlugin(File jarFile) throws MalformedURLException {
-        this.addURL(jarFile.toURI().toURL());
-        STEMSystemApp.LOGGER.DEBUG("LOAD PLUGIN LIBRARY FILE: " + jarFile.getName());
     }
 }
