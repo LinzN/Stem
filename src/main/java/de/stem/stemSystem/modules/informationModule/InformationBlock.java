@@ -3,19 +3,20 @@ package de.stem.stemSystem.modules.informationModule;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class InformationBlock {
-
     private final STEMPlugin sourcePlugin;
+    private final List<InformationIntent> informationIntents;
     private final String name;
     private String description;
     private long creationTime;
     private long expireTime;
-
     private String icon;
-
     private long id;
+
 
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
         this.creationTime = new Date().getTime();
@@ -24,6 +25,7 @@ public class InformationBlock {
         this.sourcePlugin = sourcePlugin;
         this.expireTime = 0;
         this.icon = "NONE";
+        this.informationIntents = new ArrayList<>();
     }
 
     public STEMPlugin getSourcePlugin() {
@@ -81,5 +83,17 @@ public class InformationBlock {
 
     public long getCreationTime() {
         return creationTime;
+    }
+
+    public void addIntent(InformationIntent informationIntent) {
+        this.informationIntents.add(informationIntent);
+    }
+
+    public boolean hasIntent(InformationIntent informationIntent) {
+        return this.informationIntents.contains(informationIntent);
+    }
+
+    public void removeIntent(InformationIntent informationIntent) {
+        this.informationIntents.remove(informationIntent);
     }
 }
