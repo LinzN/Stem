@@ -4,6 +4,7 @@ import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import de.stem.stemSystem.modules.healthModule.test.DummyHealthCheck;
 import de.stem.stemSystem.modules.informationModule.InformationBlock;
+import de.stem.stemSystem.modules.informationModule.InformationIntent;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -51,6 +52,7 @@ public class HealthModule extends AbstractModule {
         informationBlock = new InformationBlock("System Health Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
         informationBlock.setExpireTime(-1);
         informationBlock.setIcon("PROGRESS");
+        informationBlock.addIntent(InformationIntent.SHOW_DISPLAY);
         STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
 
 
