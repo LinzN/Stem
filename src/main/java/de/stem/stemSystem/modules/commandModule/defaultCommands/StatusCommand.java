@@ -33,7 +33,7 @@ public class StatusCommand implements ICommand {
         }
 
         HashSet<TaskMeta> tasks = STEMSystemApp.getInstance().getScheduler().getTasks();
-        STEMSystemApp.LOGGER.LIVE("Active Scheduled Tasks: (" + listener.size() + ")");
+        STEMSystemApp.LOGGER.LIVE("Active Scheduled Tasks: (" + tasks.size() + ")");
         for (TaskMeta task : tasks) {
             STEMSystemApp.LOGGER.LIVE("#TaskId: " + task.getTaskId() + " from owner: " + task.getOwner().getPluginName());
         }

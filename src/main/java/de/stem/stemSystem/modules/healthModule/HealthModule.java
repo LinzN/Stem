@@ -16,6 +16,8 @@ public class HealthModule extends AbstractModule {
     private final LinkedList<HealthCheck> healthChecks;
     private InformationBlock informationBlock;
 
+    private boolean blocked = false;
+
 
     public HealthModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
@@ -42,55 +44,65 @@ public class HealthModule extends AbstractModule {
     }
 
     private void run() {
-        if (this.informationBlock != null) {
-            if (this.informationBlock.isActive()) {
-                this.informationBlock.expire();
-            }
-        }
-
-        STEMSystemApp.LOGGER.INFO("Starting system health check...");
-        informationBlock = new InformationBlock("System Health Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
-        informationBlock.setExpireTime(-1);
-        informationBlock.setIcon("PROGRESS");
-        informationBlock.addIntent(InformationIntent.SHOW_DISPLAY);
-        STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
-
-
-        for (int i = 0; i < healthChecks.size(); i++) {
-            HealthCheck healthCheck = healthChecks.get(i);
-            informationBlock.setDescription("Running check " + (i + 1) + " of " + healthChecks.size());
-            STEMSystemApp.LOGGER.INFO("Running check " + (i + 1) + " of " + healthChecks.size());
-            healthCheck.runCheck();
-        }
-
-        int warning = 0;
-        int error = 0;
-        int done = 0;
-
-        for (HealthCheck healthCheck : this.healthChecks) {
-            for (HealthCheckFeedback healthCheckFeedback : healthCheck.getHealthCheckFeedbacks()) {
-                if (healthCheckFeedback.getHealthCheckLevel() == HealthCheckLevel.DONE) {
-                    done++;
-                } else if (healthCheckFeedback.getHealthCheckLevel() == HealthCheckLevel.WARNING) {
-                    warning++;
-                } else if (healthCheckFeedback.getHealthCheckLevel() == HealthCheckLevel.ERROR) {
-                    error++;
+        if(!this.blocked) {
+            this.blocked = true;
+            if (this.informationBlock != null) {
+                if (this.informationBlock.isActive()) {
+                    this.informationBlock.expire();
                 }
             }
-        }
 
-        if (error != 0) {
+            STEMSystemApp.LOGGER.INFO("Starting system health check...");
+            informationBlock = new InformationBlock("System Health Check", "Starting health check...", STEMSystemApp.getInstance().getScheduler().getDefaultSystemPlugin());
             informationBlock.setExpireTime(-1);
-            informationBlock.setIcon("ERROR");
-        } else if (warning != 0) {
-            informationBlock.setExpireTime(-1);
-            informationBlock.setIcon("WARNING");
+            informationBlock.setIcon("PROGRESS");
+            informationBlock.addIntent(InformationIntent.SHOW_DISPLAY);
+            STEMSystemApp.getInstance().getInformationModule().queueInformationBlock(informationBlock);
+
+
+            for (int i = 0; i < healthChecks.size(); i++) {
+                HealthCheck healthCheck = healthChecks.get(i);
+                informationBlock.setDescription("Running check " + (i + 1) + " of " + healthChecks.size());
+                STEMSystemApp.LOGGER.INFO("Running check " + (i + 1) + " of " + healthChecks.size());
+                healthCheck.runCheck();
+            }
+
+            int warning = 0;
+            int error = 0;
+            int done = 0;
+
+            for (HealthCheck healthCheck : this.healthChecks) {
+                for (HealthCheckFeedback healthCheckFeedback : healthCheck.getHealthCheckFeedbacks()) {
+                    if (healthCheckFeedback.getHealthCheckLevel() == HealthCheckLevel.DONE) {
+                        done++;
+                    } else if (healthCheckFeedback.getHealthCheckLevel() == HealthCheckLevel.WARNING) {
+                        warning++;
+                    } else if (healthCheckFeedback.getHealthCheckLevel() == HealthCheckLevel.ERROR) {
+                        error++;
+                    }
+                }
+            }
+
+            if (error != 0) {
+                informationBlock.setExpireTime(-1);
+                informationBlock.setIcon("ERROR");
+            } else if (warning != 0) {
+                informationBlock.setExpireTime(-1);
+                informationBlock.setIcon("WARNING");
+            } else {
+                informationBlock.setExpireTime(Instant.now().plus(20, ChronoUnit.MINUTES));
+                informationBlock.setIcon("SUCCESS");
+            }
+
+            informationBlock.setDescription("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
+            STEMSystemApp.LOGGER.INFO("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
+            this.blocked = false;
         } else {
-            informationBlock.setExpireTime(Instant.now().plus(20, ChronoUnit.MINUTES));
-            informationBlock.setIcon("SUCCESS");
+            STEMSystemApp.LOGGER.ERROR("Not possible to start another health check. Still running!");
         }
+    }
 
-        informationBlock.setDescription("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
-        STEMSystemApp.LOGGER.INFO("Check done! Results -  OK:" + done + " Warnings:" + warning + " Errors: " + error);
+    public void runCheckManual() {
+        this.stemSystemApp.getScheduler().runTask(this.getModulePlugin(), this::run);
     }
 }
