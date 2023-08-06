@@ -45,10 +45,9 @@ public class JavaUtils {
         InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
         Yaml yaml = new Yaml();
         Map<String, Object> obj = yaml.load(inStream);
-        String versionNumber = (String) obj.get("versionNumber");
-        String buildNumber = (String) obj.get("buildNumber");
-        String buildLabel = (String) obj.get("buildLabel");
-
+        String versionNumber = String.valueOf(obj.get("buildVersion"));
+        String buildNumber = String.valueOf(obj.get("buildNumber"));
+        String buildLabel = String.valueOf(obj.get("buildLabel"));
         return versionNumber + "." + buildNumber + "-" + buildLabel;
     }
 
