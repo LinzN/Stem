@@ -15,10 +15,13 @@
     <groupId>de.stem</groupId>
     <packaging>jar</packaging>
     <name>STEM-SYSTEM</name>
-    <version>1.0.1-${v}</version>
+    <version>${version.versionNumber}-${version.buildLabel}</version>
     <artifactId>stem-system</artifactId>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <version.versionNumber>1.0.1</version.versionNumber>
+        <version.buildNumber>CUSTOM</version.buildNumber>
+        <version.buildLabel>SNAPSHOT</version.buildLabel>
     </properties>
     <repositories>
         <repository>
@@ -37,6 +40,15 @@
     </repositories>
 
     <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

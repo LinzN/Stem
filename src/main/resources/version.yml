@@ -1,0 +1,3 @@
+buildVersion: ${version.versionNumber}
+buildNumber: ${version.buildNumber}
+buildLabel: ${version.buildLabel}

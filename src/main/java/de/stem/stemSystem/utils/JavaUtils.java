@@ -12,14 +12,17 @@
 package de.stem.stemSystem.utils;
 
 import de.stem.stemSystem.STEMSystemApp;
+import org.yaml.snakeyaml.Yaml;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
+import java.util.Map;
 import java.util.Properties;
 
 public class JavaUtils {
 
-    public static String getVersion() {
+    public static String getVersion_old() {
         String version;
         String res = "META-INF/maven/de.stem/stem-system/pom.properties";
         URL url = Thread.currentThread().getContextClassLoader().getResource(res);
@@ -36,6 +39,17 @@ public class JavaUtils {
         }
 
         return version;
+    }
+
+    public static String getVersion() {
+        InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
+        Yaml yaml = new Yaml();
+        Map<String, Object> obj = yaml.load(inStream);
+        String versionNumber = (String) obj.get("versionNumber");
+        String buildNumber = (String) obj.get("buildNumber");
+        String buildLabel = (String) obj.get("buildLabel");
+
+        return versionNumber + "." + buildNumber + "-" + buildLabel;
     }
 
 }
