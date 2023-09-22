@@ -82,7 +82,7 @@ public class InformationBlock {
     }
 
     public void setAiDescription(String eventText) {
-        setDescription(STEMSystemApp.getInstance().getInformationModule().runAiTextEngine(description));
+        setDescription(STEMSystemApp.getInstance().getInformationModule().runAiTextEngine(eventText));
     }
 
     public boolean isActive() {
