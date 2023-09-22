@@ -26,7 +26,11 @@ public class InformationBlock {
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin, boolean aiText) {
         this.creationTime = new Date().getTime();
         this.name = name;
-        this.description = description;
+        if(aiText){
+            setAiDescription(description);
+        } else {
+            setDescription(description);
+        }
         this.sourcePlugin = sourcePlugin;
         this.expireTime = 0;
         this.icon = "NONE";
