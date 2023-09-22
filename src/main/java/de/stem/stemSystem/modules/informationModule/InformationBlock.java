@@ -1,5 +1,6 @@
 package de.stem.stemSystem.modules.informationModule;
 
+import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 
 import java.time.Instant;
@@ -19,6 +20,10 @@ public class InformationBlock {
 
 
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
+        this(name, description, sourcePlugin, false);
+    }
+
+    public InformationBlock(String name, String description, STEMPlugin sourcePlugin, boolean aiText) {
         this.creationTime = new Date().getTime();
         this.name = name;
         this.description = description;
@@ -70,6 +75,10 @@ public class InformationBlock {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setAiDescription(String eventText) {
+        setDescription(STEMSystemApp.getInstance().getInformationModule().runAiTextEngine(description));
     }
 
     public boolean isActive() {

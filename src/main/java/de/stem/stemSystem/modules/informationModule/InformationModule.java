@@ -30,6 +30,8 @@ public class InformationModule extends AbstractModule {
     private final LinkedList<InformationBlock> archivedInformationBlocks;
     private boolean moduleAlive;
 
+    private AiTextEngine aiTextEngine;
+
     private long notificationCount;
 
 
@@ -111,6 +113,17 @@ public class InformationModule extends AbstractModule {
 
     public InformationBlock getInformationBlockById(long id) {
         return this.allInformationBlocks.get(id);
+    }
+
+    public void registerAiTextEngine(AiTextEngine aiTextEngine){
+        this.aiTextEngine = aiTextEngine;
+    }
+
+    public String runAiTextEngine(String input){
+        if(this.aiTextEngine != null){
+            return  this.aiTextEngine.aiResponse(input);
+        }
+        return input;
     }
 
     private static class BlockComparator implements Comparator<InformationBlock> {
