@@ -121,7 +121,7 @@ public class InformationModule extends AbstractModule {
 
     public String runAiTextEngine(String input){
         if(this.aiTextEngine != null){
-            return  this.aiTextEngine.aiResponse(input);
+            return this.aiTextEngine.aiResponse(input);
         }
         return input;
     }

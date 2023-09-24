@@ -13,28 +13,30 @@ public class InformationBlock {
     private final List<InformationIntent> informationIntents;
     private final String name;
     private String description;
-    private long creationTime;
+    private String longDescription;
+    private boolean disableLongDescription;
+    private final long creationTime;
     private long expireTime;
     private String icon;
     private long id;
 
-
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
-        this(name, description, sourcePlugin, false);
+        this(name, description, sourcePlugin, null, false);
     }
 
-    public InformationBlock(String name, String description, STEMPlugin sourcePlugin, boolean aiText) {
+    public InformationBlock(String name, String description, STEMPlugin sourcePlugin, String eventText) {
+        this(name, description, sourcePlugin, eventText, false);
+    }
+
+    public InformationBlock(String name, String description, STEMPlugin sourcePlugin, String eventText, boolean disableLongDescription) {
         this.creationTime = new Date().getTime();
         this.name = name;
-        if(aiText){
-            setAiDescription(description);
-        } else {
-            setDescription(description);
-        }
         this.sourcePlugin = sourcePlugin;
+        this.disableLongDescription = disableLongDescription;
         this.expireTime = 0;
         this.icon = "NONE";
         this.informationIntents = new ArrayList<>();
+        this.setDescription(description, eventText);
     }
 
     public STEMPlugin getSourcePlugin() {
@@ -78,11 +80,24 @@ public class InformationBlock {
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.setDescription(description, null);
     }
 
-    public void setAiDescription(String eventText) {
-        setDescription(STEMSystemApp.getInstance().getInformationModule().runAiTextEngine(eventText));
+    public void setDescription(String description, String eventText) {
+        this.description = description;
+        if (!this.disableLongDescription) {
+            if (eventText != null) {
+                this.longDescription = STEMSystemApp.getInstance().getInformationModule().runAiTextEngine(eventText);
+            } else {
+                this.longDescription = STEMSystemApp.getInstance().getInformationModule().runAiTextEngine(description);
+            }
+        } else {
+            this.longDescription = description;
+        }
+    }
+
+    public void disableLongDescription(boolean disableLongDescription) {
+        this.disableLongDescription = disableLongDescription;
     }
 
     public boolean isActive() {
@@ -108,5 +123,9 @@ public class InformationBlock {
 
     public void removeIntent(InformationIntent informationIntent) {
         this.informationIntents.remove(informationIntent);
+    }
+
+    public String getLongDescription() {
+        return longDescription;
     }
 }
