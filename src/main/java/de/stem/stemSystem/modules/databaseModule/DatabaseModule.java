@@ -14,6 +14,7 @@ package de.stem.stemSystem.modules.databaseModule;
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
 import de.linzn.simplyDatabase.DatabaseProvider;
+import de.linzn.simplyDatabase.provider.MySQLProvider;
 import de.linzn.simplyDatabase.provider.SQLiteProvider;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
@@ -31,6 +32,7 @@ public class DatabaseModule extends AbstractModule {
 
     private FileConfiguration fileConfiguration;
 
+    private String provider;
     private String hostname;
     private int port;
     private String database;
@@ -41,7 +43,11 @@ public class DatabaseModule extends AbstractModule {
     /* Create class instance */
     public DatabaseModule(STEMSystemApp stemSystemApp) {
         this.initConfig();
-        this.databaseProvider = new SQLiteProvider("STEM.db");
+        if (this.provider.equalsIgnoreCase("mysql")) {
+            this.databaseProvider = new MySQLProvider(this.hostname, this.port, this.username, this.password, this.database);
+        } else {
+            this.databaseProvider = new SQLiteProvider("STEM.db");
+        }
         this.stemSystemApp = stemSystemApp;
         Connection connection = getConnection();
         if (connection != null) {
@@ -98,6 +104,7 @@ public class DatabaseModule extends AbstractModule {
 
     private void initConfig() {
         this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_database.yml"));
+        this.provider = this.fileConfiguration.getString("provider", "sqlite");
         this.hostname = this.fileConfiguration.getString("sqlHostname", "127.0.0.1");
         this.port = this.fileConfiguration.getInt("sqlPort", 3306);
         this.database = this.fileConfiguration.getString("sqlDatabaseName", "stem_db");
