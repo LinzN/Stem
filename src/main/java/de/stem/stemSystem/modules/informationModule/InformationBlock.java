@@ -21,7 +21,7 @@ public class InformationBlock {
     private long id;
 
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
-        this(name, description, sourcePlugin, null, false);
+        this(name, description, sourcePlugin, null, true);
     }
 
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin, String eventText) {
