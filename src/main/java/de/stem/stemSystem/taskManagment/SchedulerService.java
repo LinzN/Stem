@@ -17,6 +17,7 @@ import de.linzn.simplyConfiguration.FileConfiguration;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
 import de.stem.stemSystem.utils.JavaUtils;
+import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.File;
 import java.util.Calendar;
@@ -74,6 +75,24 @@ public class SchedulerService {
         return this.execFixedTask(plugin, task, days, hours, minutes, daily, false);
     }
 
+    public TaskMeta runAsCronTask(STEMPlugin plugin, Runnable task, String cronString) {
+        if (!this.checkIsValid()) {
+            return null;
+        }
+
+        TaskMeta taskMeta = new TaskMeta(plugin, false);
+        this.tasks.add(taskMeta);
+        STEMSystemApp.LOGGER.CORE("TaskMeta setup cronJob task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
+
+        new Scheduler().schedule(cronString, () -> {
+            tasks.remove(taskMeta);
+            if (!taskMeta.isCanceled) {
+                pushCoreRunner(taskMeta, task);
+            }
+        });
+
+        return taskMeta;
+    }
 
     private TaskMeta execFixedTask(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
         if (!this.checkIsValid()) {

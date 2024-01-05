@@ -142,6 +142,11 @@
             <version>3.39.3.0</version>
         </dependency>
         <dependency>
+            <groupId>it.sauronsoftware.cron4j</groupId>
+            <artifactId>cron4j</artifactId>
+            <version>2.2.5</version>
+        </dependency>
+        <dependency>
             <groupId>de.linzn</groupId>
             <artifactId>simplyConfiguration</artifactId>
             <version>1.0</version>
