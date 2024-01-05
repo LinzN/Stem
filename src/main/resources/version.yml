@@ -1,3 +1,4 @@
+kernelName: IRIS
 buildVersion: ${version.versionNumber}
 buildNumber: ${version.buildNumber}
 buildLabel: ${version.buildLabel}
