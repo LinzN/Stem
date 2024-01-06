@@ -19,14 +19,14 @@ import org.eclipse.jetty.util.BlockingArrayQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class CoreRunner implements Runnable {
+public class StemKernel implements Runnable {
 
     private final AtomicBoolean isAlive = new AtomicBoolean();
     private final SchedulerService schedulerService;
     private final CallbackService callbackService;
     private final BlockingQueue<Pair<TaskMeta, Runnable>> taskQueue;
 
-    public CoreRunner() {
+    public StemKernel() {
         this.schedulerService = new SchedulerService(this);
         this.callbackService = new CallbackService();
         this.taskQueue = new BlockingArrayQueue<>();
@@ -66,7 +66,7 @@ public class CoreRunner implements Runnable {
     }
 
     public void endCore() {
-        STEMSystemApp.LOGGER.CORE("Stopping CoreRunner...");
+        STEMSystemApp.LOGGER.CORE("Stopping StemKernel...");
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
     }

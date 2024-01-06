@@ -27,7 +27,7 @@ import de.stem.stemSystem.modules.notificationModule.NotificationModule;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
 import de.stem.stemSystem.modules.stemLinkModule.StemLinkModule;
 import de.stem.stemSystem.taskManagment.CallbackService;
-import de.stem.stemSystem.taskManagment.CoreRunner;
+import de.stem.stemSystem.taskManagment.StemKernel;
 import de.stem.stemSystem.taskManagment.SchedulerService;
 import de.stem.stemSystem.utils.JavaUtils;
 
@@ -42,7 +42,7 @@ public class STEMSystemApp {
     public static LogSystem logSystem;
     private static STEMSystemApp instance;
     private final AtomicBoolean isActive;
-    private final CoreRunner coreRunner;
+    private final StemKernel stemKernel;
     private final Date uptimeDate;
     private final long start_time;
     private StemClassLoader stemClassLoader;
@@ -65,12 +65,12 @@ public class STEMSystemApp {
         STEMSystemApp.LOGGER.CORE("STEM version " + JavaUtils.getVersion());
         this.start_time = System.nanoTime();
         this.isActive = new AtomicBoolean(true);
-        this.coreRunner = new CoreRunner();
-        Thread main = new Thread(this.coreRunner);
+        this.stemKernel = new StemKernel();
+        Thread main = new Thread(this.stemKernel);
         main.setName("STEM");
         main.start();
         this.uptimeDate = new Date();
-        this.coreRunner.getSchedulerService().runTaskInCore(this.coreRunner.getSchedulerService().getDefaultSystemPlugin(), () -> {
+        this.stemKernel.getSchedulerService().runTaskInCore(this.stemKernel.getSchedulerService().getDefaultSystemPlugin(), () -> {
             loadModules();
             logSystem.setLogLevel(this.appConfiguration.logLevel);
             int startupTime = (int) ((System.nanoTime() - start_time) / 1e6);
@@ -123,7 +123,7 @@ public class STEMSystemApp {
         this.databaseModule.shutdownModule();
         this.libraryModule.shutdownModule();
         this.eventModule.shutdownModule();
-        this.coreRunner.endCore();
+        this.stemKernel.endCore();
         this.isActive.set(false);
         STEMSystemApp.LOGGER.CORE("Shutdown complete!");
         System.exit(0);
@@ -138,11 +138,11 @@ public class STEMSystemApp {
     }
 
     public SchedulerService getScheduler() {
-        return this.coreRunner.getSchedulerService();
+        return this.stemKernel.getSchedulerService();
     }
 
     public CallbackService getCallBackService() {
-        return this.coreRunner.getCallbackService();
+        return this.stemKernel.getCallbackService();
     }
 
     public StemLinkModule getStemLinkModule() {

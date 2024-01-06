@@ -27,14 +27,14 @@ import java.util.TimeZone;
 import java.util.concurrent.*;
 
 public class SchedulerService {
-    private final CoreRunner coreRunner;
+    private final StemKernel stemKernel;
     private final ScheduledExecutorService scheduledExecutorService;
     private final ExecutorService executorService;
     private final DefaultSTEMPlugin defaultSystemPlugin;
     private HashSet<TaskMeta> tasks;
 
-    SchedulerService(CoreRunner coreRunner) {
-        this.coreRunner = coreRunner;
+    SchedulerService(StemKernel stemKernel) {
+        this.stemKernel = stemKernel;
         this.scheduledExecutorService = new ScheduledThreadPoolExecutor(50);
         this.executorService = new ThreadPoolExecutor(30, 30, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
         this.tasks = new HashSet<>();
@@ -185,10 +185,10 @@ public class SchedulerService {
 
     private void pushCoreRunner(TaskMeta taskMeta, Runnable task) {
         if (taskMeta.runInCore) {
-            this.coreRunner.queueTask(new Pair<>(taskMeta, task));
+            this.stemKernel.queueTask(new Pair<>(taskMeta, task));
         } else {
             Runnable asyncTask = () -> executorService.submit(task);
-            this.coreRunner.queueTask(new Pair<>(taskMeta, asyncTask));
+            this.stemKernel.queueTask(new Pair<>(taskMeta, asyncTask));
         }
     }
 
