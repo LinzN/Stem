@@ -84,12 +84,14 @@ public class SchedulerService {
         this.tasks.add(taskMeta);
         STEMSystemApp.LOGGER.CORE("TaskMeta setup cronJob task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
 
-        new Scheduler().schedule(cronString, () -> {
+        Scheduler scheduler = new Scheduler();
+        scheduler.schedule(cronString, () -> {
             tasks.remove(taskMeta);
             if (!taskMeta.isCanceled) {
                 pushCoreRunner(taskMeta, task);
             }
         });
+        scheduler.start();
 
         return taskMeta;
     }
