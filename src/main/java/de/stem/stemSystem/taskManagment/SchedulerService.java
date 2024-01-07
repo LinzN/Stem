@@ -86,9 +86,12 @@ public class SchedulerService {
 
         Scheduler scheduler = new Scheduler();
         scheduler.schedule(cronString, () -> {
-            tasks.remove(taskMeta);
+            this.tasks.remove(taskMeta);
             if (!taskMeta.isCanceled) {
                 pushCoreRunner(taskMeta, task);
+                this.tasks.add(taskMeta);
+            } else {
+                scheduler.stop();
             }
         });
         scheduler.start();
