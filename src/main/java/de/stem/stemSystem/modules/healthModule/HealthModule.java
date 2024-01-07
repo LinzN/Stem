@@ -36,7 +36,7 @@ public class HealthModule extends AbstractModule {
         //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 7, 0, true);
         //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 13, 0, true);
         //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 19, 0, true);
-        this.stemSystemApp.getScheduler().runAsCronTask(this.getModulePlugin(), this::run, "* 1,7,13,19 * * *");
+        this.stemSystemApp.getScheduler().runAsCronTask(this.getModulePlugin(), this::run, "0 1,7,13,19 * * *");
     }
 
 
