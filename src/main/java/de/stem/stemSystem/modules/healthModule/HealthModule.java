@@ -32,10 +32,6 @@ public class HealthModule extends AbstractModule {
 
     private void startHealthModule() {
         this.stemSystemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2, TimeUnit.MINUTES);
-        //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 1, 0, true);
-        //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 7, 0, true);
-        //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 13, 0, true);
-        //this.stemSystemApp.getScheduler().runFixedScheduler(this.getModulePlugin(), this::run, 0, 19, 0, true);
         this.stemSystemApp.getScheduler().runAsCronTask(this.getModulePlugin(), this::run, "0 1,7,13,19 * * *");
     }
 
@@ -63,8 +59,8 @@ public class HealthModule extends AbstractModule {
 
             for (int i = 0; i < healthChecks.size(); i++) {
                 HealthCheck healthCheck = healthChecks.get(i);
-                informationBlock.setDescription("Running check " + (i + 1) + " of " + healthChecks.size());
-                STEMSystemApp.LOGGER.INFO("Running check " + (i + 1) + " of " + healthChecks.size());
+                informationBlock.setDescription("Running check " + healthCheck.getName() + " " + (i + 1) + " of " + healthChecks.size());
+                STEMSystemApp.LOGGER.INFO("Running check " + healthCheck.getName() + " " + (i + 1) + " of " + healthChecks.size());
                 healthCheck.runCheck();
             }
 
