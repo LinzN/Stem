@@ -8,6 +8,7 @@ import de.stem.stemSystem.modules.informationModule.InformationIntent;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
@@ -15,7 +16,6 @@ public class HealthModule extends AbstractModule {
     private final STEMSystemApp stemSystemApp;
     private final LinkedList<HealthCheck> healthChecks;
     private InformationBlock informationBlock;
-
     private boolean blocked = false;
 
 
@@ -101,5 +101,9 @@ public class HealthModule extends AbstractModule {
 
     public void runCheckManual() {
         this.stemSystemApp.getScheduler().runTask(this.getModulePlugin(), this::run);
+    }
+
+    public ArrayList<HealthCheck> getHealthChecks(){
+        return new ArrayList<>(this.healthChecks);
     }
 }
