@@ -32,7 +32,7 @@ public class HealthModule extends AbstractModule {
 
     private void startHealthModule() {
         this.stemSystemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2, TimeUnit.MINUTES);
-        this.stemSystemApp.getScheduler().runAsCronTask(this.getModulePlugin(), this::run, "0 1,7,13,19 * * *");
+        this.stemSystemApp.getScheduler().runAsCronTask(this.getModulePlugin(), this::run, this.stemSystemApp.getConfiguration().healthCheckCronjob);
     }
 
 

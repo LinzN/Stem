@@ -21,6 +21,8 @@ import java.util.logging.Level;
 public class AppConfiguration {
 
     public Level logLevel;
+
+    public String healthCheckCronjob;
     /* Variables */
     FileConfiguration configFile;
     private String fileName = "STEM-Settings.yml";
@@ -43,6 +45,7 @@ public class AppConfiguration {
     /* Load the file in memory */
     public void load() {
         this.logLevel = Level.parse(this.configFile.getString("system.logLevel", Level.ALL.getName()));
+        this.healthCheckCronjob = this.configFile.getString("healthModule.checkCronjob", "0 1,7,13,19 * * *");
     }
 
 }
