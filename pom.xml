@@ -166,5 +166,10 @@
             <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
             <version>1.2.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.aarboard.nextcloud</groupId>
+            <artifactId>nextcloud-api</artifactId>
+            <version>13.0.1</version>
+        </dependency>
     </dependencies>
 </project>
