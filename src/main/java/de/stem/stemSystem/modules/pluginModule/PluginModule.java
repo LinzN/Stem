@@ -11,6 +11,8 @@
 package de.stem.stemSystem.modules.pluginModule;
 
 import de.linzn.openJL.pairs.Pair;
+import de.linzn.simplyConfiguration.FileConfiguration;
+import de.linzn.simplyConfiguration.provider.YamlConfiguration;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import org.yaml.snakeyaml.Yaml;
@@ -25,14 +27,21 @@ import java.util.*;
 public class PluginModule extends AbstractModule {
     private static final String pluginFileName = "plugin.yml";
     public static File pluginDirectory = new File("plugins");
+
+    public String jenkinsURL;
     private final STEMSystemApp stemSystemApp;
     private PluginClassLoader pluginClassLoader;
     private LinkedHashMap<String, STEMPlugin> pluginList;
+
+    private FileConfiguration fileConfiguration;
+    private final UpdateCheck updateCheck;
 
     public PluginModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
         this.init();
         this.loadPlugins();
+        this.initConfig();
+        this.updateCheck = new UpdateCheck(this);
     }
 
     private void init() {
@@ -42,6 +51,12 @@ public class PluginModule extends AbstractModule {
         if (!pluginDirectory.exists()) {
             pluginDirectory.mkdir();
         }
+    }
+
+    private void initConfig() {
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_plugins.yml"));
+        this.jenkinsURL = this.fileConfiguration.getString("jenkinsURL", "https://builds.app.stem-system.de");
+        this.fileConfiguration.save();
     }
 
     public void loadPlugin(File jarFile, boolean enablePlugin) throws IOException {
@@ -208,5 +223,9 @@ public class PluginModule extends AbstractModule {
     @Override
     public void onShutdown() {
         this.unloadPlugins();
+    }
+
+    public UpdateCheck getUpdateCheck() {
+        return updateCheck;
     }
 }
