@@ -52,4 +52,11 @@ public class JavaUtils {
         return kernelName.toUpperCase() + "_" + versionNumber + "." + buildNumber + "-" + buildLabel;
     }
 
+    public static String getBuildNumber(){
+        InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
+        Yaml yaml = new Yaml();
+        Map<String, Object> obj = yaml.load(inStream);
+        return String.valueOf(obj.get("buildNumber"));
+    }
+
 }

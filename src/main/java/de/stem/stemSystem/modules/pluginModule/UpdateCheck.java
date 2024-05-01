@@ -1,6 +1,7 @@
 package de.stem.stemSystem.modules.pluginModule;
 
 import de.stem.stemSystem.STEMSystemApp;
+import de.stem.stemSystem.utils.JavaUtils;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -17,6 +18,18 @@ public class UpdateCheck {
     }
 
     public void checkForUpdates() {
+        String stemBuildId = JavaUtils.getBuildNumber();
+
+        if (stemBuildId.equalsIgnoreCase("IDEA")) {
+            STEMSystemApp.LOGGER.WARNING("STEM Framework is using a custom build! No update check available!");
+        } else {
+            int buildId = Integer.parseInt(stemBuildId);
+            int newestBuildId = this.getNewestJobId("stem");
+            if (buildId < newestBuildId) {
+                STEMSystemApp.LOGGER.CONFIG("A new build is available for STEM Framework. Current #" + buildId + " newest #" + newestBuildId);
+            }
+        }
+
         for (STEMPlugin stemPlugin : this.pluginModule.getLoadedPlugins()) {
             String buildID = stemPlugin.getBuildNumber();
             String jobName = stemPlugin.getBuildJobName();
