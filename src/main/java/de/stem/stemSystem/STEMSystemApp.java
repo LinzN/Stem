@@ -14,6 +14,7 @@ package de.stem.stemSystem;
 import de.linzn.simplyLogger.LogSystem;
 import de.linzn.simplyLogger.Logger;
 import de.stem.stemSystem.configuration.AppConfiguration;
+import de.stem.stemSystem.modules.cloudModule.CloudModule;
 import de.stem.stemSystem.modules.commandModule.CommandModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
 import de.stem.stemSystem.modules.eventModule.EventModule;
@@ -58,6 +59,7 @@ public class STEMSystemApp {
     private HealthModule healthModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
+    private CloudModule cloudModule;
 
 
     public STEMSystemApp(String[] args) {
@@ -105,6 +107,7 @@ public class STEMSystemApp {
         commandModule = new CommandModule(instance);
         libraryModule = new LibraryModule(instance);
         pluginModule = new PluginModule(instance);
+        cloudModule = new CloudModule(instance);
     }
 
 
@@ -113,6 +116,7 @@ public class STEMSystemApp {
     }
 
     public void shutdown() {
+        this.cloudModule.shutdownModule();
         this.commandModule.shutdownModule();
         this.pluginModule.shutdownModule();
         this.stemLinkModule.shutdownModule();
@@ -179,6 +183,10 @@ public class STEMSystemApp {
 
     public PluginModule getPluginModule() {
         return pluginModule;
+    }
+
+    public CloudModule getCloudModule() {
+        return cloudModule;
     }
 
     public StemClassLoader getStemClassLoader() {
