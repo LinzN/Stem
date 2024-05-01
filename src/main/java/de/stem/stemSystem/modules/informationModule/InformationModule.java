@@ -115,12 +115,12 @@ public class InformationModule extends AbstractModule {
         return this.allInformationBlocks.get(id);
     }
 
-    public void registerAiTextEngine(AiTextEngine aiTextEngine){
+    public void registerAiTextEngine(AiTextEngine aiTextEngine) {
         this.aiTextEngine = aiTextEngine;
     }
 
-    public String runAiTextEngine(String input){
-        if(this.aiTextEngine != null){
+    public String runAiTextEngine(String input) {
+        if (this.aiTextEngine != null) {
             return this.aiTextEngine.aiResponse(input);
         }
         return input;

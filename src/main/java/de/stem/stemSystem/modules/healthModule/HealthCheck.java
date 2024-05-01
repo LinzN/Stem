@@ -30,10 +30,6 @@ public abstract class HealthCheck {
         this.healthCheckFeedbacks.add(healthCheckFeedback);
     }
 
-    public void setName(String name) {
-        this.name = name.toUpperCase();
-    }
-
     public LinkedList<HealthCheckFeedback> getHealthCheckFeedbacks() {
         return healthCheckFeedbacks;
     }
@@ -44,6 +40,10 @@ public abstract class HealthCheck {
 
     public String getName() {
         return name;
+    }
+
+    public void setName(String name) {
+        this.name = name.toUpperCase();
     }
 
     public List<HealthCheckFeedback> getHealthCheckFeedbacks(HealthCheckLevel level) {

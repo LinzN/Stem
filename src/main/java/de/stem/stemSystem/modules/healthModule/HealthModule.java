@@ -41,7 +41,7 @@ public class HealthModule extends AbstractModule {
     }
 
     private void run() {
-        if(!this.blocked) {
+        if (!this.blocked) {
             this.blocked = true;
             if (this.informationBlock != null) {
                 if (this.informationBlock.isActive()) {
@@ -103,7 +103,7 @@ public class HealthModule extends AbstractModule {
         this.stemSystemApp.getScheduler().runTask(this.getModulePlugin(), this::run);
     }
 
-    public ArrayList<HealthCheck> getHealthChecks(){
+    public ArrayList<HealthCheck> getHealthChecks() {
         return new ArrayList<>(this.healthChecks);
     }
 }

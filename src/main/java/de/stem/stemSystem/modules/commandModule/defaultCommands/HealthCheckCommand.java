@@ -14,9 +14,6 @@ package de.stem.stemSystem.modules.commandModule.defaultCommands;
 
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.commandModule.ICommand;
-import de.stem.stemSystem.modules.pluginModule.STEMPlugin;
-
-import java.util.ArrayList;
 
 public class HealthCheckCommand implements ICommand {
 

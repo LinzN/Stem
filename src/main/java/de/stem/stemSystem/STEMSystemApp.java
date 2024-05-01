@@ -28,8 +28,8 @@ import de.stem.stemSystem.modules.notificationModule.NotificationModule;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
 import de.stem.stemSystem.modules.stemLinkModule.StemLinkModule;
 import de.stem.stemSystem.taskManagment.CallbackService;
-import de.stem.stemSystem.taskManagment.StemKernel;
 import de.stem.stemSystem.taskManagment.SchedulerService;
+import de.stem.stemSystem.taskManagment.StemKernel;
 import de.stem.stemSystem.utils.JavaUtils;
 
 import java.io.File;

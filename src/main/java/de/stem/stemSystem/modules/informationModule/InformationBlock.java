@@ -12,10 +12,10 @@ public class InformationBlock {
     private final STEMPlugin sourcePlugin;
     private final List<InformationIntent> informationIntents;
     private final String name;
+    private final long creationTime;
     private String description;
     private String longDescription;
     private boolean disableLongDescription;
-    private final long creationTime;
     private long expireTime;
     private String icon;
     private long id;

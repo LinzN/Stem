@@ -16,11 +16,11 @@ import de.linzn.simplyConfiguration.provider.YamlConfiguration;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.AbstractModule;
 import org.aarboard.nextcloud.api.NextcloudConnector;
-import org.eclipse.paho.client.mqttv3.*;
-import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 
 public class CloudModule extends AbstractModule {
@@ -38,7 +38,7 @@ public class CloudModule extends AbstractModule {
     public CloudModule(STEMSystemApp stemSystemApp) {
         this.stemSystemApp = stemSystemApp;
         this.initConfig();
-        if(this.isEnabled) {
+        if (this.isEnabled) {
             this.initCloudSetup();
         }
     }
@@ -53,8 +53,30 @@ public class CloudModule extends AbstractModule {
         this.fileConfiguration.save();
     }
 
-    private void initCloudSetup(){
+    private void initCloudSetup() {
         this.nextcloudConnector = new NextcloudConnector(this.cloudURL, true, cloudPort, cloudUser, cloudPassToken);
+    }
+
+    public CloudFile getCloudFile(String absoluteFilePath) {
+        if (this.nextcloudConnector.fileExists(absoluteFilePath)) {
+            return new CloudFile(this.nextcloudConnector, absoluteFilePath);
+        }
+        return null;
+    }
+
+    public CloudFile uploadFileRandomName(File file, String absoluteFolderPath) {
+        String filename = UUID.randomUUID() + "." + FilenameUtils.getExtension(file.getPath());
+        return uploadFile(file, absoluteFolderPath, filename);
+    }
+
+    public CloudFile uploadFile(File file, String absoluteFolderPath, String cloudFileName) {
+        String path = absoluteFolderPath + cloudFileName;
+
+        if (!this.nextcloudConnector.fileExists(path)) {
+            this.nextcloudConnector.uploadFile(file, path);
+            return new CloudFile(this.nextcloudConnector, path);
+        }
+        return null;
     }
 
     @Override
