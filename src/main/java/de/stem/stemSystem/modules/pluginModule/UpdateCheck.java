@@ -17,22 +17,30 @@ public class UpdateCheck {
         this.pluginModule = pluginModule;
     }
 
-    public void checkForUpdates() {
+    public void checkForUpdates(){
+        checkForFrameworkUpdate();
+        checkForPluginUpdates();
+    }
+
+    public void checkForFrameworkUpdate(){
         String stemBuildId = JavaUtils.getBuildNumber();
 
         if (stemBuildId.equalsIgnoreCase("IDEA")) {
             STEMSystemApp.LOGGER.WARNING("STEM Framework is using a custom build! No update check available!");
         } else {
             int currentId = Integer.parseInt(stemBuildId);
-            int newestId = this.getNewestJobId("stem");
+            int newestId = this.getNewestJobId("STEM");
 
-            String newestBuiltRevision = getBuiltRevision("stem", newestId);
-            String currentBuiltRevision = getBuiltRevision("stem", currentId);
+            String newestBuiltRevision = getBuiltRevision("STEM", newestId);
+            String currentBuiltRevision = getBuiltRevision("STEM", currentId);
 
             if (!newestBuiltRevision.equalsIgnoreCase(currentBuiltRevision)) {
                 STEMSystemApp.LOGGER.CONFIG("A new build is available for STEM Framework. Current #" + currentId + " SHA " + currentBuiltRevision + " newest #" + newestId + " SHA " + newestBuiltRevision);
             }
         }
+    }
+
+    public void checkForPluginUpdates() {
 
         for (STEMPlugin stemPlugin : this.pluginModule.getLoadedPlugins()) {
             STEMSystemApp.LOGGER.INFO("Checking updates for plugin " + stemPlugin.getPluginName());
@@ -47,7 +55,6 @@ public class UpdateCheck {
                 String newestBuiltRevision = getBuiltRevision(jobName, newestId);
                 String currentBuiltRevision = getBuiltRevision(jobName, currentId);
 
-
                 if (!newestBuiltRevision.equalsIgnoreCase(currentBuiltRevision)) {
                     STEMSystemApp.LOGGER.CONFIG("The current build #" + currentId + " with SHA " + currentBuiltRevision + " for plugin " + stemPlugin.getPluginName() + " is outdated. There is a new build #" + newestId + " with SHA " + newestBuiltRevision + " available.");
                 } else {
@@ -58,7 +65,7 @@ public class UpdateCheck {
     }
 
     private String getBuiltRevision(String jobName, int jobId) {
-        JSONObject jsonObject = null;
+        JSONObject jsonObject;
         try {
             URL url = new URL(this.pluginModule.jenkinsURL + "/job/" + jobName + "/" + jobId + "/api/json?pretty=true");
             InputStream input = url.openStream();
