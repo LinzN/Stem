@@ -51,6 +51,7 @@ public class CommandSetup {
         registerCommand("uptime", new UptimeCommand());
         registerCommand("healthcheck", new HealthCheckCommand());
         registerCommand("updatecheck", new UpdateCheckCommand());
+        registerCommand("runscript", new RunScriptCommand());
     }
 
     private void registerCommand(String command, ICommand ICommand) {

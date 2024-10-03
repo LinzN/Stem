@@ -26,6 +26,7 @@ import de.stem.stemSystem.modules.libraryModule.StemClassLoader;
 import de.stem.stemSystem.modules.mqttModule.MqttModule;
 import de.stem.stemSystem.modules.notificationModule.NotificationModule;
 import de.stem.stemSystem.modules.pluginModule.PluginModule;
+import de.stem.stemSystem.modules.scriptModule.ScriptManager;
 import de.stem.stemSystem.modules.stemLinkModule.StemLinkModule;
 import de.stem.stemSystem.taskManagment.CallbackService;
 import de.stem.stemSystem.taskManagment.SchedulerService;
@@ -55,7 +56,7 @@ public class STEMSystemApp {
     private CommandModule commandModule;
     private NotificationModule notificationModule;
     private InformationModule informationModule;
-
+    private ScriptManager scriptManager;
     private HealthModule healthModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
@@ -103,6 +104,7 @@ public class STEMSystemApp {
         mqttModule = new MqttModule(instance);
         notificationModule = new NotificationModule(instance);
         informationModule = new InformationModule(instance);
+        scriptManager = new ScriptManager(instance);
         healthModule = new HealthModule(instance);
         commandModule = new CommandModule(instance);
         libraryModule = new LibraryModule(instance);
@@ -118,6 +120,7 @@ public class STEMSystemApp {
     public void shutdown() {
         this.cloudModule.shutdownModule();
         this.commandModule.shutdownModule();
+        this.scriptManager.shutdownModule();
         this.pluginModule.shutdownModule();
         this.stemLinkModule.shutdownModule();
         this.mqttModule.shutdownModule();
@@ -159,6 +162,10 @@ public class STEMSystemApp {
 
     public MqttModule getMqttModule() {
         return mqttModule;
+    }
+
+    public ScriptManager getScriptManager() {
+        return scriptManager;
     }
 
     public CommandModule getCommandModule() {
