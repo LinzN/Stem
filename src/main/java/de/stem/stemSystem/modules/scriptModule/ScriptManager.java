@@ -12,6 +12,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class ScriptManager extends AbstractModule {
 
@@ -51,22 +53,28 @@ public class ScriptManager extends AbstractModule {
         if (!file.exists()) {
             throw new ScriptNotFoundException();
         }
-
-        if (!this.isValidScript(file)) {
-            throw new InvalidScriptException();
-        }
-
-        return new StemScript(this, file);
+        List<String> requiredParameters = this.checkValidScript(file);
+        return new StemScript(this, file, requiredParameters);
     }
 
-    private boolean isValidScript(File file) {
+    private List<String> checkValidScript(File file) {
+        List<String> requiredParameters = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             reader.readLine();
-            if (reader.readLine().equalsIgnoreCase("#[STEM-SCRIPT]")) {
-                return true;
+            if (!reader.readLine().equalsIgnoreCase("#[STEM-SCRIPT]")) {
+                throw new InvalidScriptException();
+            }
+            String inputParameters = reader.readLine();
+
+            if (!inputParameters.startsWith("#[") || !inputParameters.endsWith("]")) {
+                throw new InvalidScriptException();
+            }
+            String cleanedInput = inputParameters.substring(2, inputParameters.length() - 1);
+            if (!cleanedInput.isEmpty()) {
+                requiredParameters.addAll(Arrays.asList(cleanedInput.split(", ")));
             }
         } catch (IOException ignored) {
         }
-        return false;
+        return requiredParameters;
     }
 }

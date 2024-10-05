@@ -1,16 +1,14 @@
 package de.stem.stemSystem.modules.scriptModule;
 
-import de.linzn.openJL.pairs.ImmutablePair;
 import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptException;
 import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptNotStartedException;
 import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptTimeoutException;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -18,21 +16,23 @@ public class StemScript {
 
     private final ScriptManager scriptManager;
     private final File scriptFile;
-    private final ArrayList<ImmutablePair<String, String>> scriptParameters;
+    private final List<String> requiredParameters;
+    private final Map<String, String> scriptParameters;
     private Process process;
     private final List<String> output_lines;
     private final List<String> error_lines;
 
-    public StemScript(ScriptManager scriptManager, File scriptFile) {
+    public StemScript(ScriptManager scriptManager, File scriptFile, List<String> requiredParameters) {
         this.scriptManager = scriptManager;
         this.scriptFile = scriptFile;
-        this.scriptParameters = new ArrayList<>();
+        this.requiredParameters = requiredParameters;
+        this.scriptParameters = new LinkedHashMap<>();
         this.output_lines = new ArrayList<>();
         this.error_lines = new ArrayList<>();
     }
 
     public void addScriptParameter(String parameterName, Object parameterValue) {
-        this.scriptParameters.add(new ImmutablePair<>(parameterName, parameterValue.toString()));
+        this.scriptParameters.put(parameterName.toLowerCase(), parameterValue.toString());
     }
 
     public File getScriptFile() {
@@ -40,14 +40,20 @@ public class StemScript {
     }
 
     public void start() throws ScriptException {
+        for (String requiredParameter : requiredParameters) {
+            if (!this.scriptParameters.containsKey(requiredParameter)) {
+                throw new ScriptException("Missing required parameter! : " + requiredParameter);
+            }
+        }
         ArrayList<String> commandList = new ArrayList<>();
         commandList.add("/bin/bash");
         commandList.add(scriptFile.getAbsolutePath());
 
-        this.scriptParameters.forEach(parameter -> {
-            commandList.add("-" + parameter.getLeft());
-            commandList.add(parameter.getRight());
-        });
+        for (String scriptParameterName : this.scriptParameters.keySet()) {
+            commandList.add("-" + scriptParameterName);
+            commandList.add(this.scriptParameters.get(scriptParameterName));
+        }
+
         try {
             this.process = Runtime.getRuntime().exec(commandList.toArray(String[]::new));
             this.scriptManager.stemScripts.add(this);
@@ -110,4 +116,5 @@ public class StemScript {
     public List<String> getError_lines() {
         return error_lines;
     }
+
 }
