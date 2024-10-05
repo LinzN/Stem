@@ -14,13 +14,11 @@ package de.stem.stemSystem.taskManagment.operations.defaultOperations;
 import de.linzn.openJL.pairs.ImmutablePair;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.scriptModule.StemScript;
-import de.stem.stemSystem.modules.scriptModule.exceptions.InvalidScriptException;
-import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptNotFoundException;
+import de.stem.stemSystem.modules.scriptModule.exceptions.*;
 import de.stem.stemSystem.taskManagment.operations.AbstractOperation;
 import de.stem.stemSystem.taskManagment.operations.OperationOutput;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class ScriptOperation extends AbstractOperation {
@@ -54,9 +52,15 @@ public class ScriptOperation extends AbstractOperation {
         } catch (InvalidScriptException e) {
             STEMSystemApp.LOGGER.ERROR(e);
             operationOutput.setExit(2);
-        } catch (IOException | InterruptedException e) {
+        } catch (ScriptTimeoutException e) {
             STEMSystemApp.LOGGER.ERROR(e);
             operationOutput.setExit(3);
+        } catch (ScriptNotStartedException e) {
+            STEMSystemApp.LOGGER.ERROR(e);
+            operationOutput.setExit(4);
+        } catch (ScriptException e) {
+            STEMSystemApp.LOGGER.ERROR(e);
+            operationOutput.setExit(5);
         }
         return operationOutput;
     }

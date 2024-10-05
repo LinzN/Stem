@@ -1,7 +1,9 @@
 package de.stem.stemSystem.modules.scriptModule;
 
 import de.linzn.openJL.pairs.ImmutablePair;
+import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptException;
 import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptNotStartedException;
+import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptTimeoutException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,7 +39,7 @@ public class StemScript {
         return scriptFile;
     }
 
-    public void start() throws IOException {
+    public void start() throws ScriptException {
         ArrayList<String> commandList = new ArrayList<>();
         commandList.add("/bin/bash");
         commandList.add(scriptFile.getAbsolutePath());
@@ -46,42 +48,47 @@ public class StemScript {
             commandList.add("-" + parameter.getLeft());
             commandList.add(parameter.getRight());
         });
-        this.process = Runtime.getRuntime().exec(commandList.toArray(String[]::new));
-        this.scriptManager.stemScripts.add(this);
+        try {
+            this.process = Runtime.getRuntime().exec(commandList.toArray(String[]::new));
+            this.scriptManager.stemScripts.add(this);
+        } catch (IOException e) {
+            throw new ScriptException(e.getMessage());
+        }
     }
 
-    public boolean await() throws InterruptedException, ScriptNotStartedException {
-        return await(60, TimeUnit.MINUTES);
+    public void await() throws ScriptNotStartedException, ScriptTimeoutException {
+        await(60, TimeUnit.MINUTES);
     }
 
-    public boolean await(int timeout, TimeUnit timeUnit) throws InterruptedException, ScriptNotStartedException {
+    public void await(int timeout, TimeUnit timeUnit) throws ScriptNotStartedException, ScriptTimeoutException {
         if (this.process == null) {
             throw new ScriptNotStartedException();
         }
 
-        if (process.waitFor(timeout, timeUnit)) {
-            this.scriptManager.stemScripts.remove(this);
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    output_lines.add(line);
+        try {
+            if (process.waitFor(timeout, timeUnit)) {
+                this.scriptManager.stemScripts.remove(this);
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        output_lines.add(line);
+                    }
+                } catch (IOException ignored) {
                 }
-            } catch (IOException ignored) {
-            }
 
-            try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                String line;
-                while ((line = errorReader.readLine()) != null) {
-                    error_lines.add(line);
+                try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                    String line;
+                    while ((line = errorReader.readLine()) != null) {
+                        error_lines.add(line);
+                    }
+                } catch (IOException ignored) {
                 }
-            } catch (IOException ignored) {
+            } else {
+                process.destroyForcibly();
+                this.scriptManager.stemScripts.remove(this);
+                throw new ScriptTimeoutException();
             }
-
-            return true;
-        } else {
-            process.destroyForcibly();
-            this.scriptManager.stemScripts.remove(this);
-            return false;
+        } catch (InterruptedException ignored) {
         }
     }
 
