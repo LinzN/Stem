@@ -57,7 +57,7 @@ public class ScriptManager extends AbstractModule {
         return new StemScript(this, file, requiredParameters);
     }
 
-    private List<String> checkValidScript(File file) {
+    private List<String> checkValidScript(File file) throws InvalidScriptException {
         List<String> requiredParameters = new ArrayList<>();
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             reader.readLine();
@@ -66,12 +66,13 @@ public class ScriptManager extends AbstractModule {
             }
             String inputParameters = reader.readLine();
 
-            if (!(inputParameters.startsWith("#[") && inputParameters.endsWith("]"))) {
+            if (inputParameters.startsWith("#[") && inputParameters.endsWith("]")) {
+                String cleanedInput = inputParameters.substring(2, inputParameters.length() - 1);
+                if (!cleanedInput.isEmpty()) {
+                    requiredParameters.addAll(Arrays.asList(cleanedInput.split(", ")));
+                }
+            } else {
                 throw new InvalidScriptException();
-            }
-            String cleanedInput = inputParameters.substring(2, inputParameters.length() - 1);
-            if (!cleanedInput.isEmpty()) {
-                requiredParameters.addAll(Arrays.asList(cleanedInput.split(", ")));
             }
         } catch (IOException ignored) {
         }
