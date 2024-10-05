@@ -66,7 +66,7 @@ public class ScriptManager extends AbstractModule {
             }
             String inputParameters = reader.readLine();
 
-            if (!inputParameters.startsWith("#[") || !inputParameters.endsWith("]")) {
+            if (!(inputParameters.startsWith("#[") && inputParameters.endsWith("]"))) {
                 throw new InvalidScriptException();
             }
             String cleanedInput = inputParameters.substring(2, inputParameters.length() - 1);
