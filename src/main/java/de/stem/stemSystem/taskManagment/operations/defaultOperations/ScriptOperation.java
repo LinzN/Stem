@@ -11,7 +11,6 @@
 
 package de.stem.stemSystem.taskManagment.operations.defaultOperations;
 
-import de.linzn.openJL.pairs.ImmutablePair;
 import de.stem.stemSystem.STEMSystemApp;
 import de.stem.stemSystem.modules.scriptModule.StemScript;
 import de.stem.stemSystem.modules.scriptModule.exceptions.*;
@@ -19,12 +18,12 @@ import de.stem.stemSystem.taskManagment.operations.AbstractOperation;
 import de.stem.stemSystem.taskManagment.operations.OperationOutput;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 
 public class ScriptOperation extends AbstractOperation {
 
     private final String scriptName;
-    private final ArrayList<ImmutablePair<String, String>> parameters = new ArrayList<>();
+    private final LinkedHashMap<String, String> parameters = new LinkedHashMap<>();
 
     public ScriptOperation(String scriptName) {
         this.scriptName = scriptName;
@@ -36,8 +35,8 @@ public class ScriptOperation extends AbstractOperation {
         JSONObject jsonObject = new JSONObject();
         try {
             StemScript stemScript = STEMSystemApp.getInstance().getScriptManager().getStemScript(this.scriptName);
-            for (ImmutablePair<String, String> parameter : parameters) {
-                stemScript.addScriptParameter(parameter.getLeft(), parameter.getRight());
+            for (String parameterName : parameters.keySet()) {
+                stemScript.addScriptParameter(parameterName, parameters.get(parameterName));
             }
             stemScript.start();
             stemScript.await();
@@ -66,6 +65,10 @@ public class ScriptOperation extends AbstractOperation {
     }
 
     public void addParameter(String parameter, String value) {
-        parameters.add(new ImmutablePair<>(parameter, value));
+        parameters.put(parameter, value);
+    }
+
+    public String getParameterValue(String parameterName) {
+        return this.parameters.get(parameterName);
     }
 }
