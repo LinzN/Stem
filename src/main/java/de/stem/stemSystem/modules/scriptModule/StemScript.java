@@ -4,7 +4,10 @@ import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptException;
 import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptNotStartedException;
 import de.stem.stemSystem.modules.scriptModule.exceptions.ScriptTimeoutException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,6 +48,7 @@ public class StemScript {
                 throw new ScriptException("Missing required parameter! : " + requiredParameter);
             }
         }
+
         ArrayList<String> commandList = new ArrayList<>();
         commandList.add("/bin/bash");
         commandList.add(scriptFile.getAbsolutePath());
@@ -54,8 +58,11 @@ public class StemScript {
             commandList.add(this.scriptParameters.get(scriptParameterName));
         }
 
+        ProcessBuilder processBuilder = new ProcessBuilder(commandList);
+        processBuilder.redirectErrorStream(true);
+
         try {
-            this.process = Runtime.getRuntime().exec(commandList.toArray(String[]::new));
+            this.process = processBuilder.start();
             this.scriptManager.stemScripts.add(this);
         } catch (IOException e) {
             throw new ScriptException(e.getMessage());
@@ -78,14 +85,6 @@ public class StemScript {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         output_lines.add(line);
-                    }
-                } catch (IOException ignored) {
-                }
-
-                try (BufferedReader errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
-                    String line;
-                    while ((line = errorReader.readLine()) != null) {
-                        error_lines.add(line);
                     }
                 } catch (IOException ignored) {
                 }

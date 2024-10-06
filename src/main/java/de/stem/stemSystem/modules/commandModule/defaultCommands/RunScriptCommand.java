@@ -47,9 +47,6 @@ public class RunScriptCommand implements ICommand {
                 for (String line : stemScript.getOutput_lines()) {
                     STEMSystemApp.LOGGER.WARNING(line);
                 }
-                for (String line : stemScript.getError_lines()) {
-                    STEMSystemApp.LOGGER.WARNING(line);
-                }
             }
         } catch (ScriptException e) {
             STEMSystemApp.LOGGER.ERROR("Error while getting script file!");
