@@ -59,10 +59,14 @@ public class CallbackService {
         TaskMeta taskMeta;
 
         Runnable runnable = () -> callMethod(abstractCallback, plugin);
-        if (callbackTime.fixedTask) {
-            taskMeta = STEMSystemApp.getInstance().getScheduler().runFixedScheduler(plugin, runnable, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
+        if (!callbackTime.isCron) {
+            if (callbackTime.fixedTask) {
+                taskMeta = STEMSystemApp.getInstance().getScheduler().runFixedScheduler(plugin, runnable, callbackTime.days, callbackTime.hours, callbackTime.minutes, callbackTime.daily);
+            } else {
+                taskMeta = STEMSystemApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
+            }
         } else {
-            taskMeta = STEMSystemApp.getInstance().getScheduler().runRepeatScheduler(plugin, runnable, callbackTime.delay, callbackTime.period, callbackTime.timeUnit);
+            taskMeta = STEMSystemApp.getInstance().getScheduler().runAsCronTask(plugin, runnable, callbackTime.cronTask);
         }
         STEMSystemApp.LOGGER.DEBUG("Callback register for " + plugin.getPluginName() + " with taskId :" + taskMeta.taskId);
         abstractCallback.setIDs(taskMeta.getTaskId());

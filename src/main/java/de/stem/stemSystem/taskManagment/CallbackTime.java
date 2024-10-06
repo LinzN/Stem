@@ -22,14 +22,17 @@ public class CallbackTime {
     int hours;
     int minutes;
     boolean daily;
+    String cronTask;
 
     boolean fixedTask;
+    boolean isCron;
 
     public CallbackTime(int delay, int period, TimeUnit timeUnit) {
         this.delay = delay;
         this.period = period;
         this.timeUnit = timeUnit;
         this.fixedTask = false;
+        this.isCron = false;
     }
 
     public CallbackTime(int days, int hours, int minutes, boolean daily) {
@@ -40,4 +43,8 @@ public class CallbackTime {
         this.fixedTask = true;
     }
 
+    public CallbackTime(String cronTask){
+        this.isCron = true;
+        this.cronTask = cronTask;
+    }
 }
