@@ -107,8 +107,8 @@ public class STEMSystemApp {
         notificationModule = new NotificationModule(instance);
         informationModule = new InformationModule(instance);
         scriptManager = new ScriptManager(instance);
-        healthModule = new HealthModule(instance);
         complianceModule = new ComplianceModule(instance);
+        healthModule = new HealthModule(instance);
         commandModule = new CommandModule(instance);
         libraryModule = new LibraryModule(instance);
         pluginModule = new PluginModule(instance);
@@ -124,13 +124,13 @@ public class STEMSystemApp {
         this.cloudModule.shutdownModule();
         this.commandModule.shutdownModule();
         this.scriptManager.shutdownModule();
+        this.complianceModule.shutdownModule();
         this.pluginModule.shutdownModule();
         this.stemLinkModule.shutdownModule();
         this.mqttModule.shutdownModule();
         this.notificationModule.shutdownModule();
         this.informationModule.shutdownModule();
         this.healthModule.shutdownModule();
-        this.complianceModule.shutdownModule();
         this.databaseModule.shutdownModule();
         this.libraryModule.shutdownModule();
         this.eventModule.shutdownModule();

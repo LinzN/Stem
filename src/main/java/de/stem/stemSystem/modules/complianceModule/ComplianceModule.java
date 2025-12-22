@@ -50,7 +50,7 @@ public class ComplianceModule extends AbstractModule {
     private void readDefaultComplianceChecks() {
         for (final File file : complianceDirectory.listFiles()) {
             try {
-                this.registerComplianceCheck(file, STEMSystemApp.getInstance().getPluginModule().getModulePlugin());
+                this.registerComplianceCheck(file, this.getModulePlugin());
             } catch (InvalidComplianceException e){
                 STEMSystemApp.LOGGER.ERROR(e);
             }
