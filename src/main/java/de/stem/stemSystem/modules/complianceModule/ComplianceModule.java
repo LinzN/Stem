@@ -62,12 +62,13 @@ public class ComplianceModule extends AbstractModule {
             throw new InvalidComplianceException("Invalid complianceCheckFile extension for " + file.getName() + "!");
         }
 
-        FileConfiguration serviceConfig = YamlConfiguration.loadConfiguration(file);
-        String complianceID = serviceConfig.getString("complianceID");
-        String script = serviceConfig.getString("script");
-        String cronTime = serviceConfig.getString("cronTime");
-        List<Integer> runningCodes = serviceConfig.getIntegerList("runningCodes");
-        List<Integer> errorCodes = serviceConfig.getIntegerList("errorCodes");
+        FileConfiguration complianceConfig = YamlConfiguration.loadConfiguration(file);
+        String complianceID = complianceConfig.getString("complianceID");
+        String script = complianceConfig.getString("script");
+        boolean informUser = complianceConfig.getBoolean("informUser", false);
+        String cronTime = complianceConfig.getString("cronTime");
+        List<Integer> runningCodes = complianceConfig.getIntegerList("runningCodes");
+        List<Integer> errorCodes = complianceConfig.getIntegerList("errorCodes");
         ComplianceCheck complianceCheck = new ComplianceCheck(complianceID, script, cronTime, runningCodes, errorCodes, stemPlugin, this.stemSystemApp);
         complianceCheck.register();
         STEMSystemApp.LOGGER.CONFIG("Register complianceCheck for " + complianceID);
