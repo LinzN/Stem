@@ -16,6 +16,7 @@ import de.linzn.simplyLogger.Logger;
 import de.stem.stemSystem.configuration.AppConfiguration;
 import de.stem.stemSystem.modules.cloudModule.CloudModule;
 import de.stem.stemSystem.modules.commandModule.CommandModule;
+import de.stem.stemSystem.modules.complianceModule.ComplianceModule;
 import de.stem.stemSystem.modules.databaseModule.DatabaseModule;
 import de.stem.stemSystem.modules.eventModule.EventModule;
 import de.stem.stemSystem.modules.eventModule.events.StemStartupEvent;
@@ -58,6 +59,7 @@ public class STEMSystemApp {
     private InformationModule informationModule;
     private ScriptManager scriptManager;
     private HealthModule healthModule;
+    private ComplianceModule complianceModule;
     private DatabaseModule databaseModule;
     private PluginModule pluginModule;
     private CloudModule cloudModule;
@@ -106,6 +108,7 @@ public class STEMSystemApp {
         informationModule = new InformationModule(instance);
         scriptManager = new ScriptManager(instance);
         healthModule = new HealthModule(instance);
+        complianceModule = new ComplianceModule(instance);
         commandModule = new CommandModule(instance);
         libraryModule = new LibraryModule(instance);
         pluginModule = new PluginModule(instance);
@@ -127,6 +130,7 @@ public class STEMSystemApp {
         this.notificationModule.shutdownModule();
         this.informationModule.shutdownModule();
         this.healthModule.shutdownModule();
+        this.complianceModule.shutdownModule();
         this.databaseModule.shutdownModule();
         this.libraryModule.shutdownModule();
         this.eventModule.shutdownModule();
@@ -182,6 +186,10 @@ public class STEMSystemApp {
 
     public HealthModule getHealthModule() {
         return healthModule;
+    }
+
+    public ComplianceModule getComplianceModule(){
+        return complianceModule;
     }
 
     public DatabaseModule getDatabaseModule() {
