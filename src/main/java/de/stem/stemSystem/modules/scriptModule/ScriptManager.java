@@ -49,7 +49,20 @@ public class ScriptManager extends AbstractModule {
     }
 
     public StemScript getStemScript(String name) throws ScriptNotFoundException, InvalidScriptException {
-        File file = new File(scriptDirectory, name + ".stemsh");
+        return getStemScript(scriptDirectory, name);
+    }
+
+    public StemScript getStemScript(String subDirectoryName, String name) throws InvalidScriptException, ScriptNotFoundException {
+        File subDirectory = new File(scriptDirectory, subDirectoryName);
+        return getStemScript(subDirectory, name);
+    }
+
+    public StemScript getStemScript(File directory, String name) throws ScriptNotFoundException, InvalidScriptException {
+        if(!directory.exists() || !directory.isDirectory()){
+            throw new ScriptNotFoundException();
+        }
+
+        File file = new File(directory, name + ".stemsh");
         if (!file.exists()) {
             throw new ScriptNotFoundException();
         }

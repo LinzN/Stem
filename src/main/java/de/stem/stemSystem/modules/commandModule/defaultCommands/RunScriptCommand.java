@@ -22,8 +22,7 @@ public class RunScriptCommand implements ICommand {
     @Override
     public boolean executeTerminal(String[] args) {
 
-        if (args.length < 2 || (args.length - 1) % 2 != 0) {
-            System.out.println("E");
+        if (args.length < 1 || (args.length - 1) % 2 != 0) {
             STEMSystemApp.LOGGER.ERROR("Error: runscript [scriptname] <parameterame> <parametervalue> ...");
             return true;
         }
@@ -32,10 +31,12 @@ public class RunScriptCommand implements ICommand {
 
         try {
             StemScript stemScript = STEMSystemApp.getInstance().getScriptManager().getStemScript(scriptName);
-            for (int i = 1; i < args.length; i += 2) {
-                String paramName = args[i];
-                String paramValue = args[i + 1];
-                stemScript.addScriptParameter(paramName, paramValue);
+            if (args.length > 1) {
+                for (int i = 1; i < args.length; i += 2) {
+                    String paramName = args[i];
+                    String paramValue = args[i + 1];
+                    stemScript.addScriptParameter(paramName, paramValue);
+                }
             }
             stemScript.start();
             STEMSystemApp.LOGGER.CORE("Script execution started!");
