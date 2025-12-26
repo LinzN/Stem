@@ -12,10 +12,10 @@
 
 package de.linzn.stem.modules.stemLinkModule.listener;
 
+import de.linzn.stem.STEMApp;
 import de.linzn.stemLink.components.events.ConnectEvent;
 import de.linzn.stemLink.components.events.DisconnectEvent;
 import de.linzn.stemLink.components.events.handler.EventHandler;
-import de.linzn.stem.STEMApp;
 
 public class ConnectionListener {
 

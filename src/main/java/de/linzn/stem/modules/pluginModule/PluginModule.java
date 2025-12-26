@@ -28,14 +28,12 @@ import java.util.*;
 public class PluginModule extends AbstractModule {
     private static final String pluginFileName = "plugin.yml";
     public static File pluginDirectory = new File("plugins");
-
-    public String jenkinsURL;
     private final STEMApp stemApp;
+    private final UpdateCheck updateCheck;
+    public String jenkinsURL;
     private PluginClassLoader pluginClassLoader;
     private LinkedHashMap<String, STEMPlugin> pluginList;
-
     private FileConfiguration fileConfiguration;
-    private final UpdateCheck updateCheck;
 
     public PluginModule(STEMApp stemApp) {
         this.stemApp = stemApp;

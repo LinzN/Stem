@@ -33,9 +33,9 @@ public class StemScript {
     private final File scriptFile;
     private final List<String> requiredParameters;
     private final Map<String, String> scriptParameters;
-    private Process process;
     private final List<String> output_lines;
     private final List<String> error_lines;
+    private Process process;
 
     public StemScript(ScriptManager scriptManager, File scriptFile, List<String> requiredParameters) {
         this.scriptManager = scriptManager;

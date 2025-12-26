@@ -12,7 +12,7 @@
 
 package de.linzn.stem.modules.scriptModule.exceptions;
 
-public class ScriptNotStartedException extends ScriptException{
+public class ScriptNotStartedException extends ScriptException {
     public ScriptNotStartedException() {
         super("Script execution not started yet!");
     }

@@ -25,8 +25,8 @@ import java.util.List;
 
 public class ComplianceModule extends AbstractModule {
 
-    private final STEMApp stemApp;
     public static File complianceDirectory = new File("compliance");
+    private final STEMApp stemApp;
     private FileConfiguration fileConfiguration;
     private ArrayList<ComplianceCheck> complianceChecks;
 
@@ -52,7 +52,7 @@ public class ComplianceModule extends AbstractModule {
 
     @Override
     public void onShutdown() {
-        for(ComplianceCheck complianceCheck : this.complianceChecks){
+        for (ComplianceCheck complianceCheck : this.complianceChecks) {
             complianceCheck.unregister();
         }
         this.complianceChecks.clear();
@@ -63,13 +63,13 @@ public class ComplianceModule extends AbstractModule {
         for (final File file : complianceDirectory.listFiles()) {
             try {
                 this.registerComplianceCheck(file, this.getModulePlugin());
-            } catch (InvalidComplianceException e){
+            } catch (InvalidComplianceException e) {
                 STEMApp.LOGGER.ERROR(e);
             }
         }
     }
 
-    public void registerComplianceCheck(File file, STEMPlugin stemPlugin){
+    public void registerComplianceCheck(File file, STEMPlugin stemPlugin) {
         if (!file.getName().endsWith(".yml")) {
             throw new InvalidComplianceException("Invalid complianceCheckFile extension for " + file.getName() + "!");
         }
@@ -87,9 +87,9 @@ public class ComplianceModule extends AbstractModule {
         this.complianceChecks.add(complianceCheck);
     }
 
-    public void unregisterComplianceCheck(String complianceID){
+    public void unregisterComplianceCheck(String complianceID) {
         ComplianceCheck complianceCheck = getComplianceCheck(complianceID);
-        if(complianceCheck != null){
+        if (complianceCheck != null) {
             complianceCheck.unregister();
         }
     }
@@ -98,9 +98,9 @@ public class ComplianceModule extends AbstractModule {
         return complianceChecks;
     }
 
-    public ComplianceCheck getComplianceCheck(String complianceID){
-        for (ComplianceCheck complianceCheck : this.complianceChecks){
-            if(complianceCheck.getComplianceID().equalsIgnoreCase(complianceID)){
+    public ComplianceCheck getComplianceCheck(String complianceID) {
+        for (ComplianceCheck complianceCheck : this.complianceChecks) {
+            if (complianceCheck.getComplianceID().equalsIgnoreCase(complianceID)) {
                 return complianceCheck;
             }
         }

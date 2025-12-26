@@ -12,14 +12,10 @@
 
 package de.linzn.stem.utils;
 
-import de.linzn.stem.STEMApp;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.util.Map;
-import java.util.Properties;
 
 public class JavaUtils {
 
@@ -34,15 +30,15 @@ public class JavaUtils {
         return kernelName.toUpperCase() + "_" + versionNumber + "." + buildNumber + "-" + buildLabel;
     }
 
-    public static String getKernelName(){
+    public static String getKernelName() {
         InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
         Yaml yaml = new Yaml();
         Map<String, Object> obj = yaml.load(inStream);
         String kernelName = String.valueOf(obj.get("kernelName"));
-        return  kernelName.toUpperCase();
+        return kernelName.toUpperCase();
     }
 
-    public static String getBuildNumber(){
+    public static String getBuildNumber() {
         InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
         Yaml yaml = new Yaml();
         Map<String, Object> obj = yaml.load(inStream);

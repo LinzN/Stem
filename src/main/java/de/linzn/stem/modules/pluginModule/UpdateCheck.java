@@ -29,12 +29,12 @@ public class UpdateCheck {
         this.pluginModule = pluginModule;
     }
 
-    public void checkForUpdates(){
+    public void checkForUpdates() {
         checkForFrameworkUpdate();
         checkForPluginUpdates();
     }
 
-    public void checkForFrameworkUpdate(){
+    public void checkForFrameworkUpdate() {
         String stemBuildId = JavaUtils.getBuildNumber();
 
         if (stemBuildId.equalsIgnoreCase("IDEA")) {

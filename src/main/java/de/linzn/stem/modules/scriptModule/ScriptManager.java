@@ -29,10 +29,10 @@ import java.util.List;
 
 public class ScriptManager extends AbstractModule {
 
-    private final STEMApp stemApp;
     public static File scriptDirectory = new File("scripts");
-    private FileConfiguration fileConfiguration;
+    private final STEMApp stemApp;
     ArrayList<StemScript> stemScripts;
+    private FileConfiguration fileConfiguration;
 
     public ScriptManager(STEMApp stemApp) {
         this.stemApp = stemApp;
@@ -70,7 +70,7 @@ public class ScriptManager extends AbstractModule {
     }
 
     public StemScript getStemScript(File directory, String name) throws ScriptNotFoundException, InvalidScriptException {
-        if(!directory.exists() || !directory.isDirectory()){
+        if (!directory.exists() || !directory.isDirectory()) {
             throw new ScriptNotFoundException();
         }
 

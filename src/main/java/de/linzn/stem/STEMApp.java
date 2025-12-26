@@ -189,7 +189,7 @@ public class STEMApp {
         return healthModule;
     }
 
-    public ComplianceModule getComplianceModule(){
+    public ComplianceModule getComplianceModule() {
         return complianceModule;
     }
 

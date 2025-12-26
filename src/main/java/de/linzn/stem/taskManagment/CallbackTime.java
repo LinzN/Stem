@@ -44,7 +44,7 @@ public class CallbackTime {
         this.fixedTask = true;
     }
 
-    public CallbackTime(String cronTask){
+    public CallbackTime(String cronTask) {
         this.isCron = true;
         this.cronTask = cronTask;
     }

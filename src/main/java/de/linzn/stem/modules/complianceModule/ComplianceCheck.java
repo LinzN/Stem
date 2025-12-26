@@ -65,9 +65,9 @@ public class ComplianceCheck extends AbstractCallback {
         int exitCode = operationOutput.getExit();
         String statusString = "unknown";
 
-        if(this.runningCodes.contains(exitCode)){
+        if (this.runningCodes.contains(exitCode)) {
             statusString = "passed";
-        } else if(this.errorCodes.contains(exitCode)){
+        } else if (this.errorCodes.contains(exitCode)) {
             statusString = "error";
         }
 
@@ -90,14 +90,15 @@ public class ComplianceCheck extends AbstractCallback {
         return complianceID;
     }
 
-    public JSONObject getStatus(){
+    public JSONObject getStatus() {
         return this.status;
     }
 
-    void register(){
+    void register() {
         this.stemApp.getCallBackService().registerCallbackListener(this, this.stemPlugin);
     }
-    void unregister(){
+
+    void unregister() {
         this.stemApp.getCallBackService().unregisterCallbackListener(this);
     }
 }

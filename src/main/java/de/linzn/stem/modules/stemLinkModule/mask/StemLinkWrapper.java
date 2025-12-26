@@ -12,9 +12,9 @@
 
 package de.linzn.stem.modules.stemLinkModule.mask;
 
-import de.linzn.stemLink.components.IStemLinkWrapper;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.stemLinkModule.StemLinkModule;
+import de.linzn.stemLink.components.IStemLinkWrapper;
 
 import java.util.logging.Level;
 
