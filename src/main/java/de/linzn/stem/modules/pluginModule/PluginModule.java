@@ -1,0 +1,232 @@
+/*
+ * Copyright (c) 2025 MirraNET, Niklas Linz. All rights reserved.
+ *
+ * This file is part of the MirraNET project and is licensed under the
+ * GNU Lesser General Public License v3.0 (LGPLv3).
+ *
+ * You may use, distribute and modify this code under the terms
+ * of the LGPLv3 license. You should have received a copy of the
+ * license along with this file. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>
+ * or contact: niklas.linz@mirranet.de
+ */
+package de.linzn.stem.modules.pluginModule;
+
+import de.linzn.openJL.pairs.Pair;
+import de.linzn.simplyConfiguration.FileConfiguration;
+import de.linzn.simplyConfiguration.provider.YamlConfiguration;
+import de.linzn.stem.STEMApp;
+import de.linzn.stem.modules.AbstractModule;
+import org.yaml.snakeyaml.Yaml;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
+
+public class PluginModule extends AbstractModule {
+    private static final String pluginFileName = "plugin.yml";
+    public static File pluginDirectory = new File("plugins");
+
+    public String jenkinsURL;
+    private final STEMApp stemApp;
+    private PluginClassLoader pluginClassLoader;
+    private LinkedHashMap<String, STEMPlugin> pluginList;
+
+    private FileConfiguration fileConfiguration;
+    private final UpdateCheck updateCheck;
+
+    public PluginModule(STEMApp stemApp) {
+        this.stemApp = stemApp;
+        this.init();
+        this.loadPlugins();
+        this.initConfig();
+        this.updateCheck = new UpdateCheck(this);
+    }
+
+    private void init() {
+        this.pluginList = new LinkedHashMap<>();
+        this.pluginClassLoader = new PluginClassLoader(STEMApp.getInstance().getStemClassLoader());
+
+        if (!pluginDirectory.exists()) {
+            pluginDirectory.mkdir();
+        }
+    }
+
+    private void initConfig() {
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_plugins.yml"));
+        this.jenkinsURL = this.fileConfiguration.getString("jenkinsURL", "https://builds.app.stem-system.de");
+        this.fileConfiguration.save();
+    }
+
+    public void loadPlugin(File jarFile, boolean enablePlugin) throws IOException {
+        URLClassLoader child = new URLClassLoader(new URL[]{jarFile.toURL()}, this.getClass().getClassLoader());
+        InputStream inStream = child.getResourceAsStream(pluginFileName);
+        Yaml yaml = new Yaml();
+        Map<String, Object> obj = yaml.load(inStream);
+        String pluginName = (String) obj.get("name");
+        String classPath = (String) obj.get("main");
+        String version = (String) obj.get("version");
+        String buildJobName = "CUSTOM";
+        String buildNumber = "SNAPSHOT";
+
+        if (obj.containsKey("buildJobName")) {
+            buildJobName = String.valueOf(obj.get("buildJobName"));
+        }
+        if (obj.containsKey("buildNumber")) {
+            buildNumber = String.valueOf(obj.get("buildNumber"));
+        }
+
+        loadPlugin(pluginName, classPath, version, buildJobName, buildNumber, jarFile, enablePlugin);
+    }
+
+    private void loadPlugin(String pluginName, String classPath, String version, String buildJobName, String buildNumber, File jarFile, boolean enablePlugin) throws IOException {
+        STEMPlugin plugin = pluginClassLoader.addPluginFile(pluginName, classPath, version, buildJobName, buildNumber, jarFile);
+        this.pluginList.put(plugin.getPluginName(), plugin);
+        if (enablePlugin) {
+            enablePlugin(plugin.getPluginName());
+        }
+    }
+
+    public void unloadPlugin(String pluginName) {
+        STEMApp.LOGGER.INFO("Unload plugin: " + pluginName);
+        if (disablePlugin(pluginName)) {
+            this.pluginList.remove(pluginName);
+        }
+    }
+
+    public boolean enablePlugin(String pluginName) {
+        STEMPlugin plugin = this.pluginList.get(pluginName);
+        if (plugin == null) {
+            return false;
+        }
+        STEMApp.LOGGER.INFO("Enable plugin: " + plugin.getDescription());
+
+        try {
+            plugin.onEnable();
+        } catch (Exception e) {
+            STEMApp.LOGGER.ERROR(e);
+            return false;
+        }
+        return true;
+    }
+
+    public boolean disablePlugin(String pluginName) {
+        STEMPlugin plugin = this.pluginList.get(pluginName);
+        if (plugin == null) {
+            return false;
+        }
+        STEMApp.LOGGER.INFO("Disable plugin: " + plugin.getDescription());
+        try {
+            plugin.onDisable();
+            this.stemApp.getCallBackService().unregisterCallbackListeners(plugin);
+            this.stemApp.getScheduler().cancelTasks(plugin);
+        } catch (Exception e) {
+            STEMApp.LOGGER.ERROR(e);
+            return false;
+        }
+
+        return true;
+    }
+
+    private void unloadPlugins() {
+        Set<String> pluginsCopy = new HashSet<>(this.pluginList.keySet());
+        for (String name : pluginsCopy) {
+            unloadPlugin(name);
+        }
+    }
+
+    private void loadPlugins() {
+        LinkedList<Pair<String, File>> pluginsWithDependencies = new LinkedList<>();
+
+        for (File jarFile : Objects.requireNonNull(pluginDirectory.listFiles())) {
+            if (!jarFile.isDirectory() && jarFile.getName().endsWith(".jar")) {
+                try {
+                    URLClassLoader child = new URLClassLoader(new URL[]{jarFile.toURL()}, this.getClass().getClassLoader());
+
+                    if (child.getResource(pluginFileName) == null) {
+                        STEMApp.LOGGER.ERROR("No " + pluginFileName + " file found for " + jarFile.getName());
+                        continue;
+                    }
+
+                    InputStream inStream = child.getResourceAsStream(pluginFileName);
+                    Yaml yaml = new Yaml();
+                    Map<String, Object> obj = yaml.load(inStream);
+                    String pluginName = (String) obj.get("name");
+                    String classPath = (String) obj.get("main");
+                    String version = (String) obj.get("version");
+                    String buildJobName = "CUSTOM";
+                    String buildNumber = "SNAPSHOT";
+
+                    if (obj.containsKey("buildJobName")) {
+                        buildJobName = String.valueOf(obj.get("buildJobName"));
+                    }
+                    if (obj.containsKey("buildNumber")) {
+                        buildNumber = String.valueOf(obj.get("buildNumber"));
+                    }
+
+                    List<String> dependencies = (List<String>) obj.get("depend");
+                    if (dependencies == null || dependencies.size() == 0) {
+                        loadPlugin(pluginName, classPath, version, buildJobName, buildNumber, jarFile, false);
+                    } else {
+                        pluginsWithDependencies.add(new Pair<>(pluginName, jarFile));
+                    }
+                    child.close();
+                } catch (Exception e) {
+                    STEMApp.LOGGER.ERROR(e);
+                }
+            }
+        }
+
+        int i = 0;
+        while (pluginsWithDependencies.size() != 0) {
+            int maxValue = pluginsWithDependencies.size() * pluginsWithDependencies.size();
+
+            if (i > maxValue) { //todo fix this
+                STEMApp.LOGGER.ERROR("Some plugins could not be loaded!");
+                break;
+            }
+
+            try {
+                Pair<String, File> pluginPair = pluginsWithDependencies.removeFirst();
+                URLClassLoader child = new URLClassLoader(new URL[]{pluginPair.getValue().toURL()}, this.getClass().getClassLoader());
+                InputStream inStream = child.getResourceAsStream(pluginFileName);
+                Yaml yaml = new Yaml();
+                Map<String, Object> obj = yaml.load(inStream);
+                List<String> dependencies = (List<String>) obj.get("depend");
+
+                for (String dependency : dependencies) {
+                    if (!this.pluginList.containsKey(dependency)) {
+                        pluginsWithDependencies.addLast(pluginPair);
+                        break;
+                    }
+                }
+                if (pluginsWithDependencies.size() == 0 || pluginsWithDependencies.getLast() != pluginPair) {
+                    loadPlugin(pluginPair.getValue(), false);
+                    i = 0;
+                }
+            } catch (Exception e) {
+                STEMApp.LOGGER.ERROR(e);
+            }
+            i++;
+        }
+
+        for (String pluginName : this.pluginList.keySet()) {
+            enablePlugin(pluginName);
+        }
+    }
+
+    public ArrayList<STEMPlugin> getLoadedPlugins() {
+        return new ArrayList<>(this.pluginList.values());
+    }
+
+    @Override
+    public void onShutdown() {
+        this.unloadPlugins();
+    }
+
+    public UpdateCheck getUpdateCheck() {
+        return updateCheck;
+    }
+}
