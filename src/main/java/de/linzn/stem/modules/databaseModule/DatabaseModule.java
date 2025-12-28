@@ -28,7 +28,6 @@ import java.sql.Statement;
 
 public class DatabaseModule extends AbstractModule {
     // Define variables
-    private final STEMApp stemApp;
     private final DatabaseProvider databaseProvider;
 
     private FileConfiguration fileConfiguration;
@@ -43,13 +42,13 @@ public class DatabaseModule extends AbstractModule {
 
     /* Create class instance */
     public DatabaseModule(STEMApp stemApp) {
+        super(stemApp);
         this.initConfig();
         if (this.provider.equalsIgnoreCase("mysql")) {
             this.databaseProvider = new MySQLProvider(this.hostname, this.port, this.username, this.password, this.database);
         } else {
             this.databaseProvider = new SQLiteProvider("STEM.db");
         }
-        this.stemApp = stemApp;
         Connection connection = getConnection();
         if (connection != null) {
             releaseConnection(connection);

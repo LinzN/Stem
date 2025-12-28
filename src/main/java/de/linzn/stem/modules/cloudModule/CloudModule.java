@@ -26,7 +26,6 @@ import java.util.UUID;
 
 public class CloudModule extends AbstractModule {
 
-    STEMApp stemApp;
     private FileConfiguration fileConfiguration;
     private NextcloudConnector nextcloudConnector;
 
@@ -37,7 +36,7 @@ public class CloudModule extends AbstractModule {
     private String cloudPassToken;
 
     public CloudModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.initConfig();
         if (this.isEnabled) {
             this.initCloudSetup();

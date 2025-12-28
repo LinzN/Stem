@@ -18,12 +18,12 @@ import de.linzn.stem.modules.pluginModule.STEMPlugin;
 public class TaskMeta {
     long taskId;
     boolean isCanceled;
-    boolean runInCore;
+    boolean synchronous;
     STEMPlugin owner;
 
-    public TaskMeta(STEMPlugin owner, boolean runInCore) {
+    public TaskMeta(STEMPlugin owner, boolean synchronous) {
         this.owner = owner;
-        this.runInCore = runInCore;
+        this.synchronous = synchronous;
         this.taskId = System.nanoTime();
         this.isCanceled = false;
     }
@@ -43,8 +43,8 @@ public class TaskMeta {
         return isCanceled;
     }
 
-    public boolean isRunInCore() {
-        return runInCore;
+    public boolean isSynchronous() {
+        return synchronous;
     }
 
     public STEMPlugin getOwner() {

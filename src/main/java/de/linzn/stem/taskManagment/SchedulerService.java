@@ -190,7 +190,7 @@ public class SchedulerService {
     }
 
     private void pushCoreRunner(TaskMeta taskMeta, Runnable task) {
-        if (taskMeta.runInCore) {
+        if (taskMeta.synchronous) {
             this.stemKernel.queueTask(new Pair<>(taskMeta, task));
         } else {
             Runnable asyncTask = () -> executorService.submit(task);

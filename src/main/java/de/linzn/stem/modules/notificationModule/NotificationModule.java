@@ -24,23 +24,22 @@ import java.util.Date;
 import java.util.LinkedList;
 
 public class NotificationModule extends AbstractModule {
-    private final STEMApp stemApp;
     private final LinkedList<NotificationContainer> notificationQueue;
     private final NotificationArchive notificationArchive;
     private boolean moduleAlive;
 
 
     public NotificationModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.notificationQueue = new LinkedList<>();
         this.notificationArchive = new NotificationArchive();
         this.moduleAlive = true;
-        this.stemApp.getEventModule().getStemEventBus().register(new NotificationListener());
+        this.getStemApp().getEventModule().getStemEventBus().register(new NotificationListener());
         startNotificationModule();
     }
 
     public void pushNotification(String message) {
-        STEMPlugin stemPlugin = this.stemApp.getScheduler().getDefaultSystemPlugin();
+        STEMPlugin stemPlugin = this.getStemApp().getScheduler().getDefaultSystemPlugin();
         pushNotification(message, NotificationPriority.DEFAULT, stemPlugin);
     }
 
@@ -49,7 +48,7 @@ public class NotificationModule extends AbstractModule {
     }
 
     public void pushNotification(String message, NotificationPriority notificationPriority) {
-        STEMPlugin stemPlugin = this.stemApp.getScheduler().getDefaultSystemPlugin();
+        STEMPlugin stemPlugin = this.getStemApp().getScheduler().getDefaultSystemPlugin();
         pushNotification(message, notificationPriority, stemPlugin);
     }
 
@@ -64,7 +63,7 @@ public class NotificationModule extends AbstractModule {
     }
 
     private void startNotificationModule() {
-        this.stemApp.getScheduler().runTask(this.getModulePlugin(), this::run);
+        this.getStemApp().getScheduler().runTask(this.getModulePlugin(), this::run);
     }
 
     public void stopNotificationModule() {

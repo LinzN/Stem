@@ -24,7 +24,6 @@ import java.io.File;
 
 public class MqttModule extends AbstractModule {
 
-    STEMApp stemApp;
     private FileConfiguration fileConfiguration;
     private String broker;
     private String clientId;
@@ -35,7 +34,7 @@ public class MqttModule extends AbstractModule {
 
 
     public MqttModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.initConfig();
         this.createClient();
     }
@@ -55,7 +54,7 @@ public class MqttModule extends AbstractModule {
 
             MqttMessage mqttMessage = new MqttMessage("Hello".getBytes());
             mqttMessage.setQos(2);
-            mqttClient.publish("stem-system/test", mqttMessage);
+            mqttClient.publish("stem/test", mqttMessage);
 
         } catch (MqttException e) {
             STEMApp.LOGGER.ERROR(e);
@@ -65,7 +64,7 @@ public class MqttModule extends AbstractModule {
     private void initConfig() {
         this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_mqtt.yml"));
         this.broker = this.fileConfiguration.getString("broker", "tcp://10.50.0.1:1883");
-        this.clientId = this.fileConfiguration.getString("clientId", "STEM-SYSTEM");
+        this.clientId = this.fileConfiguration.getString("clientId", "STEM");
         this.user = this.fileConfiguration.getString("user", "testuser");
         this.password = this.fileConfiguration.getString("password", "GeheimesPW");
         this.fileConfiguration.save();
@@ -76,7 +75,7 @@ public class MqttModule extends AbstractModule {
         try {
             MqttMessage mqttMessage = new MqttMessage("Bye".getBytes());
             mqttMessage.setQos(2);
-            mqttClient.publish("stem-system/test", mqttMessage);
+            mqttClient.publish("stem/test", mqttMessage);
 
             STEMApp.LOGGER.INFO("Disconnecting from IOBroker...");
             this.mqttClient.disconnect();

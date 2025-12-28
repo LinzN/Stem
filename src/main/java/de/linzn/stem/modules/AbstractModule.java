@@ -20,19 +20,25 @@ import de.linzn.stem.utils.JavaUtils;
 import java.io.File;
 
 public abstract class AbstractModule {
+    private final STEMApp stemApp;
     private STEMPlugin modulePlugin;
 
-    public AbstractModule() {
+    public AbstractModule(STEMApp stemApp) {
+        this.stemApp = stemApp;
         this.modulePlugin = this.setupModulePlugin(this.getClass().getSimpleName());
-        STEMApp.LOGGER.CORE("Load module " + this.modulePlugin.getPluginName());
+        STEMApp.LOGGER.CORE("Loading core module " + this.modulePlugin.getPluginName());
     }
 
     public STEMPlugin getModulePlugin() {
         return this.modulePlugin;
     }
 
+    public STEMApp getStemApp() {
+        return stemApp;
+    }
+
     public void shutdownModule() {
-        STEMApp.LOGGER.CORE("Unload module " + this.modulePlugin.getPluginName());
+        STEMApp.LOGGER.CORE("Unloading core module " + this.modulePlugin.getPluginName());
         this.onShutdown();
         STEMApp.getInstance().getCallBackService().unregisterCallbackListeners(this.modulePlugin);
         STEMApp.getInstance().getScheduler().cancelTasks(this.modulePlugin);

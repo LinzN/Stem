@@ -28,7 +28,6 @@ import java.util.*;
 public class PluginModule extends AbstractModule {
     private static final String pluginFileName = "plugin.yml";
     public static File pluginDirectory = new File("plugins");
-    private final STEMApp stemApp;
     private final UpdateCheck updateCheck;
     public String jenkinsURL;
     private PluginClassLoader pluginClassLoader;
@@ -36,7 +35,7 @@ public class PluginModule extends AbstractModule {
     private FileConfiguration fileConfiguration;
 
     public PluginModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.init();
         this.loadPlugins();
         this.initConfig();
@@ -54,7 +53,7 @@ public class PluginModule extends AbstractModule {
 
     private void initConfig() {
         this.fileConfiguration = YamlConfiguration.loadConfiguration(new File("module_plugins.yml"));
-        this.jenkinsURL = this.fileConfiguration.getString("jenkinsURL", "https://builds.app.stem-system.de");
+        this.jenkinsURL = this.fileConfiguration.getString("jenkinsURL", "https://builds.mirranet.de/");
         this.fileConfiguration.save();
     }
 
@@ -118,8 +117,8 @@ public class PluginModule extends AbstractModule {
         STEMApp.LOGGER.INFO("Disable plugin: " + plugin.getDescription());
         try {
             plugin.onDisable();
-            this.stemApp.getCallBackService().unregisterCallbackListeners(plugin);
-            this.stemApp.getScheduler().cancelTasks(plugin);
+            this.getStemApp().getCallBackService().unregisterCallbackListeners(plugin);
+            this.getStemApp().getScheduler().cancelTasks(plugin);
         } catch (Exception e) {
             STEMApp.LOGGER.ERROR(e);
             return false;

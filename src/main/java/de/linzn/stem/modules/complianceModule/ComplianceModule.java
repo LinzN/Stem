@@ -26,13 +26,12 @@ import java.util.List;
 public class ComplianceModule extends AbstractModule {
 
     public static File complianceDirectory = new File("compliance");
-    private final STEMApp stemApp;
     private FileConfiguration fileConfiguration;
     private ArrayList<ComplianceCheck> complianceChecks;
 
 
     public ComplianceModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.init();
         this.initConfig();
         this.readDefaultComplianceChecks();
@@ -81,7 +80,7 @@ public class ComplianceModule extends AbstractModule {
         String cronTime = complianceConfig.getString("cronTime");
         List<Integer> runningCodes = complianceConfig.getIntegerList("runningCodes");
         List<Integer> errorCodes = complianceConfig.getIntegerList("errorCodes");
-        ComplianceCheck complianceCheck = new ComplianceCheck(complianceID, script, cronTime, runningCodes, errorCodes, stemPlugin, this.stemApp);
+        ComplianceCheck complianceCheck = new ComplianceCheck(complianceID, script, cronTime, runningCodes, errorCodes, stemPlugin, this.getStemApp());
         complianceCheck.register();
         STEMApp.LOGGER.CONFIG("Register complianceCheck for " + complianceID);
         this.complianceChecks.add(complianceCheck);

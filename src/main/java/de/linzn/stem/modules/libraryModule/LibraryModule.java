@@ -21,14 +21,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
 public class LibraryModule extends AbstractModule {
-    // Define variables
-    private final STEMApp stemApp;
-
 
     /* Create class instance */
     public LibraryModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
-        this.stemApp.setClassLoader(new StemClassLoader());
+        super(stemApp);
+        this.getStemApp().setClassLoader(new StemClassLoader());
 
         try {
             loadJarFiles();
@@ -60,6 +57,6 @@ public class LibraryModule extends AbstractModule {
 
     @Override
     public void onShutdown() {
-        this.stemApp.setClassLoader(null);
+        this.getStemApp().setClassLoader(null);
     }
 }

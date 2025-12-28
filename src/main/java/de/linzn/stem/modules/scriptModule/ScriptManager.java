@@ -30,12 +30,11 @@ import java.util.List;
 public class ScriptManager extends AbstractModule {
 
     public static File scriptDirectory = new File("scripts");
-    private final STEMApp stemApp;
     ArrayList<StemScript> stemScripts;
     private FileConfiguration fileConfiguration;
 
     public ScriptManager(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.stemScripts = new ArrayList<>();
         this.init();
         this.initConfig();

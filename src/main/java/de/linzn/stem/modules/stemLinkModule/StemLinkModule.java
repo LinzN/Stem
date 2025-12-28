@@ -37,6 +37,7 @@ public class StemLinkModule extends AbstractModule {
     private byte[] vector16B;
 
     public StemLinkModule(STEMApp stemApp) {
+        super(stemApp);
         this.initConfig();
         CryptContainer cryptContainer = new CryptContainer(this.cryptAESKey, this.vector16B);
         this.stemLinkServer = new StemLinkServer(this.socketHost, this.socketPort, new StemLinkWrapper(this), cryptContainer);

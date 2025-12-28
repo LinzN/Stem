@@ -19,7 +19,7 @@ public class StopCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        STEMApp.LOGGER.LIVE("Stopping STEM-System...");
+        STEMApp.LOGGER.LIVE("Stopping STEM...");
         STEMApp.getInstance().shutdown();
         return true;
     }

@@ -21,13 +21,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CommandModule extends AbstractModule implements InputHandler {
-    private final STEMApp stemApp;
     private final CommandSetup commandSetup;
 
     public CommandModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         STEMApp.logSystem.registerInputHandler(this);
-        this.commandSetup = new CommandSetup(this.stemApp);
+        this.commandSetup = new CommandSetup(this.getStemApp());
     }
 
     @Override

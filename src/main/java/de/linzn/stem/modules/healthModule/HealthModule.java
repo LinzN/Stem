@@ -25,14 +25,13 @@ import java.util.LinkedList;
 import java.util.concurrent.TimeUnit;
 
 public class HealthModule extends AbstractModule {
-    private final STEMApp stemApp;
     private final LinkedList<HealthCheck> healthChecks;
     private InformationBlock informationBlock;
     private boolean blocked = false;
 
 
     public HealthModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.healthChecks = new LinkedList<>();
         this.startHealthModule();
         this.registerHealthCheck(new DummyHealthCheck());
@@ -43,8 +42,8 @@ public class HealthModule extends AbstractModule {
     }
 
     private void startHealthModule() {
-        this.stemApp.getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2, TimeUnit.MINUTES);
-        this.stemApp.getScheduler().runAsCronTask(this.getModulePlugin(), this::run, this.stemApp.getConfiguration().healthCheckCronjob);
+        this.getStemApp().getScheduler().runTaskLater(this.getModulePlugin(), this::run, 2, TimeUnit.MINUTES);
+        this.getStemApp().getScheduler().runAsCronTask(this.getModulePlugin(), this::run, this.getStemApp().getConfiguration().healthCheckCronjob);
     }
 
 
@@ -112,7 +111,7 @@ public class HealthModule extends AbstractModule {
     }
 
     public void runCheckManual() {
-        this.stemApp.getScheduler().runTask(this.getModulePlugin(), this::run);
+        this.getStemApp().getScheduler().runTask(this.getModulePlugin(), this::run);
     }
 
     public ArrayList<HealthCheck> getHealthChecks() {

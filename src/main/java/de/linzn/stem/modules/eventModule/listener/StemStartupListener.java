@@ -21,6 +21,6 @@ public class StemStartupListener {
 
     @StemEventHandler(priority = StemEventPriority.NORMAL)
     public void onStartupTree(StemStartupEvent event) {
-        STEMApp.LOGGER.CORE("STEM-System startup finished in " + event.getStartupTime() + " ms.");
+        STEMApp.LOGGER.CORE("STEM startup finished in " + event.getStartupTime() + " ms.");
     }
 }

@@ -19,11 +19,10 @@ import de.linzn.stem.modules.eventModule.listener.StemStartupListener;
 
 public class EventModule extends AbstractModule {
 
-    private STEMApp stemApp;
     private StemEventBus stemEventBus;
 
     public EventModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.stemEventBus = new StemEventBus();
         this.stemEventBus.register(new StemStartupListener());
     }

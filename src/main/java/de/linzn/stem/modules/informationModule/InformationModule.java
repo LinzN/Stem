@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 
 public class InformationModule extends AbstractModule {
-    private final STEMApp stemApp;
 
     private final HashMap<Long, InformationBlock> allInformationBlocks;
     private final LinkedList<InformationBlock> informationQueue;
@@ -37,20 +36,20 @@ public class InformationModule extends AbstractModule {
 
 
     public InformationModule(STEMApp stemApp) {
-        this.stemApp = stemApp;
+        super(stemApp);
         this.allInformationBlocks = new HashMap<>();
         this.informationQueue = new LinkedList<>();
         this.activeInformationBlocks = new LinkedList<>();
         this.archivedInformationBlocks = new LinkedList<>();
         this.notificationCount = 1;
         this.moduleAlive = true;
-        this.stemApp.getEventModule().getStemEventBus().register(new DefaultInformationBlockListener());
+        this.getStemApp().getEventModule().getStemEventBus().register(new DefaultInformationBlockListener());
         startNotificationModule();
     }
 
 
     private void startNotificationModule() {
-        this.stemApp.getScheduler().runTask(this.getModulePlugin(), this::run);
+        this.getStemApp().getScheduler().runTask(this.getModulePlugin(), this::run);
     }
 
     public void stopNotificationModule() {
@@ -71,7 +70,7 @@ public class InformationModule extends AbstractModule {
                 if (informationBlock != null) {
                     activeInformationBlocks.addLast(informationBlock);
                     InformationEvent informationEvent = new InformationEvent(informationBlock);
-                    this.stemApp.getEventModule().getStemEventBus().fireEvent(informationEvent);
+                    this.getStemApp().getEventModule().getStemEventBus().fireEvent(informationEvent);
                 }
             }
 

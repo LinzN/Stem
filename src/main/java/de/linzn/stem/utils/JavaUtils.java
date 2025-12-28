@@ -19,30 +19,42 @@ import java.util.Map;
 
 public class JavaUtils {
 
+    public static Map<String, Object> data;
+
     public static String getVersion() {
-        InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
-        Yaml yaml = new Yaml();
-        Map<String, Object> obj = yaml.load(inStream);
-        String kernelName = String.valueOf(obj.get("kernelName"));
-        String versionNumber = String.valueOf(obj.get("buildVersion"));
-        String buildNumber = String.valueOf(obj.get("buildNumber"));
-        String buildLabel = String.valueOf(obj.get("buildLabel"));
-        return kernelName.toUpperCase() + "_" + versionNumber + "." + buildNumber + "-" + buildLabel;
+        readConfig();
+        String kernelName = getKernelName();
+        String versionNumber = getBuildVersion();
+        String buildNumber = getBuildNumber();
+        String buildLabel = getBuildLabel();
+        return kernelName + "_" + versionNumber + "." + buildNumber + "-" + buildLabel;
     }
 
     public static String getKernelName() {
-        InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
-        Yaml yaml = new Yaml();
-        Map<String, Object> obj = yaml.load(inStream);
-        String kernelName = String.valueOf(obj.get("kernelName"));
-        return kernelName.toUpperCase();
+        readConfig();
+        return String.valueOf(data.get("kernelName")).toUpperCase();
+    }
+
+    public static String getBuildVersion() {
+        readConfig();
+        return String.valueOf(data.get("buildVersion")).toUpperCase();
     }
 
     public static String getBuildNumber() {
-        InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
-        Yaml yaml = new Yaml();
-        Map<String, Object> obj = yaml.load(inStream);
-        return String.valueOf(obj.get("buildNumber"));
+        readConfig();
+        return String.valueOf(data.get("buildNumber"));
     }
 
+    public static String getBuildLabel() {
+        readConfig();
+        return String.valueOf(data.get("buildLabel"));
+    }
+
+    public static void readConfig() {
+        if (data == null) {
+            InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
+            Yaml yaml = new Yaml();
+            data = yaml.load(inStream);
+        }
+    }
 }

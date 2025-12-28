@@ -40,7 +40,7 @@ public class StemKernel implements Runnable {
             if (!this.taskQueue.isEmpty()) {
                 try {
                     Pair<TaskMeta, Runnable> metaPair = this.taskQueue.take();
-                    STEMApp.LOGGER.DEBUG("Run task from owner: " + metaPair.getKey().owner.getPluginName() + " CoreTask: " + metaPair.getKey().runInCore + " taskId: " + metaPair.getKey().taskId);
+                    STEMApp.LOGGER.DEBUG("Run task from owner: " + metaPair.getKey().owner.getPluginName() + " Synchronous: " + metaPair.getKey().synchronous + " taskId: " + metaPair.getKey().taskId);
                     try {
                         metaPair.getValue().run();
                     } catch (Exception e) {
@@ -68,7 +68,7 @@ public class StemKernel implements Runnable {
     }
 
     public void endCore() {
-        STEMApp.LOGGER.CORE("Stopping StemKernel...");
+        STEMApp.LOGGER.CORE("Stopping kernel...");
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
     }
