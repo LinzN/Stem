@@ -14,8 +14,11 @@ package de.linzn.stem.modules.pluginModule;
 
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.simplyConfiguration.provider.YamlConfiguration;
+import de.linzn.stem.STEMApp;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
 public abstract class STEMPlugin {
     private String pluginName;
@@ -24,6 +27,7 @@ public abstract class STEMPlugin {
     private String buildNumber;
     private String classPath;
     private File dataFolder;
+    private File tempFolder;
     private FileConfiguration defaultConfig;
 
     void setUp(String pluginName, String version, String buildJobName, String buildNumber, String classPath) {
@@ -60,6 +64,19 @@ public abstract class STEMPlugin {
         return dataFolder;
     }
 
+    public File getTempFolder() {
+        if (this.tempFolder != null) {
+            return this.tempFolder;
+        }
+
+        try {
+            this.tempFolder = Files.createTempDirectory(STEMApp.getInstance().getTempFolder().toPath(), this.pluginName + "_").toFile();
+        } catch (IOException e) {
+            STEMApp.LOGGER.ERROR(e);
+        }
+        return this.tempFolder;
+    }
+
     public FileConfiguration getDefaultConfig() {
         return defaultConfig;
     }
@@ -71,4 +88,5 @@ public abstract class STEMPlugin {
     public String getBuildNumber() {
         return buildNumber;
     }
+
 }

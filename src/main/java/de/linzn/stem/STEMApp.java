@@ -36,6 +36,9 @@ import de.linzn.stem.taskManagment.StemKernel;
 import de.linzn.stem.utils.JavaUtils;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -49,6 +52,7 @@ public class STEMApp {
     private final StemKernel stemKernel;
     private final Date uptimeDate;
     private final long start_time;
+    private File tempFolder;
     private StemClassLoader stemClassLoader;
     private AppConfiguration appConfiguration;
     private EventModule eventModule;
@@ -77,6 +81,7 @@ public class STEMApp {
         main.start();
         this.uptimeDate = new Date();
         this.stemKernel.getSchedulerService().runTaskInCore(this.stemKernel.getSchedulerService().getDefaultSystemPlugin(), () -> {
+            createTempFolder();
             loadModules();
             logSystem.setLogLevel(this.appConfiguration.logLevel);
             int startupTime = (int) ((System.nanoTime() - start_time) / 1e6);
@@ -85,7 +90,7 @@ public class STEMApp {
         });
     }
 
-    public static void main(String[] args) {
+    static void main(String[] args) {
         logSystem = new LogSystem("STEM");
         logSystem.setFileLogger(new File("logs"));
         logSystem.setLogLevel(Level.ALL);
@@ -108,6 +113,27 @@ public class STEMApp {
 
     public static STEMApp getInstance() {
         return instance;
+    }
+
+    private void createTempFolder() {
+        this.tempFolder = new File("_temp");
+        if (this.tempFolder.exists()) {
+            this.tempFolder.delete();
+        }
+        tempFolder.mkdirs();
+        tempFolder.deleteOnExit();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Files.walk(tempFolder.toPath()).sorted(Comparator.reverseOrder()).forEach(path -> {
+                    try {
+                        Files.delete(path);
+                    } catch (IOException _) {
+                    }
+                });
+            } catch (Exception _) {
+            }
+        }));
     }
 
 
@@ -225,4 +251,7 @@ public class STEMApp {
         return this.uptimeDate;
     }
 
+    public File getTempFolder() {
+        return tempFolder;
+    }
 }
