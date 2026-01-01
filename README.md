@@ -1,3 +1,5 @@
+![MirraNET Logo](https://raw.githubusercontent.com/LinzN/Stem/refs/heads/master/src/main/resources/header-logo.png)
+
 # STEM
 > **S**mart **T**echnology Framework for **E**nhanced Home **M**anagement
 
