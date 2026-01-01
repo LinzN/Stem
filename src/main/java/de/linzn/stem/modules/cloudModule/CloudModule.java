@@ -82,7 +82,9 @@ public class CloudModule extends AbstractModule {
     @Override
     public void onShutdown() {
         try {
-            this.nextcloudConnector.shutdown();
+            if(this.isEnabled) {
+                this.nextcloudConnector.shutdown();
+            }
         } catch (IOException e) {
             STEMApp.LOGGER.ERROR(e);
         }
