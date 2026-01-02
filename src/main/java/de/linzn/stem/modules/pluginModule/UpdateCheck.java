@@ -43,7 +43,7 @@ public class UpdateCheck {
         for(AvailableBuild availableBuild : this.availableUpdates){
             if(!availableBuild.locked()){
                 if(availableBuild.update()){
-                    STEMApp.LOGGER.INFO("Plugin #" + availableBuild.getStemPlugin().getPluginName()+ " updated to newest version! Please reboot STEM Framework!");
+                    STEMApp.LOGGER.CONFIG("Plugin #" + availableBuild.getStemPlugin().getPluginName()+ " updated to newest version! Please reboot STEM Framework!");
                 } else {
                     STEMApp.LOGGER.ERROR("Plugin #" + availableBuild.getStemPlugin().getPluginName()+ " updated failed!");
                 }
@@ -62,7 +62,7 @@ public class UpdateCheck {
             availableBuild.check();
             if(availableBuild.hasUpdateAvailable()){
                 this.availableUpdates.add(availableBuild);
-                STEMApp.LOGGER.INFO("There is a new build #" + availableBuild.getUpdateAvailableBuildId() + " available for STEM Framework");
+                STEMApp.LOGGER.CONFIG("There is a new build #" + availableBuild.getUpdateAvailableBuildId() + " available for STEM Framework");
             } else {
                 STEMApp.LOGGER.INFO("The current build #" + availableBuild.getFileBuildId() + " for STEM Framework is up to date.");
             }
@@ -82,7 +82,7 @@ public class UpdateCheck {
                 availableBuild.check();
                 if(availableBuild.hasUpdateAvailable()){
                     this.availableUpdates.add(availableBuild);
-                    STEMApp.LOGGER.INFO("There is a new build #" + availableBuild.getUpdateAvailableBuildId() + " available for plugin " + stemPlugin.getPluginName());
+                    STEMApp.LOGGER.CONFIG("There is a new build #" + availableBuild.getUpdateAvailableBuildId() + " available for plugin " + stemPlugin.getPluginName());
                 } else {
                     STEMApp.LOGGER.INFO("The current build #" + availableBuild.getFileBuildId() + " for plugin " + stemPlugin.getPluginName() + " is up to date.");
                 }
