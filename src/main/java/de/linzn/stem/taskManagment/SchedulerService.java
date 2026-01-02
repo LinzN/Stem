@@ -21,6 +21,7 @@ import de.linzn.stem.utils.JavaUtils;
 import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -316,6 +317,11 @@ public class SchedulerService {
         @Override
         public String getBuildNumber() {
             return JavaUtils.getBuildNumber();
+        }
+
+        @Override
+        public Path getFilePath() {
+            return JavaUtils.getFilePath();
         }
     }
 

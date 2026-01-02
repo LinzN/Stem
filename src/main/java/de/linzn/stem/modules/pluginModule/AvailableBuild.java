@@ -13,13 +13,16 @@
 package de.linzn.stem.modules.pluginModule;
 
 import de.linzn.stem.STEMApp;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AvailableBuild {
     private final STEMPlugin stemPlugin;
@@ -27,6 +30,7 @@ public class AvailableBuild {
     private final boolean isCustom;
     private boolean updateAvailable;
     private int updateAvailableBuildId;
+    private AtomicBoolean locked;
 
     public AvailableBuild(STEMPlugin stemPlugin, PluginModule pluginModule) {
         this.stemPlugin = stemPlugin;
@@ -56,7 +60,33 @@ public class AvailableBuild {
     }
 
     public boolean update() {
-        return false;
+        if(this.locked == null || !this.locked.get()) {
+            JSONObject artifactData = this.getArtifactData(this.stemPlugin.getBuildJobName(), this.updateAvailableBuildId);
+
+            JSONArray artifacts = artifactData.getJSONArray("artifacts");
+            String baseUrl = artifactData.getString("url");
+
+            for (int i = 0; i < artifacts.length(); i++) {
+                JSONObject artifact = artifacts.getJSONObject(i);
+                String fileName = artifact.getString("fileName");
+                String relPath = artifact.getString("relativePath");
+                String downloadUrl = baseUrl + "artifact/" + relPath;
+
+                try {
+                    if (fileName.endsWith(".jar")) {
+                        downloadArtifact(downloadUrl, this.stemPlugin.getFilePath());
+                    } else if (fileName.equalsIgnoreCase("libraries.zip")) {
+                        downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), fileName).getAbsolutePath()));
+                    }
+                    locked = new AtomicBoolean(true);
+                } catch (IOException e) {
+                    locked = new AtomicBoolean(false);
+                    STEMApp.LOGGER.ERROR(e);
+                }
+            }
+            return this.locked.get();
+        }
+        return true;
     }
 
     public boolean isCustom() {
@@ -73,6 +103,17 @@ public class AvailableBuild {
 
     public String getFileBuildId() {
         return this.stemPlugin.getBuildNumber();
+    }
+
+    public boolean locked(){
+        if(this.locked != null){
+            return this.locked.get();
+        }
+        return false;
+    }
+
+    public STEMPlugin getStemPlugin(){
+        return stemPlugin;
     }
 
     private String getJenkinsBuiltRevision(String jobName, int jobId) {
@@ -122,5 +163,30 @@ public class AvailableBuild {
         } else {
             return 0;
         }
+    }
+
+    private void downloadArtifact(String artifactUrl, Path destination) throws IOException {
+        try (InputStream in = new URL(artifactUrl).openStream()) {
+            Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private JSONObject getArtifactData(String jobName, int jobId) {
+        JSONObject jsonObject = null;
+        try {
+            URL url = new URL(this.pluginModule.jenkinsURL + "/job/" + jobName + "/" + jobId + "/api/json?pretty=true");
+            InputStream input = url.openStream();
+            InputStreamReader isr = new InputStreamReader(input);
+            BufferedReader reader = new BufferedReader(isr);
+            StringBuilder json = new StringBuilder();
+            int c;
+            while ((c = reader.read()) != -1) {
+                json.append((char) c);
+            }
+            jsonObject = new JSONObject(json.toString());
+        } catch (IOException e) {
+            STEMApp.LOGGER.ERROR(e);
+        }
+        return jsonObject;
     }
 }

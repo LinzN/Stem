@@ -39,6 +39,20 @@ public class UpdateCheck {
         checkPluginUpdates();
     }
 
+    public void updateAvailableBuilds(){
+        for(AvailableBuild availableBuild : this.availableUpdates){
+            if(!availableBuild.locked()){
+                if(availableBuild.update()){
+                    STEMApp.LOGGER.INFO("Plugin #" + availableBuild.getStemPlugin().getPluginName()+ " updated to newest version! Please reboot STEM Framework!");
+                } else {
+                    STEMApp.LOGGER.ERROR("Plugin #" + availableBuild.getStemPlugin().getPluginName()+ " updated failed!");
+                }
+            } else {
+                STEMApp.LOGGER.WARNING("Plugin #" + availableBuild.getStemPlugin().getPluginName()+ " is locked. Pending reboot!");
+            }
+        }
+    }
+
     public void checkFrameworkUpdate() {
         STEMPlugin stemPlugin = STEMApp.getInstance().getScheduler().getDefaultSystemPlugin();
         AvailableBuild availableBuild = new AvailableBuild(stemPlugin, this.pluginModule);

@@ -52,6 +52,7 @@ public class CommandSetup {
         registerCommand("uptime", new UptimeCommand());
         registerCommand("healthcheck", new HealthCheckCommand());
         registerCommand("updatecheck", new UpdateCheckCommand());
+        registerCommand("upgrade", new UpgradeCommand());
         registerCommand("runscript", new RunScriptCommand());
     }
 
