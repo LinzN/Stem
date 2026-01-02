@@ -12,9 +12,13 @@
 
 package de.linzn.stem.utils;
 
+import de.linzn.stem.STEMApp;
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Map;
 
 public class JavaUtils {
@@ -56,5 +60,14 @@ public class JavaUtils {
             Yaml yaml = new Yaml();
             data = yaml.load(inStream);
         }
+    }
+
+    public static Path getFilePath() {
+        try {
+            return Paths.get(STEMApp.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException e) {
+            STEMApp.LOGGER.ERROR(e);
+        }
+        return null;
     }
 }
