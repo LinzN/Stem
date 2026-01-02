@@ -307,6 +307,16 @@ public class SchedulerService {
         public FileConfiguration getDefaultConfig() {
             return null;
         }
+
+        @Override
+        public String getBuildJobName() {
+            return "STEM";
+        }
+
+        @Override
+        public String getBuildNumber() {
+            return JavaUtils.getBuildNumber();
+        }
     }
 
 }
