@@ -34,10 +34,10 @@ public class PluginClassLoader extends URLClassLoader {
 
     public synchronized STEMPlugin addPluginFile(String pluginName, String classPath, String version, String buildJobName, String buildNumber, File jarFile) throws MalformedURLException {
         super.addURL(jarFile.toURI().toURL());
-        return initPlugin(pluginName, classPath, version, buildJobName, buildNumber);
+        return initPlugin(pluginName, classPath, version, buildJobName, buildNumber, jarFile.toPath());
     }
 
-    private STEMPlugin initPlugin(String pluginName, String classPath, String version, String buildJobName, String buildNumber) {
+    private STEMPlugin initPlugin(String pluginName, String classPath, String version, String buildJobName, String buildNumber, Path filePath) {
         STEMApp.LOGGER.INFO("Load plugin: " + pluginName);
         try {
             Class<?> jarClass;
@@ -55,7 +55,7 @@ public class PluginClassLoader extends URLClassLoader {
             }
 
             STEMPlugin plugin = pluginClass.getDeclaredConstructor().newInstance();
-            plugin.setUp(pluginName, version, buildJobName, buildNumber, classPath);
+            plugin.setUp(pluginName, version, buildJobName, buildNumber, classPath, filePath);
             this.loadPluginLibraryFiles(plugin);
             return plugin;
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {

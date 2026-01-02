@@ -19,6 +19,7 @@ import de.linzn.stem.STEMApp;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 public abstract class STEMPlugin {
     private String pluginName;
@@ -28,15 +29,17 @@ public abstract class STEMPlugin {
     private String classPath;
     private File dataFolder;
     private File tempFolder;
+    private Path filePath;
     private FileConfiguration defaultConfig;
 
-    void setUp(String pluginName, String version, String buildJobName, String buildNumber, String classPath) {
+    void setUp(String pluginName, String version, String buildJobName, String buildNumber, String classPath, Path filePath) {
         this.pluginName = pluginName;
         this.version = version;
         this.buildJobName = buildJobName;
         this.buildNumber = buildNumber;
         this.classPath = classPath;
         this.dataFolder = new File(PluginModule.pluginDirectory, pluginName);
+        this.filePath = filePath;
         this.defaultConfig = YamlConfiguration.loadConfiguration(new File(dataFolder, "config.yml"));
     }
 
@@ -89,4 +92,7 @@ public abstract class STEMPlugin {
         return buildNumber;
     }
 
+    public Path getFilePath() {
+        return filePath;
+    }
 }
