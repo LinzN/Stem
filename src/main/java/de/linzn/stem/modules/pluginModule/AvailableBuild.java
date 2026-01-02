@@ -48,11 +48,10 @@ public class AvailableBuild {
             String fileBuiltRevision = getJenkinsBuiltRevision(this.stemPlugin.getBuildJobName(), fileBuildId);
             String latestBuiltRevision = getJenkinsBuiltRevision(this.stemPlugin.getBuildJobName(), latestBuildId);
 
-            if (!fileBuiltRevision.equalsIgnoreCase(latestBuiltRevision) && fileBuildId < latestBuildId) {
+            if (!fileBuiltRevision.equalsIgnoreCase(latestBuiltRevision) && latestBuildId > fileBuildId) {
                 this.updateAvailable = true;
                 this.updateAvailableBuildId = latestBuildId;
-            }
-            {
+            } else {
                 this.updateAvailable = false;
                 this.updateAvailableBuildId = -1;
             }
