@@ -271,7 +271,8 @@ public class SchedulerService {
 
     public static class DefaultSTEMPlugin extends STEMPlugin {
 
-        private DefaultSTEMPlugin (){}
+        private DefaultSTEMPlugin() {
+        }
 
         @Override
         public void onEnable() {

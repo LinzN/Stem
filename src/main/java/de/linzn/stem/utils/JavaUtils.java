@@ -71,7 +71,7 @@ public class JavaUtils {
         return null;
     }
 
-    public static Path getRootPath(){
+    public static Path getRootPath() {
         try {
             return Paths.get(STEMApp.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
         } catch (URISyntaxException e) {

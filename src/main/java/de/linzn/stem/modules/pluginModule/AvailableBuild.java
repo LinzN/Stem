@@ -63,7 +63,7 @@ public class AvailableBuild {
 
     public boolean update() {
 
-        if(this.locked == null || !this.locked.get()) {
+        if (this.locked == null || !this.locked.get()) {
             JSONObject artifactData = this.getArtifactData(this.stemPlugin.getBuildJobName(), this.updateAvailableBuildId);
 
             JSONArray artifacts = artifactData.getJSONArray("artifacts");
@@ -79,7 +79,7 @@ public class AvailableBuild {
                     if (fileName.endsWith(".jar")) {
                         downloadArtifact(downloadUrl, this.stemPlugin.getFilePath());
                     } else if (fileName.equalsIgnoreCase("libraries.zip") || fileName.equalsIgnoreCase("coreDependencies.zip")) {
-                        if(this.isStemFramework){
+                        if (this.isStemFramework) {
                             downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), "core.zip").getAbsolutePath()));
                         } else {
                             downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), fileName).getAbsolutePath()));
@@ -112,14 +112,14 @@ public class AvailableBuild {
         return this.stemPlugin.getBuildNumber();
     }
 
-    public boolean locked(){
-        if(this.locked != null){
+    public boolean locked() {
+        if (this.locked != null) {
             return this.locked.get();
         }
         return false;
     }
 
-    public STEMPlugin getStemPlugin(){
+    public STEMPlugin getStemPlugin() {
         return stemPlugin;
     }
 

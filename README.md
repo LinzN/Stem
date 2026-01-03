@@ -1,9 +1,11 @@
 ![MirraNET Logo](https://raw.githubusercontent.com/LinzN/Stem/refs/heads/master/src/main/resources/header-logo.png)
 
 # STEM
+
 > **S**mart **T**echnology Framework for **E**nhanced Home **M**anagement
 
-**STEM** is the core smart home and network control framework by MirraNET — built for high-tech households, nerd lairs, makerspaces, and everyone who expects more from their tech stack.
+**STEM** is the core smart home and network control framework by MirraNET — built for high-tech households, nerd lairs,
+makerspaces, and everyone who expects more from their tech stack.
 
 Powered by **MIRRA**:
 > **M**ultifunctional **I**ntelligent **R**eal-time **R**esponsive **A**ssistant
