@@ -35,6 +35,7 @@ public class UpdateCheck {
     }
 
     public void checkForUpdates() {
+        this.availableUpdates.clear();
         checkFrameworkUpdate();
         checkPluginUpdates();
     }
@@ -53,7 +54,7 @@ public class UpdateCheck {
         }
     }
 
-    public void checkFrameworkUpdate() {
+    private void checkFrameworkUpdate() {
         STEMPlugin stemPlugin = STEMApp.getInstance().getScheduler().getDefaultSystemPlugin();
         AvailableBuild availableBuild = new AvailableBuild(stemPlugin, this.pluginModule);
         if (availableBuild.isCustom()){
@@ -69,8 +70,7 @@ public class UpdateCheck {
         }
     }
 
-    public void checkPluginUpdates() {
-        this.availableUpdates.clear();
+    private void checkPluginUpdates() {
         for (STEMPlugin stemPlugin : this.pluginModule.getLoadedPlugins())
         {
             STEMApp.LOGGER.INFO("Checking updates for plugin " + stemPlugin.getPluginName());
