@@ -91,8 +91,7 @@ public class JavaUtils {
                     }
                 }
             }
-            return file.delete();
         }
-        return false;
+        return file.delete();
     }
 }
