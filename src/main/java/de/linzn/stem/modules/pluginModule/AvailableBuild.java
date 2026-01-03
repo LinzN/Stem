@@ -85,10 +85,10 @@ public class AvailableBuild {
                         if (this.isStemFramework) {
                             Path zipFile = Paths.get(new File(this.stemPlugin.getTempFolder(), "core.zip").getAbsolutePath());
                             downloadArtifact(downloadUrl, zipFile);
-                            if(zipFile.toFile().exists()){
+                            if (zipFile.toFile().exists()) {
                                 Path rootPath = this.stemPlugin.getDataFolder().toPath();
                                 File oldCores = new File(rootPath.toFile(), "core");
-                                if(JavaUtils.deleteFolder(oldCores)) {
+                                if (JavaUtils.deleteFolder(oldCores)) {
                                     try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile))) {
                                         ZipEntry entry;
                                         while ((entry = zis.getNextEntry()) != null) {

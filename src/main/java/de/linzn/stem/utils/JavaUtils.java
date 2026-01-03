@@ -81,7 +81,7 @@ public class JavaUtils {
         return null;
     }
 
-    public static boolean deleteFolder(File file){
+    public static boolean deleteFolder(File file) {
         if (file.isDirectory()) {
             File[] files = file.listFiles();
             if (files != null) {
