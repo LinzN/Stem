@@ -21,6 +21,8 @@ import de.linzn.stem.utils.JavaUtils;
 import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -270,6 +272,7 @@ public class SchedulerService {
 
 
     public static class DefaultSTEMPlugin extends STEMPlugin {
+        private File tempFolder = null;
 
         private DefaultSTEMPlugin() {
         }
@@ -305,6 +308,19 @@ public class SchedulerService {
         @Override
         public File getDataFolder() {
             return JavaUtils.getRootPath().toFile();
+        }
+
+        @Override
+        public File getTempFolder() {
+            if (this.tempFolder != null) {
+                return this.tempFolder;
+            }
+            try {
+                this.tempFolder = Files.createTempDirectory(STEMApp.getInstance().getTempFolder().toPath(), this.getPluginName() + "_").toFile();
+            } catch (IOException e) {
+                STEMApp.LOGGER.ERROR(e);
+            }
+            return this.tempFolder;
         }
 
         @Override

@@ -14,6 +14,7 @@ package de.linzn.stem.modules.pluginModule;
 
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.taskManagment.SchedulerService;
+import de.linzn.stem.utils.JavaUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -24,6 +25,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 public class AvailableBuild {
     private final STEMPlugin stemPlugin;
@@ -80,7 +83,26 @@ public class AvailableBuild {
                         downloadArtifact(downloadUrl, this.stemPlugin.getFilePath());
                     } else if (fileName.equalsIgnoreCase("libraries.zip") || fileName.equalsIgnoreCase("coreDependencies.zip")) {
                         if (this.isStemFramework) {
-                            downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), "core.zip").getAbsolutePath()));
+                            Path zipFile = Paths.get(new File(this.stemPlugin.getTempFolder(), "core.zip").getAbsolutePath());
+                            downloadArtifact(downloadUrl, zipFile);
+                            if(zipFile.toFile().exists()){
+                                Path rootPath = this.stemPlugin.getDataFolder().toPath();
+                                File oldCores = new File(rootPath.toFile(), "core");
+                                if(JavaUtils.deleteFolder(oldCores)) {
+                                    try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile))) {
+                                        ZipEntry entry;
+                                        while ((entry = zis.getNextEntry()) != null) {
+                                            if (entry.isDirectory()) continue;
+                                            Path newFile = rootPath.resolve(entry.getName());
+                                            Files.createDirectories(newFile.getParent()).toFile();
+                                            STEMApp.LOGGER.INFO("Copy core library file " + newFile.toFile().getName() + " for STEM framework");
+                                            Files.copy(zis, newFile, StandardCopyOption.REPLACE_EXISTING);
+                                        }
+                                    }
+                                } else {
+                                    STEMApp.LOGGER.ERROR("Something went wrong while removing old core!");
+                                }
+                            }
                         } else {
                             downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), fileName).getAbsolutePath()));
                         }

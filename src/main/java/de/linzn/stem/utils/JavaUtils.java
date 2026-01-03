@@ -15,6 +15,7 @@ package de.linzn.stem.utils;
 import de.linzn.stem.STEMApp;
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -78,5 +79,20 @@ public class JavaUtils {
             STEMApp.LOGGER.ERROR(e);
         }
         return null;
+    }
+
+    public static boolean deleteFolder(File file){
+        if (file.isDirectory()) {
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File f : files) {
+                    if (!deleteFolder(f)) {
+                        return false;
+                    }
+                }
+            }
+            return file.delete();
+        }
+        return false;
     }
 }
