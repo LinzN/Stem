@@ -13,6 +13,7 @@
 package de.linzn.stem.modules.pluginModule;
 
 import de.linzn.stem.STEMApp;
+import de.linzn.stem.taskManagment.SchedulerService;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -31,11 +32,13 @@ public class AvailableBuild {
     private boolean updateAvailable;
     private int updateAvailableBuildId;
     private AtomicBoolean locked;
+    private boolean isStemFramework;
 
     public AvailableBuild(STEMPlugin stemPlugin, PluginModule pluginModule) {
         this.stemPlugin = stemPlugin;
         this.pluginModule = pluginModule;
         this.isCustom = this.stemPlugin.getBuildJobName().equalsIgnoreCase("CUSTOM") || this.stemPlugin.getBuildNumber().equalsIgnoreCase("SNAPSHOT") || this.stemPlugin.getBuildNumber().equalsIgnoreCase("IDEA");
+        this.isStemFramework = this.stemPlugin instanceof SchedulerService.DefaultSTEMPlugin;
         this.updateAvailable = false;
         this.updateAvailableBuildId = -1;
     }
@@ -59,6 +62,7 @@ public class AvailableBuild {
     }
 
     public boolean update() {
+
         if(this.locked == null || !this.locked.get()) {
             JSONObject artifactData = this.getArtifactData(this.stemPlugin.getBuildJobName(), this.updateAvailableBuildId);
 
@@ -74,8 +78,12 @@ public class AvailableBuild {
                 try {
                     if (fileName.endsWith(".jar")) {
                         downloadArtifact(downloadUrl, this.stemPlugin.getFilePath());
-                    } else if (fileName.equalsIgnoreCase("libraries.zip")) {
-                        downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), fileName).getAbsolutePath()));
+                    } else if (fileName.equalsIgnoreCase("libraries.zip") || fileName.equalsIgnoreCase("coreDependencies.zip")) {
+                        if(this.isStemFramework){
+                            downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), "core.zip").getAbsolutePath()));
+                        } else {
+                            downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), fileName).getAbsolutePath()));
+                        }
                     }
                     locked = new AtomicBoolean(true);
                 } catch (IOException e) {

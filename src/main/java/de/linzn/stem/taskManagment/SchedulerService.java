@@ -269,7 +269,9 @@ public class SchedulerService {
     }
 
 
-    private class DefaultSTEMPlugin extends STEMPlugin {
+    public static class DefaultSTEMPlugin extends STEMPlugin {
+
+        private DefaultSTEMPlugin (){}
 
         @Override
         public void onEnable() {
@@ -301,7 +303,7 @@ public class SchedulerService {
 
         @Override
         public File getDataFolder() {
-            return null;
+            return JavaUtils.getRootPath().toFile();
         }
 
         @Override
@@ -323,6 +325,7 @@ public class SchedulerService {
         public Path getFilePath() {
             return JavaUtils.getFilePath();
         }
+
     }
 
 }
