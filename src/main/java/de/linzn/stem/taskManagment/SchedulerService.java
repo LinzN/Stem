@@ -14,6 +14,7 @@ package de.linzn.stem.taskManagment;
 
 
 import de.linzn.openJL.pairs.Pair;
+import de.linzn.openJL.system.FileSystem;
 import de.linzn.simplyConfiguration.FileConfiguration;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
@@ -22,6 +23,7 @@ import it.sauronsoftware.cron4j.Scheduler;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Calendar;
@@ -307,7 +309,12 @@ public class SchedulerService {
 
         @Override
         public File getDataFolder() {
-            return JavaUtils.getRootPath().toFile();
+            try {
+                return FileSystem.getFileDirectoryPath(STEMApp.class).toFile();
+            } catch (URISyntaxException e) {
+                STEMApp.LOGGER.ERROR(e);
+            }
+            return null;
         }
 
         @Override
@@ -340,7 +347,12 @@ public class SchedulerService {
 
         @Override
         public Path getFilePath() {
-            return JavaUtils.getFilePath();
+            try {
+                return FileSystem.getFilePath(STEMApp.class);
+            } catch (URISyntaxException e) {
+                STEMApp.LOGGER.ERROR(e);
+            }
+            return null;
         }
 
     }

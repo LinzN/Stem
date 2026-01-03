@@ -12,9 +12,9 @@
 
 package de.linzn.stem.modules.pluginModule;
 
+import de.linzn.openJL.system.FileSystem;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.taskManagment.SchedulerService;
-import de.linzn.stem.utils.JavaUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -88,7 +88,7 @@ public class AvailableBuild {
                             if (zipFile.toFile().exists()) {
                                 Path rootPath = this.stemPlugin.getDataFolder().toPath();
                                 File oldCores = new File(rootPath.toFile(), "core");
-                                if (JavaUtils.deleteFolder(oldCores)) {
+                                if (FileSystem.deleteFolder(oldCores)) {
                                     try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile))) {
                                         ZipEntry entry;
                                         while ((entry = zis.getNextEntry()) != null) {

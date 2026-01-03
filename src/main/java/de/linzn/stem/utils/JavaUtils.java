@@ -12,14 +12,9 @@
 
 package de.linzn.stem.utils;
 
-import de.linzn.stem.STEMApp;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 
 public class JavaUtils {
@@ -61,37 +56,5 @@ public class JavaUtils {
             Yaml yaml = new Yaml();
             data = yaml.load(inStream);
         }
-    }
-
-    public static Path getFilePath() {
-        try {
-            return Paths.get(STEMApp.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-        } catch (URISyntaxException e) {
-            STEMApp.LOGGER.ERROR(e);
-        }
-        return null;
-    }
-
-    public static Path getRootPath() {
-        try {
-            return Paths.get(STEMApp.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getParent();
-        } catch (URISyntaxException e) {
-            STEMApp.LOGGER.ERROR(e);
-        }
-        return null;
-    }
-
-    public static boolean deleteFolder(File file) {
-        if (file.isDirectory()) {
-            File[] files = file.listFiles();
-            if (files != null) {
-                for (File f : files) {
-                    if (!deleteFolder(f)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        return file.delete();
     }
 }
