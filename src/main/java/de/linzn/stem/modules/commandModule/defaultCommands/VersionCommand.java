@@ -16,9 +16,6 @@ import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.commandModule.ICommand;
 import de.linzn.stem.utils.JavaUtils;
 
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-
 public class VersionCommand implements ICommand {
 
     @Override

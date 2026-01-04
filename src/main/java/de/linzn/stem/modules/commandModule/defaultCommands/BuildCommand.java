@@ -21,17 +21,17 @@ public class BuildCommand implements ICommand {
     public boolean executeTerminal(String[] args) {
         if (args.length > 0) {
             String command = args[0];
-            if(command.equalsIgnoreCase("update")){
+            if (command.equalsIgnoreCase("update")) {
                 STEMApp.LOGGER.INFO("Starting to check for available builds on MirraNET CI Server....");
-                if(STEMApp.getInstance().getPluginModule().getUpdateCheck().checkForUpdates()){
+                if (STEMApp.getInstance().getPluginModule().getUpdateCheck().checkForUpdates()) {
                     STEMApp.LOGGER.INFO("There are new builds available. To upgrade do 'build upgrade'. This will trigger a restart of the STEM Framework after upgrade!");
                 }
                 STEMApp.LOGGER.INFO("Check done");
-            } else if(command.equalsIgnoreCase("upgrade")){
+            } else if (command.equalsIgnoreCase("upgrade")) {
                 STEMApp.LOGGER.INFO("Starting to applying new builds for plugins and framework....");
                 STEMApp.LOGGER.INFO("If there are new available builds to apply the STEM Framework will restart after upgrade!");
                 int upgraded = STEMApp.getInstance().getPluginModule().getUpdateCheck().upgradeAvailableBuilds();
-                if(upgraded > 0){
+                if (upgraded > 0) {
                     STEMApp.LOGGER.INFO("Builds upgraded: " + upgraded);
                     STEMApp.LOGGER.INFO("Restart pending!");
                 } else {
