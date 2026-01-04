@@ -24,7 +24,7 @@ public class CommandSetup {
     public CommandSetup(STEMApp stemApp) {
         this.stemApp = stemApp;
         this.terminalExecutes = new TreeMap<>();
-        this.initialTerminalExecudes();
+        this.initialTerminalExecutes();
     }
 
     public void runCommand(String command, String[] args) {
@@ -41,9 +41,10 @@ public class CommandSetup {
         });
     }
 
-    private void initialTerminalExecudes() {
+    private void initialTerminalExecutes() {
         registerCommand("stop", new StopCommand());
         registerCommand("loadplugin", new LoadPluginCommand());
+        registerCommand("reboot", new RebootCommand());
         registerCommand("plugins", new PluginsCommand());
         registerCommand("push", new PushCommand());
         registerCommand("help", new HelpCommand());

@@ -14,6 +14,9 @@ package de.linzn.stem.modules.commandModule.defaultCommands;
 
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.commandModule.ICommand;
+import de.linzn.stem.taskManagment.operations.defaultOperations.StemRestartOperation;
+
+import java.util.concurrent.TimeUnit;
 
 public class BuildCommand implements ICommand {
 
@@ -34,6 +37,8 @@ public class BuildCommand implements ICommand {
                 if (upgraded > 0) {
                     STEMApp.LOGGER.INFO("Builds upgraded: " + upgraded);
                     STEMApp.LOGGER.INFO("Restart pending!");
+                    STEMApp.LOGGER.CORE("Stem framework will reboot in 10 seconds!");
+                    STEMApp.getInstance().getScheduler().runTaskLater(STEMApp.getInstance().getScheduler().getDefaultSystemPlugin(), new StemRestartOperation(), 10, TimeUnit.SECONDS);
                 } else {
                     STEMApp.LOGGER.WARNING("There was no available builds to upgrade! Please run 'build update' first before upgrading!");
                 }
