@@ -14,14 +14,17 @@ package de.linzn.stem.modules.commandModule.defaultCommands;
 
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.commandModule.ICommand;
+import de.linzn.stem.utils.JavaUtils;
 
-public class UpgradeCommand implements ICommand {
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+public class VersionCommand implements ICommand {
 
     @Override
     public boolean executeTerminal(String[] args) {
-        STEMApp.LOGGER.INFO("Starting to Upgrade plugins and framework!");
-        STEMApp.getInstance().getPluginModule().getUpdateCheck().updateAvailableBuilds();
-        STEMApp.LOGGER.INFO("Upgrade done!");
+        String version = JavaUtils.getVersion();
+        STEMApp.LOGGER.LIVE("Version: " + version);
         return true;
     }
 

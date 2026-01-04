@@ -26,43 +26,22 @@ public class UpdateCheck {
         this.availableUpdates = new HashSet<>();
     }
 
-    public void checkForUpdates() {
+    public boolean checkForUpdates() {
         this.availableUpdates.clear();
-        checkFrameworkUpdate();
-        checkPluginUpdates();
-    }
-
-    public void updateAvailableBuilds() {
-        for (AvailableBuild availableBuild : this.availableUpdates) {
-            if (!availableBuild.locked()) {
-                if (availableBuild.update()) {
-                    STEMApp.LOGGER.CONFIG("Plugin #" + availableBuild.getStemPlugin().getPluginName() + " updated to newest version! Please reboot STEM Framework!");
-                } else {
-                    STEMApp.LOGGER.ERROR("Plugin #" + availableBuild.getStemPlugin().getPluginName() + " updated failed!");
-                }
-            } else {
-                STEMApp.LOGGER.WARNING("Plugin #" + availableBuild.getStemPlugin().getPluginName() + " is locked. Pending reboot!");
-            }
-        }
-    }
-
-    private void checkFrameworkUpdate() {
-        STEMPlugin stemPlugin = STEMApp.getInstance().getScheduler().getDefaultSystemPlugin();
-        AvailableBuild availableBuild = new AvailableBuild(stemPlugin, this.pluginModule);
-        if (availableBuild.isCustom()) {
+        STEMPlugin stemDefaultPlugin = STEMApp.getInstance().getScheduler().getDefaultSystemPlugin();
+        AvailableBuild availableFrameworkBuild = new AvailableBuild(stemDefaultPlugin, this.pluginModule);
+        if (availableFrameworkBuild.isCustom()) {
             STEMApp.LOGGER.WARNING("STEM Framework is running a custom build! No update check available!");
         } else {
-            availableBuild.check();
-            if (availableBuild.hasUpdateAvailable()) {
-                this.availableUpdates.add(availableBuild);
-                STEMApp.LOGGER.CONFIG("There is a new build #" + availableBuild.getUpdateAvailableBuildId() + " available for STEM Framework");
+            availableFrameworkBuild.check();
+            if (availableFrameworkBuild.hasUpdateAvailable()) {
+                this.availableUpdates.add(availableFrameworkBuild);
+                STEMApp.LOGGER.CONFIG("There is a new build #" + availableFrameworkBuild.getUpdateAvailableBuildId() + " available for STEM Framework");
             } else {
-                STEMApp.LOGGER.INFO("The current build #" + availableBuild.getFileBuildId() + " for STEM Framework is up to date.");
+                STEMApp.LOGGER.INFO("The current build #" + availableFrameworkBuild.getFileBuildId() + " for STEM Framework is up to date.");
             }
         }
-    }
 
-    private void checkPluginUpdates() {
         for (STEMPlugin stemPlugin : this.pluginModule.getLoadedPlugins()) {
             STEMApp.LOGGER.INFO("Checking updates for plugin " + stemPlugin.getPluginName());
 
@@ -79,5 +58,23 @@ public class UpdateCheck {
                 }
             }
         }
+        return !this.availableUpdates.isEmpty();
+    }
+
+    public int upgradeAvailableBuilds() {
+        int updatesDone = 0;
+        for (AvailableBuild availableBuild : this.availableUpdates) {
+            if (!availableBuild.locked()) {
+                if (availableBuild.update()) {
+                    STEMApp.LOGGER.CONFIG("Plugin #" + availableBuild.getStemPlugin().getPluginName() + " updated to newest version! Please reboot STEM Framework!");
+                    updatesDone++;
+                } else {
+                    STEMApp.LOGGER.ERROR("Plugin #" + availableBuild.getStemPlugin().getPluginName() + " updated failed!");
+                }
+            } else {
+                STEMApp.LOGGER.WARNING("Plugin #" + availableBuild.getStemPlugin().getPluginName() + " is locked. Pending reboot!");
+            }
+        }
+        return updatesDone;
     }
 }
