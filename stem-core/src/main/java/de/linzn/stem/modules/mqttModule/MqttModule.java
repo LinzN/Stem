@@ -35,6 +35,8 @@ import java.util.concurrent.*;
  *     <li>Several listeners can subscribe to the same topic; each listener is tied to an owner plugin.</li>
  *     <li>Messages are handed to listeners on a separate, ordered dispatch thread, so slow listeners never block
  *     the Paho network thread and a failing listener can not drop the connection.</li>
+ *     <li>The broker sends retained messages only once per subscription. They are cached per topic filter and replayed
+ *     to every listener that subscribes later to an already subscribed filter, so all listeners see the same state.</li>
  * </ul>
  */
 public class MqttModule extends AbstractModule {
@@ -43,6 +45,8 @@ public class MqttModule extends AbstractModule {
 
     /* topic filter -> listeners */
     private final ConcurrentHashMap<String, CopyOnWriteArrayList<Subscription>> subscriptions = new ConcurrentHashMap<>();
+    /* topic filter -> (topic -> last retained message); only touched on the dispatch thread */
+    private final ConcurrentHashMap<String, ConcurrentHashMap<String, MqttMessage>> retainedMessages = new ConcurrentHashMap<>();
     private final ExecutorService dispatcher = Executors.newSingleThreadExecutor(Thread.ofVirtual().name("STEM-MQTT-Dispatch").factory());
     private final Object connectLock = new Object();
     private FileConfiguration fileConfiguration;
@@ -143,6 +147,7 @@ public class MqttModule extends AbstractModule {
             }
         }
         this.subscriptions.clear();
+        this.retainedMessages.clear();
         this.dispatcher.shutdownNow();
     }
 
@@ -192,18 +197,77 @@ public class MqttModule extends AbstractModule {
             return false;
         }
         boolean[] firstForTopic = {false};
+        Subscription subscription = new Subscription(iMqttMessageListener, owner);
         this.subscriptions.compute(topic, (_, list) -> {
             if (list == null) {
                 list = new CopyOnWriteArrayList<>();
                 firstForTopic[0] = true;
             }
-            list.add(new Subscription(iMqttMessageListener, owner));
+            list.add(subscription);
             return list;
         });
         if (firstForTopic[0]) {
             return this.subscribeAtBroker(topic);
         }
+        /* the broker does not send retained messages again for an existing subscription */
+        this.replayRetained(topic, subscription);
         return true;
+    }
+
+    /**
+     * Hands the cached retained messages of a topic filter to a listener that subscribed later. Runs on the
+     * dispatch thread and reads the cache when it runs, so a newer message can never be overwritten by an older one.
+     */
+    private void replayRetained(String topicFilter, Subscription subscription) {
+        try {
+            this.dispatcher.execute(() -> {
+                Map<String, MqttMessage> retained = this.retainedMessages.get(topicFilter);
+                List<Subscription> list = this.subscriptions.get(topicFilter);
+                if (retained == null || list == null || !list.contains(subscription)) {
+                    return;
+                }
+                for (Map.Entry<String, MqttMessage> entry : retained.entrySet()) {
+                    deliver(subscription, entry.getKey(), entry.getValue());
+                }
+            });
+        } catch (RejectedExecutionException ignored) {
+            /* module is shutting down */
+        }
+    }
+
+    /* dispatch thread only */
+    private void rememberRetained(String topicFilter, String topic, MqttMessage message) {
+        ConcurrentHashMap<String, MqttMessage> retained = this.retainedMessages.get(topicFilter);
+        boolean known = retained != null && retained.containsKey(topic);
+        if (!message.isRetained() && !known) {
+            return;
+        }
+        if (message.getPayload().length == 0) {
+            /* an empty retained message deletes the retained value at the broker */
+            if (retained != null) {
+                retained.remove(topic);
+            }
+            return;
+        }
+        if (!this.subscriptions.containsKey(topicFilter)) {
+            return;
+        }
+        /* live updates of a retained topic arrive without the retained flag but replace the state */
+        MqttMessage copy = new MqttMessage(message.getPayload());
+        copy.setQos(message.getQos());
+        copy.setRetained(true);
+        this.retainedMessages.computeIfAbsent(topicFilter, _ -> new ConcurrentHashMap<>()).put(topic, copy);
+    }
+
+    private static void deliver(Subscription subscription, String topic, MqttMessage message) {
+        try {
+            subscription.listener.messageArrived(topic, message);
+        } catch (Throwable throwable) {
+            STEMApp.LOGGER.ERROR("Error in MQTT listener for " + topic + ": " + throwable);
+            if (throwable instanceof Exception exception) {
+                STEMApp.LOGGER.ERROR(exception);
+            }
+        }
     }
 
     private boolean subscribeAtBroker(String topic) {
@@ -246,6 +310,7 @@ public class MqttModule extends AbstractModule {
      */
     public void unsubscribe(String topic) {
         if (this.subscriptions.remove(topic) != null) {
+            this.retainedMessages.remove(topic);
             this.unsubscribeAtBroker(topic);
         }
     }
@@ -277,6 +342,7 @@ public class MqttModule extends AbstractModule {
             return list;
         });
         if (removed[0]) {
+            this.retainedMessages.remove(topic);
             this.unsubscribeAtBroker(topic);
         }
     }
@@ -326,19 +392,13 @@ public class MqttModule extends AbstractModule {
         public void messageArrived(String topic, MqttMessage message) {
             try {
                 dispatcher.execute(() -> {
+                    rememberRetained(this.topicFilter, topic, message);
                     List<Subscription> list = subscriptions.get(this.topicFilter);
                     if (list == null) {
                         return;
                     }
                     for (Subscription subscription : list) {
-                        try {
-                            subscription.listener.messageArrived(topic, message);
-                        } catch (Throwable throwable) {
-                            STEMApp.LOGGER.ERROR("Error in MQTT listener for " + topic + ": " + throwable);
-                            if (throwable instanceof Exception exception) {
-                                STEMApp.LOGGER.ERROR(exception);
-                            }
-                        }
+                        deliver(subscription, topic, message);
                     }
                 });
             } catch (RejectedExecutionException ignored) {
