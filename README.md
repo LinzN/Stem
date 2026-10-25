@@ -30,6 +30,20 @@ Powered by **MIRRA**:
 
 ---
 
+## 🧩 Plugin API
+
+Plugins compile against the `de.linzn:stem-api` artifact and access STEM through `getStemApi()`:
+
+```java
+getStemApi().scheduler().runRepeating(this::poll, 0, 30, TimeUnit.SECONDS);
+getStemApi().mqtt().subscribe("home/+/temperature", (topic, payload) -> { /* ... */ });
+```
+
+Everything registered through the API is removed automatically when a plugin is disabled.
+See [docs/PLUGIN_API.md](docs/PLUGIN_API.md) for details.
+
+---
+
 ## 🤖 Meet Mirra – Your Smart AI Butler
 
 > Mirra is the STEM assistant! She helps you control, analyze, maintain, and even drops a nerdy joke when you need it.

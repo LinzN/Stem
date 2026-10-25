@@ -1,0 +1,150 @@
+<!--
+  ~ Copyright (c) 2026 MirraNET, Niklas Linz. All rights reserved.
+  ~
+  ~ This file is part of the MirraNET project and is licensed under the
+  ~ GNU Lesser General Public License v3.0 (LGPLv3).
+  ~
+  ~ You may use, distribute and modify this code under the terms
+  ~ of the LGPLv3 license. You should have received a copy of the
+  ~ license along with this file. If not, see <https://www.gnu.org/licenses/lgpl-3.0.html>
+  ~ or contact: niklas.linz@mirranet.de
+  -->
+
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>de.linzn</groupId>
+        <artifactId>stem-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>stem</artifactId>
+    <packaging>jar</packaging>
+    <name>STEM</name>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>${project.basedir}/src/main/resources</directory>
+                <includes>
+                    <include>**</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>de.linzn.stem.STEMApp</mainClass>
+                            <classpathPrefix>core/dependencies</classpathPrefix>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <!-- package: the reactor-built stem-api jar must exist before it is copied -->
+                        <phase>package</phase>
+
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+
+                        <configuration>
+                            <outputDirectory>target/core/dependencies</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <archiveClasses>true</archiveClasses>
+                </configuration>
+            </plugin>
+
+        </plugins>
+    </build>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>stem-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-util</artifactId>
+            <version>12.1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>stemLink</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>openJL</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>33.5.0-jre</version>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20251224</version>
+        </dependency>
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.51.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>it.sauronsoftware.cron4j</groupId>
+            <artifactId>cron4j</artifactId>
+            <version>2.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>simplyConfiguration</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>simplyDatabase</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>de.linzn</groupId>
+            <artifactId>simplyLogger</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.paho</groupId>
+            <artifactId>org.eclipse.paho.client.mqttv3</artifactId>
+            <version>1.2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.aarboard.nextcloud</groupId>
+            <artifactId>nextcloud-api</artifactId>
+            <version>14.1.0</version>
+        </dependency>
+    </dependencies>
+</project>
