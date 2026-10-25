@@ -21,21 +21,24 @@ import de.linzn.stem.modules.scriptModule.exceptions.ScriptNotFoundException;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ScriptManager extends AbstractModule {
 
     public static File scriptDirectory = new File("scripts");
-    ArrayList<StemScript> stemScripts;
+    final Set<StemScript> stemScripts = ConcurrentHashMap.newKeySet();
     private FileConfiguration fileConfiguration;
 
     public ScriptManager(STEMApp stemApp) {
         super(stemApp);
-        this.stemScripts = new ArrayList<>();
         this.init();
         this.initConfig();
     }
@@ -53,7 +56,7 @@ public class ScriptManager extends AbstractModule {
 
     @Override
     public void onShutdown() {
-        for (StemScript stemScript : this.stemScripts) {
+        for (StemScript stemScript : List.copyOf(this.stemScripts)) {
             stemScript.destroy();
         }
         this.stemScripts.clear();
@@ -65,6 +68,9 @@ public class ScriptManager extends AbstractModule {
 
     public StemScript getStemScript(String subDirectoryName, String name) throws InvalidScriptException, ScriptNotFoundException {
         File subDirectory = new File(scriptDirectory, subDirectoryName);
+        if (!isInside(scriptDirectory, subDirectory)) {
+            throw new ScriptNotFoundException();
+        }
         return getStemScript(subDirectory, name);
     }
 
@@ -73,23 +79,37 @@ public class ScriptManager extends AbstractModule {
             throw new ScriptNotFoundException();
         }
 
+        if (name == null || name.isBlank()) {
+            throw new ScriptNotFoundException();
+        }
         File file = new File(directory, name + ".stemsh");
-        if (!file.exists()) {
+        /* Block names like "../../tmp/evil" that point outside the script directory */
+        if (!isInside(directory, file) || !file.isFile()) {
             throw new ScriptNotFoundException();
         }
         List<String> requiredParameters = this.checkValidScript(file);
         return new StemScript(this, file, requiredParameters);
     }
 
+    private static boolean isInside(File directory, File file) {
+        Path base = directory.toPath().toAbsolutePath().normalize();
+        Path target = file.toPath().toAbsolutePath().normalize();
+        return target.startsWith(base);
+    }
+
     private List<String> checkValidScript(File file) throws InvalidScriptException {
         List<String> requiredParameters = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+        try (BufferedReader reader = Files.newBufferedReader(file.toPath(), StandardCharsets.UTF_8)) {
             reader.readLine();
-            if (!reader.readLine().equalsIgnoreCase("#[STEM-SCRIPT]")) {
+            String marker = reader.readLine();
+            if (marker == null || !marker.trim().equalsIgnoreCase("#[STEM-SCRIPT]")) {
                 throw new InvalidScriptException();
             }
             String inputParameters = reader.readLine();
-
+            if (inputParameters == null) {
+                throw new InvalidScriptException();
+            }
+            inputParameters = inputParameters.trim();
             if (inputParameters.startsWith("#[") && inputParameters.endsWith("]")) {
                 String cleanedInput = inputParameters.substring(2, inputParameters.length() - 1);
                 if (!cleanedInput.isEmpty()) {
@@ -98,7 +118,8 @@ public class ScriptManager extends AbstractModule {
             } else {
                 throw new InvalidScriptException();
             }
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            throw new InvalidScriptException();
         }
         return requiredParameters;
     }

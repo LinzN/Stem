@@ -15,11 +15,10 @@ package de.linzn.stem.modules.scriptModule;
 import de.linzn.stem.modules.scriptModule.exceptions.ScriptException;
 import de.linzn.stem.modules.scriptModule.exceptions.ScriptNotStartedException;
 import de.linzn.stem.modules.scriptModule.exceptions.ScriptTimeoutException;
+import de.linzn.stem.utils.ProcessOutput;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,7 +34,8 @@ public class StemScript {
     private final Map<String, String> scriptParameters;
     private final List<String> output_lines;
     private final List<String> error_lines;
-    private Process process;
+    private volatile Process process;
+    private volatile ProcessOutput processOutput;
 
     public StemScript(ScriptManager scriptManager, File scriptFile, List<String> requiredParameters) {
         this.scriptManager = scriptManager;
@@ -55,30 +55,32 @@ public class StemScript {
     }
 
     public void start() throws ScriptException {
+        if (this.process != null) {
+            throw new ScriptException("Script already started!");
+        }
         for (String requiredParameter : requiredParameters) {
             if (!this.scriptParameters.containsKey(requiredParameter)) {
                 throw new ScriptException("Missing required parameter! : " + requiredParameter);
             }
         }
-
+        /* Arguments are passed as a list, never through a shell, so values can not inject commands */
         ArrayList<String> commandList = new ArrayList<>();
         commandList.add("/bin/bash");
         commandList.add(scriptFile.getAbsolutePath());
-
-        for (String scriptParameterName : this.scriptParameters.keySet()) {
-            commandList.add("-" + scriptParameterName);
-            commandList.add(this.scriptParameters.get(scriptParameterName));
+        for (Map.Entry<String, String> parameter : this.scriptParameters.entrySet()) {
+            commandList.add("-" + parameter.getKey());
+            commandList.add(parameter.getValue());
         }
 
         ProcessBuilder processBuilder = new ProcessBuilder(commandList);
         processBuilder.redirectErrorStream(true);
-
         try {
             this.process = processBuilder.start();
-            this.scriptManager.stemScripts.add(this);
         } catch (IOException e) {
             throw new ScriptException(e.getMessage());
         }
+        this.processOutput = ProcessOutput.drain(this.process, scriptFile.getName());
+        this.scriptManager.stemScripts.add(this);
     }
 
     public void await() throws ScriptNotStartedException, ScriptTimeoutException {
@@ -89,23 +91,30 @@ public class StemScript {
         if (this.process == null) {
             throw new ScriptNotStartedException();
         }
-
         try {
             if (process.waitFor(timeout, timeUnit)) {
-                this.scriptManager.stemScripts.remove(this);
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        output_lines.add(line);
-                    }
-                } catch (IOException ignored) {
-                }
+                this.collectOutput();
             } else {
-                process.destroyForcibly();
-                this.scriptManager.stemScripts.remove(this);
+                this.destroy();
                 throw new ScriptTimeoutException();
             }
-        } catch (InterruptedException ignored) {
+        } catch (InterruptedException e) {
+            this.destroy();
+            Thread.currentThread().interrupt();
+            throw new ScriptTimeoutException();
+        } finally {
+            this.scriptManager.stemScripts.remove(this);
+            ProcessOutput.closeStreams(this.process);
+        }
+    }
+
+    private void collectOutput() {
+        if (this.processOutput != null) {
+            this.processOutput.awaitCompletion(10, TimeUnit.SECONDS);
+            synchronized (this.output_lines) {
+                this.output_lines.clear();
+                this.output_lines.addAll(this.processOutput.getLines());
+            }
         }
     }
 
@@ -117,11 +126,27 @@ public class StemScript {
     }
 
     void destroy() {
-        this.process.destroyForcibly();
+        Process runningProcess = this.process;
+        if (runningProcess == null) {
+            return;
+        }
+        runningProcess.descendants().forEach(ProcessHandle::destroyForcibly);
+        runningProcess.destroyForcibly();
+        try {
+            runningProcess.waitFor(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        this.collectOutput();
     }
 
+    /**
+     * stdout and stderr are merged into the output lines; this list is kept for compatibility and stays empty.
+     */
     public List<String> getOutput_lines() {
-        return output_lines;
+        synchronized (this.output_lines) {
+            return new ArrayList<>(output_lines);
+        }
     }
 
     public List<String> getError_lines() {

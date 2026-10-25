@@ -21,7 +21,7 @@ import java.util.List;
 public abstract class HealthCheck {
 
     private final STEMPlugin stemPlugin;
-    private LinkedList<HealthCheckFeedback> healthCheckFeedbacks;
+    private volatile LinkedList<HealthCheckFeedback> healthCheckFeedbacks;
 
     private String name;
 
@@ -39,7 +39,10 @@ public abstract class HealthCheck {
     protected abstract void runCheckProgress();
 
     public void addHealthCheckFeedback(HealthCheckFeedback healthCheckFeedback) {
-        this.healthCheckFeedbacks.add(healthCheckFeedback);
+        LinkedList<HealthCheckFeedback> feedbacks = this.healthCheckFeedbacks;
+        synchronized (feedbacks) {
+            feedbacks.add(healthCheckFeedback);
+        }
     }
 
     public LinkedList<HealthCheckFeedback> getHealthCheckFeedbacks() {

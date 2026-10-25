@@ -35,7 +35,7 @@ public class ComplianceCheck extends AbstractCallback {
     private final STEMPlugin stemPlugin;
     private final STEMApp stemApp;
 
-    public JSONObject status;
+    public volatile JSONObject status;
 
     ComplianceCheck(String complianceID, String scriptName, String cronTime, List<Integer> runningCodes, List<Integer> errorCodes, STEMPlugin stemPlugin, STEMApp stemApp) {
         this.complianceID = complianceID;
@@ -84,6 +84,10 @@ public class ComplianceCheck extends AbstractCallback {
     @Override
     public CallbackTime getTime() {
         return new CallbackTime(this.cronTime);
+    }
+
+    public STEMPlugin getStemPlugin() {
+        return stemPlugin;
     }
 
     public String getComplianceID() {

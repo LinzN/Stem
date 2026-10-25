@@ -26,7 +26,7 @@ public class UptimeCommand implements ICommand {
 
         long diff = TimeUnit.MILLISECONDS.toSeconds(new Date().getTime() - date.getTime());
 
-        String uptime = String.format("%d days, %02d:%02d:%02d", (diff / (3600 * 24)), diff / 3600, (diff % 3600) / 60, (diff % 60));
+        String uptime = String.format("%d days, %02d:%02d:%02d", (diff / (3600 * 24)), (diff % (3600 * 24)) / 3600, (diff % 3600) / 60, (diff % 60));
         STEMApp.LOGGER.LIVE("Uptime: " + uptime);
         return true;
     }

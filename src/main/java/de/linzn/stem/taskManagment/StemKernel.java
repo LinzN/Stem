@@ -12,53 +12,60 @@
 
 package de.linzn.stem.taskManagment;
 
-
 import de.linzn.openJL.pairs.Pair;
 import de.linzn.stem.STEMApp;
-import org.eclipse.jetty.util.BlockingArrayQueue;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * The kernel executes core tasks one after another on a single thread.
+ * It blocks on the queue instead of polling, so a task starts as soon as it is queued.
+ */
 public class StemKernel implements Runnable {
 
     private final AtomicBoolean isAlive = new AtomicBoolean();
     private final SchedulerService schedulerService;
     private final CallbackService callbackService;
     private final BlockingQueue<Pair<TaskMeta, Runnable>> taskQueue;
+    private volatile Thread kernelThread;
 
     public StemKernel() {
+        this.taskQueue = new LinkedBlockingQueue<>();
         this.schedulerService = new SchedulerService(this);
         this.callbackService = new CallbackService();
-        this.taskQueue = new BlockingArrayQueue<>();
         isAlive.set(true);
     }
 
     public void run() {
+        this.kernelThread = Thread.currentThread();
         STEMApp.LOGGER.CORE("Starting kernel " + Thread.currentThread().getName());
         while (isAlive.get()) {
-            if (!this.taskQueue.isEmpty()) {
-                try {
-                    Pair<TaskMeta, Runnable> metaPair = this.taskQueue.take();
-                    STEMApp.LOGGER.DEBUG("Run task from owner: " + metaPair.getKey().owner.getPluginName() + " Synchronous: " + metaPair.getKey().synchronous + " taskId: " + metaPair.getKey().taskId);
-                    try {
-                        metaPair.getValue().run();
-                    } catch (Exception e) {
-                        STEMApp.LOGGER.ERROR(e);
-                    }
-
-                } catch (InterruptedException e) {
-                    STEMApp.LOGGER.ERROR(e);
-                }
+            Pair<TaskMeta, Runnable> metaPair;
+            try {
+                metaPair = this.taskQueue.take();
+            } catch (InterruptedException e) {
+                /* interrupted by endCore or spurious: re-check alive flag */
+                continue;
+            }
+            TaskMeta taskMeta = metaPair.getKey();
+            if (taskMeta != null) {
+                STEMApp.LOGGER.DEBUG("Run task from owner: " + taskMeta.owner.getPluginName() + " Synchronous: " + taskMeta.synchronous + " taskId: " + taskMeta.taskId);
             }
             try {
-                Thread.sleep(50);
-            } catch (InterruptedException ignored) {
+                metaPair.getValue().run();
+            } catch (Throwable throwable) {
+                SchedulerService.logThrowable(throwable);
             }
         }
+        STEMApp.LOGGER.CORE("Kernel stopped");
     }
 
     void queueTask(Pair<TaskMeta, Runnable> metaPair) {
+        if (!this.isAlive.get()) {
+            return;
+        }
         this.taskQueue.add(metaPair);
     }
 
@@ -71,6 +78,12 @@ public class StemKernel implements Runnable {
         STEMApp.LOGGER.CORE("Stopping kernel...");
         this.schedulerService.cancelAll();
         this.isAlive.set(false);
+        this.taskQueue.clear();
+        Thread thread = this.kernelThread;
+        /* Do not interrupt ourselves when shutdown runs as a core task */
+        if (thread != null && thread != Thread.currentThread()) {
+            thread.interrupt();
+        }
     }
 
     public CallbackService getCallbackService() {

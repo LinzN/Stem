@@ -26,9 +26,22 @@ public class StemLinkWrapper implements IStemLinkWrapper {
         this.stemLinkModule = stemLinkModule;
     }
 
+    /**
+     * StemLink uses this for its long-running accept and connection loops as well as for every received
+     * packet. Each runnable gets its own virtual thread, so connections never occupy a shared pool and
+     * any number of clients can be served.
+     */
     @Override
     public void runThread(Runnable runnable) {
-        STEMApp.getInstance().getScheduler().runTask(this.stemLinkModule.getModulePlugin(), runnable);
+        Thread.ofVirtual().name("STEM-StemLink-", 0).start(() -> {
+            try {
+                runnable.run();
+            } catch (Exception e) {
+                STEMApp.LOGGER.ERROR(e);
+            } catch (Throwable throwable) {
+                STEMApp.LOGGER.ERROR("Uncaught error in StemLink thread: " + throwable);
+            }
+        });
     }
 
     @Override

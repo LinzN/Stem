@@ -28,7 +28,7 @@ public abstract class STEMPlugin {
     private String buildNumber;
     private String classPath;
     private File dataFolder;
-    private File tempFolder;
+    private volatile File tempFolder;
     private Path filePath;
     private FileConfiguration defaultConfig;
 
@@ -67,7 +67,7 @@ public abstract class STEMPlugin {
         return dataFolder;
     }
 
-    public File getTempFolder() {
+    public synchronized File getTempFolder() {
         if (this.tempFolder != null) {
             return this.tempFolder;
         }

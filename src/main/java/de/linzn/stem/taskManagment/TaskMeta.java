@@ -15,24 +15,76 @@ package de.linzn.stem.taskManagment;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+
+/**
+ * Handle for a task registered in the {@link SchedulerService}.
+ * <p>
+ * Cancelling a task takes effect immediately: the pending trigger (timer future or cron entry)
+ * is removed and the task is dropped from the scheduler registry, so no reference to the owning
+ * plugin is retained after {@link #cancel()}.
+ */
 public class TaskMeta {
-    long taskId;
-    boolean isCanceled;
-    boolean synchronous;
-    STEMPlugin owner;
+    private static final AtomicLong ID_SEQUENCE = new AtomicLong(1);
+
+    final long taskId;
+    final boolean synchronous;
+    final STEMPlugin owner;
+    /* Guards against overlapping executions of the same repeating task */
+    final AtomicBoolean running = new AtomicBoolean(false);
+    volatile boolean isCanceled;
+    /* Removes the pending trigger (timer future, cron entry, ...) */
+    private volatile Runnable cancelHook;
+    /* Called once after cancel to drop the task from the scheduler registry */
+    private volatile Runnable unregisterHook;
 
     public TaskMeta(STEMPlugin owner, boolean synchronous) {
         this.owner = owner;
         this.synchronous = synchronous;
-        this.taskId = System.nanoTime();
+        this.taskId = ID_SEQUENCE.getAndIncrement();
         this.isCanceled = false;
+    }
+
+    void setHooks(Runnable cancelHook, Runnable unregisterHook) {
+        this.cancelHook = cancelHook;
+        this.unregisterHook = unregisterHook;
+        /* Cancel may have raced with scheduling */
+        if (this.isCanceled) {
+            runHooks();
+        }
+    }
+
+    void setCancelHook(Runnable cancelHook) {
+        this.cancelHook = cancelHook;
+        if (this.isCanceled) {
+            runHooks();
+        }
     }
 
     public void cancel() {
         if (!this.isCanceled) {
+            this.isCanceled = true;
             STEMApp.LOGGER.DEBUG("Cancel task " + taskId + " from plugin " + owner.getPluginName());
         }
-        this.isCanceled = true;
+        runHooks();
+    }
+
+    private void runHooks() {
+        Runnable hook = this.cancelHook;
+        this.cancelHook = null;
+        if (hook != null) {
+            try {
+                hook.run();
+            } catch (Exception e) {
+                STEMApp.LOGGER.ERROR(e);
+            }
+        }
+        Runnable unregister = this.unregisterHook;
+        this.unregisterHook = null;
+        if (unregister != null) {
+            unregister.run();
+        }
     }
 
     public long getTaskId() {

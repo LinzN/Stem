@@ -13,6 +13,7 @@
 package de.linzn.stem.modules.pluginModule;
 
 import de.linzn.stem.STEMApp;
+import de.linzn.stem.utils.SafeFiles;
 
 import java.io.File;
 import java.io.IOException;
@@ -20,13 +21,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class PluginClassLoader extends URLClassLoader {
+
+    static {
+        ClassLoader.registerAsParallelCapable();
+    }
 
     public PluginClassLoader(ClassLoader parentClassLoader) {
         super(new URL[]{}, parentClassLoader);
@@ -64,45 +65,43 @@ public class PluginClassLoader extends URLClassLoader {
             throw new InvalidPluginException("Abnormal plugin type");
         } catch (MalformedURLException e) {
             throw new InvalidPluginException("Plugin libraries not loaded");
+        } catch (LinkageError e) {
+            throw new InvalidPluginException("Plugin class could not be linked: " + e);
         }
     }
 
     public synchronized void loadPluginLibraryFiles(STEMPlugin plugin) throws MalformedURLException {
         File pluginDirectory = plugin.getDataFolder();
-        if (pluginDirectory.exists() && pluginDirectory.isDirectory()) {
-            File zipFile = new File(pluginDirectory, "libraries.zip");
-            if (zipFile.exists()) {
-                try {
-                    Path tempDir = plugin.getTempFolder().toPath();
-                    try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile.toPath()))) {
-                        ZipEntry entry;
-                        while ((entry = zis.getNextEntry()) != null) {
-                            if (entry.isDirectory()) continue;
-                            Path newFile = tempDir.resolve(entry.getName());
-                            Files.createDirectories(newFile.getParent()).toFile();
-                            STEMApp.LOGGER.INFO("Copy temporarily library file " + newFile.toFile().getName() + " for plugin: " + plugin.getPluginName());
-                            Files.copy(zis, newFile, StandardCopyOption.REPLACE_EXISTING);
-                        }
-                    }
-                    // loading jar files
-                    File dependencyDirectory = new File(tempDir.toFile(), "libraries");
-                    if (dependencyDirectory.exists() && dependencyDirectory.isDirectory()) {
-                        if (dependencyDirectory.exists() && dependencyDirectory.isDirectory()) {
-                            File[] files = dependencyDirectory.listFiles();
-                            for (File file : files) {
-                                if (file.isFile()) {
-                                    if (file.getName().endsWith(".jar")) {
-                                        STEMApp.LOGGER.INFO("Loading temporarily library " + file.getName() + " for plugin: " + plugin.getPluginName());
-                                        this.addURL(file.toURI().toURL());
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                } catch (IOException e) {
-                    STEMApp.LOGGER.ERROR(e);
-                }
+        if (pluginDirectory == null || !pluginDirectory.isDirectory()) {
+            return;
+        }
+        File zipFile = new File(pluginDirectory, "libraries.zip");
+        if (!zipFile.isFile()) {
+            return;
+        }
+        File tempFolder = plugin.getTempFolder();
+        if (tempFolder == null) {
+            STEMApp.LOGGER.ERROR("No temp folder available for plugin " + plugin.getPluginName());
+            return;
+        }
+        Path tempDir = tempFolder.toPath();
+        try {
+            SafeFiles.unzip(zipFile.toPath(), tempDir, newFile ->
+                    STEMApp.LOGGER.INFO("Copy temporarily library file " + newFile.getFileName() + " for plugin: " + plugin.getPluginName()));
+        } catch (IOException e) {
+            STEMApp.LOGGER.ERROR(e);
+            return;
+        }
+        // loading jar files
+        File dependencyDirectory = new File(tempDir.toFile(), "libraries");
+        File[] files = dependencyDirectory.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            if (file.isFile() && file.getName().endsWith(".jar")) {
+                STEMApp.LOGGER.INFO("Loading temporarily library " + file.getName() + " for plugin: " + plugin.getPluginName());
+                this.addURL(file.toURI().toURL());
             }
         }
     }

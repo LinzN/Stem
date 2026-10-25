@@ -21,27 +21,27 @@ import de.linzn.stem.modules.pluginModule.STEMPlugin;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 
 public class ComplianceModule extends AbstractModule {
 
     public static File complianceDirectory = new File("compliance");
+    private final CopyOnWriteArrayList<ComplianceCheck> complianceChecks;
     private FileConfiguration fileConfiguration;
-    private ArrayList<ComplianceCheck> complianceChecks;
-
 
     public ComplianceModule(STEMApp stemApp) {
         super(stemApp);
+        this.complianceChecks = new CopyOnWriteArrayList<>();
         this.init();
         this.initConfig();
         this.readDefaultComplianceChecks();
     }
 
     private void init() {
-        if (!complianceDirectory.exists()) {
-            complianceDirectory.mkdir();
+        if (!complianceDirectory.exists() && !complianceDirectory.mkdirs()) {
+            STEMApp.LOGGER.ERROR("Could not create compliance directory " + complianceDirectory.getAbsolutePath());
         }
-        this.complianceChecks = new ArrayList<>();
     }
 
     private void initConfig() {
@@ -57,13 +57,19 @@ public class ComplianceModule extends AbstractModule {
         this.complianceChecks.clear();
     }
 
-
     private void readDefaultComplianceChecks() {
-        for (final File file : complianceDirectory.listFiles()) {
+        File[] files = complianceDirectory.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (final File file : files) {
+            if (file.isDirectory()) {
+                continue;
+            }
             try {
                 this.registerComplianceCheck(file, this.getModulePlugin());
-            } catch (InvalidComplianceException e) {
-                STEMApp.LOGGER.ERROR(e);
+            } catch (Exception e) {
+                STEMApp.LOGGER.ERROR("Invalid compliance check " + file.getName() + ": " + e.getMessage());
             }
         }
     }
@@ -72,14 +78,19 @@ public class ComplianceModule extends AbstractModule {
         if (!file.getName().endsWith(".yml")) {
             throw new InvalidComplianceException("Invalid complianceCheckFile extension for " + file.getName() + "!");
         }
-
         FileConfiguration complianceConfig = YamlConfiguration.loadConfiguration(file);
         String complianceID = complianceConfig.getString("complianceID");
         String script = complianceConfig.getString("script");
-        boolean informUser = complianceConfig.getBoolean("informUser", false);
         String cronTime = complianceConfig.getString("cronTime");
+        if (complianceID == null || script == null || cronTime == null) {
+            throw new InvalidComplianceException("Missing complianceID, script or cronTime in " + file.getName() + "!");
+        }
+        if (this.getComplianceCheck(complianceID) != null) {
+            throw new InvalidComplianceException("Compliance check " + complianceID + " is already registered!");
+        }
         List<Integer> runningCodes = complianceConfig.getIntegerList("runningCodes");
         List<Integer> errorCodes = complianceConfig.getIntegerList("errorCodes");
+
         ComplianceCheck complianceCheck = new ComplianceCheck(complianceID, script, cronTime, runningCodes, errorCodes, stemPlugin, this.getStemApp());
         complianceCheck.register();
         STEMApp.LOGGER.CONFIG("Register complianceCheck for " + complianceID);
@@ -90,14 +101,35 @@ public class ComplianceModule extends AbstractModule {
         ComplianceCheck complianceCheck = getComplianceCheck(complianceID);
         if (complianceCheck != null) {
             complianceCheck.unregister();
+            this.complianceChecks.remove(complianceCheck);
         }
     }
 
+    /**
+     * Unregister all compliance checks of a plugin
+     *
+     * @param stemPlugin plugin to remove the compliance checks for
+     */
+    public void unregisterComplianceChecks(STEMPlugin stemPlugin) {
+        for (ComplianceCheck complianceCheck : this.complianceChecks) {
+            if (complianceCheck.getStemPlugin() == stemPlugin) {
+                complianceCheck.unregister();
+                this.complianceChecks.remove(complianceCheck);
+            }
+        }
+    }
+
+    /**
+     * @return snapshot of all registered compliance checks
+     */
     public ArrayList<ComplianceCheck> getComplianceChecks() {
-        return complianceChecks;
+        return new ArrayList<>(complianceChecks);
     }
 
     public ComplianceCheck getComplianceCheck(String complianceID) {
+        if (complianceID == null) {
+            return null;
+        }
         for (ComplianceCheck complianceCheck : this.complianceChecks) {
             if (complianceCheck.getComplianceID().equalsIgnoreCase(complianceID)) {
                 return complianceCheck;

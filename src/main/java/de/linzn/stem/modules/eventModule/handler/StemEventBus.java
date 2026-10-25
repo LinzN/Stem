@@ -12,74 +12,122 @@
 
 package de.linzn.stem.modules.eventModule.handler;
 
-
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.eventModule.StemEvent;
+import de.linzn.stem.modules.pluginModule.PluginModule;
+import de.linzn.stem.modules.pluginModule.STEMPlugin;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.lang.reflect.Modifier;
+import java.util.*;
 
+/**
+ * Thread-safe event bus.
+ * <p>
+ * Handlers are resolved once at registration time and indexed by event class and priority, so firing an
+ * event does no reflection lookups. Registration and firing may happen concurrently from any thread.
+ * Every listener is tied to an owner plugin so it can be removed when the plugin is disabled.
+ */
 public class StemEventBus {
-    private final Map<Object, Map<Method, Class<StemEvent>>> activeListener;
+    private static final StemEventPriority[] PRIORITIES = StemEventPriority.values();
+    private static final Handler[] NO_HANDLERS = new Handler[0];
 
+    /* All registered listeners in registration order. Guarded by "this". */
+    private final List<Registration> registrations = new ArrayList<>();
+    /* Immutable index: event class -> handlers per priority ordinal. Rebuilt on every change. */
+    private volatile Map<Class<?>, Handler[][]> index = Map.of();
 
     public StemEventBus() {
-        this.activeListener = new HashMap<>();
     }
 
     /**
      * Gets methods and event class in a listener
      *
      * @param listener Listener to check if a method has an annotation
-     * @return Map with event class and methods for this listener
+     * @return list of handlers of this listener
      */
-    private Map<Method, Class<StemEvent>> findHandlers(Object listener) {
-        Map<Method, Class<StemEvent>> methods = new HashMap<>();
-
+    private static List<Handler> findHandlers(Object listener) {
+        List<Handler> handlers = new ArrayList<>();
         for (Method m : listener.getClass().getDeclaredMethods()) {
             StemEventHandler annotation = m.getAnnotation(StemEventHandler.class);
-            if (annotation != null) {
-                Class<?>[] params = m.getParameterTypes();
-                if (params.length != 1) {
-                    STEMApp.LOGGER.ERROR("Method " + m + " in class " + listener.getClass() + " annotated with " + annotation + " does not have single argument");
-                    continue;
-                }
-                Class<StemEvent> iEvent = (Class<StemEvent>) params[0];
-                methods.put(m, iEvent);
+            if (annotation == null) {
+                continue;
             }
+            Class<?>[] params = m.getParameterTypes();
+            if (params.length != 1 || !StemEvent.class.isAssignableFrom(params[0])) {
+                STEMApp.LOGGER.ERROR("Method " + m + " in class " + listener.getClass() + " annotated with " + annotation + " does not have a single StemEvent argument");
+                continue;
+            }
+            if (Modifier.isStatic(m.getModifiers())) {
+                STEMApp.LOGGER.ERROR("Method " + m + " in class " + listener.getClass() + " is static and can not be used as event handler");
+                continue;
+            }
+            if (!m.trySetAccessible()) {
+                STEMApp.LOGGER.ERROR("Method " + m + " in class " + listener.getClass() + " is not accessible");
+                continue;
+            }
+            handlers.add(new Handler(listener, m, params[0], annotation.priority()));
         }
-        return methods;
+        return handlers;
     }
 
+    private static STEMPlugin resolveOwner(Object classInstance) {
+        return PluginModule.findOwner(classInstance.getClass());
+    }
 
     /**
      * Call a listener method
      *
-     * @param event         IEvent to call
-     * @param method        Method in listener
-     * @param classInstance classInstance object which contains the method to call
+     * @param event   event to call
+     * @param handler handler to invoke
      */
-    private void callMethod(StemEvent event, Method method, Object classInstance) {
+    private static void callMethod(StemEvent event, Handler handler) {
         try {
-            method.invoke(classInstance, event);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            handler.method.invoke(handler.instance, event);
+        } catch (InvocationTargetException e) {
+            Throwable cause = e.getCause() != null ? e.getCause() : e;
+            logError(handler, cause);
+        } catch (Throwable e) {
+            logError(handler, e);
         }
     }
 
+    private static void logError(Handler handler, Throwable throwable) {
+        STEMApp.LOGGER.ERROR("Error in event handler " + handler.method.getDeclaringClass().getName() + "#" + handler.method.getName());
+        if (throwable instanceof Exception exception) {
+            STEMApp.LOGGER.ERROR(exception);
+        } else {
+            STEMApp.LOGGER.ERROR(throwable.toString());
+        }
+    }
 
     /**
-     * Register a new Event listener classInstance
+     * Register a new Event listener classInstance. The owner plugin is detected automatically.
      *
      * @param classInstance Event listener classInstance to register
      */
     public void register(Object classInstance) {
-        Map<Method, Class<StemEvent>> handler = findHandlers(classInstance);
-        this.activeListener.put(classInstance, handler);
+        this.register(classInstance, resolveOwner(classInstance));
     }
 
+    /**
+     * Register a new Event listener classInstance for a plugin
+     *
+     * @param classInstance Event listener classInstance to register
+     * @param owner         plugin owning this listener, may be null for core listeners
+     */
+    public void register(Object classInstance, STEMPlugin owner) {
+        if (classInstance == null) {
+            return;
+        }
+        List<Handler> handlers = findHandlers(classInstance);
+        synchronized (this) {
+            this.registrations.removeIf(registration -> registration.instance == classInstance);
+            this.registrations.add(new Registration(classInstance, owner, handlers));
+            this.rebuildIndex();
+        }
+    }
 
     /**
      * Unregister a event listener classInstance
@@ -87,7 +135,59 @@ public class StemEventBus {
      * @param classInstance Event listener classInstance to unregister
      */
     public void unregister(Object classInstance) {
-        activeListener.remove(classInstance);
+        synchronized (this) {
+            if (this.registrations.removeIf(registration -> registration.instance == classInstance)) {
+                this.rebuildIndex();
+            }
+        }
+    }
+
+    /**
+     * Unregister all event listeners of a plugin
+     *
+     * @param owner plugin to remove all listeners for
+     * @return number of removed listeners
+     */
+    public int unregisterAll(STEMPlugin owner) {
+        if (owner == null) {
+            return 0;
+        }
+        synchronized (this) {
+            int before = this.registrations.size();
+            this.registrations.removeIf(registration -> registration.owner == owner);
+            int removed = before - this.registrations.size();
+            if (removed > 0) {
+                this.rebuildIndex();
+            }
+            return removed;
+        }
+    }
+
+    /* Must be called while holding the lock */
+    private void rebuildIndex() {
+        Map<Class<?>, List<List<Handler>>> builder = new HashMap<>();
+        for (Registration registration : this.registrations) {
+            for (Handler handler : registration.handlers) {
+                List<List<Handler>> perPriority = builder.computeIfAbsent(handler.eventClass, _ -> {
+                    List<List<Handler>> lists = new ArrayList<>(PRIORITIES.length);
+                    for (int i = 0; i < PRIORITIES.length; i++) {
+                        lists.add(new ArrayList<>());
+                    }
+                    return lists;
+                });
+                perPriority.get(handler.priority.ordinal()).add(handler);
+            }
+        }
+        Map<Class<?>, Handler[][]> newIndex = new HashMap<>();
+        for (Map.Entry<Class<?>, List<List<Handler>>> entry : builder.entrySet()) {
+            Handler[][] arrays = new Handler[PRIORITIES.length][];
+            for (int i = 0; i < PRIORITIES.length; i++) {
+                List<Handler> list = entry.getValue().get(i);
+                arrays[i] = list.isEmpty() ? NO_HANDLERS : list.toArray(NO_HANDLERS);
+            }
+            newIndex.put(entry.getKey(), arrays);
+        }
+        this.index = Map.copyOf(newIndex);
     }
 
     /**
@@ -96,36 +196,35 @@ public class StemEventBus {
      * @param event StemEvent to call in classInstance
      */
     public void fireEvent(final StemEvent event) {
+        if (event == null) {
+            return;
+        }
         STEMApp.LOGGER.DEBUG("Fire event " + event.getName());
-        if (!event.isCanceled()) {
-            fireEventPriority(event, StemEventPriority.HIGH);
+        Handler[][] handlers = this.index.get(event.getClass());
+        if (handlers == null) {
+            return;
         }
         if (!event.isCanceled()) {
-            fireEventPriority(event, StemEventPriority.NORMAL);
+            fireEventPriority(event, handlers[StemEventPriority.HIGH.ordinal()]);
         }
         if (!event.isCanceled()) {
-            fireEventPriority(event, StemEventPriority.LOW);
+            fireEventPriority(event, handlers[StemEventPriority.NORMAL.ordinal()]);
         }
-        fireEventPriority(event, StemEventPriority.CANCELED);
+        if (!event.isCanceled()) {
+            fireEventPriority(event, handlers[StemEventPriority.LOW.ordinal()]);
+        }
+        fireEventPriority(event, handlers[StemEventPriority.CANCELED.ordinal()]);
     }
 
-    private void fireEventPriority(StemEvent event, StemEventPriority stemEventPriority) {
-        for (Object classInstance : this.activeListener.keySet()) {
-            Map<Method, Class<StemEvent>> handler = this.activeListener.get(classInstance);
-            for (Method method : handler.keySet()) {
-                Class<StemEvent> stemEventClass = handler.get(method);
-                if (stemEventClass.equals(event.getClass())) {
-                    StemEventHandler annotation = method.getAnnotation(StemEventHandler.class);
-                    StemEventPriority priority = annotation.priority();
-                    if (priority == stemEventPriority) {
-                        try {
-                            callMethod(event, method, classInstance);
-                        } catch (Exception e) {
-                            STEMApp.LOGGER.ERROR(e);
-                        }
-                    }
-                }
-            }
+    private void fireEventPriority(StemEvent event, Handler[] handlers) {
+        for (Handler handler : handlers) {
+            callMethod(event, handler);
         }
+    }
+
+    private record Handler(Object instance, Method method, Class<?> eventClass, StemEventPriority priority) {
+    }
+
+    private record Registration(Object instance, STEMPlugin owner, List<Handler> handlers) {
     }
 }

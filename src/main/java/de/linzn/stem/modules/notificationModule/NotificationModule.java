@@ -21,20 +21,21 @@ import de.linzn.stem.modules.notificationModule.listener.NotificationListener;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
 
 import java.util.Date;
-import java.util.LinkedList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class NotificationModule extends AbstractModule {
-    private final LinkedList<NotificationContainer> notificationQueue;
+    private static final int MAX_QUEUE_SIZE = 10_000;
+    private final LinkedBlockingQueue<NotificationContainer> notificationQueue;
     private final NotificationArchive notificationArchive;
-    private boolean moduleAlive;
-
+    private volatile boolean moduleAlive;
+    private volatile Thread workerThread;
 
     public NotificationModule(STEMApp stemApp) {
         super(stemApp);
-        this.notificationQueue = new LinkedList<>();
+        this.notificationQueue = new LinkedBlockingQueue<>(MAX_QUEUE_SIZE);
         this.notificationArchive = new NotificationArchive();
         this.moduleAlive = true;
-        this.getStemApp().getEventModule().getStemEventBus().register(new NotificationListener());
+        this.getStemApp().getEventModule().getStemEventBus().register(new NotificationListener(), this.getModulePlugin());
         startNotificationModule();
     }
 
@@ -53,9 +54,17 @@ public class NotificationModule extends AbstractModule {
     }
 
     public void pushNotification(String message, NotificationPriority notificationPriority, STEMPlugin stemPlugin) {
-        NotificationContainer notificationContainer = new NotificationContainer(message, notificationPriority);
-        notificationQueue.add(notificationContainer);
-        this.notificationArchive.addToArchive(new ArchivedNotification(stemPlugin.getPluginName(), notificationContainer.notification, new Date()));
+        if (message == null) {
+            return;
+        }
+        NotificationPriority priority = notificationPriority == null ? NotificationPriority.DEFAULT : notificationPriority;
+        String source = stemPlugin == null ? "UNKNOWN" : stemPlugin.getPluginName();
+        NotificationContainer notificationContainer = new NotificationContainer(message, priority);
+        if (!notificationQueue.offer(notificationContainer)) {
+            STEMApp.LOGGER.ERROR("Notification queue is full. Dropping notification from " + source);
+            return;
+        }
+        this.notificationArchive.addToArchive(new ArchivedNotification(source, notificationContainer.notification, new Date()));
     }
 
     public NotificationArchive getNotificationArchive() {
@@ -63,11 +72,15 @@ public class NotificationModule extends AbstractModule {
     }
 
     private void startNotificationModule() {
-        this.getStemApp().getScheduler().runTask(this.getModulePlugin(), this::run);
+        this.workerThread = Thread.ofVirtual().name("STEM-Notification").start(this::run);
     }
 
     public void stopNotificationModule() {
         this.moduleAlive = false;
+        Thread thread = this.workerThread;
+        if (thread != null) {
+            thread.interrupt();
+        }
     }
 
     @Override
@@ -76,19 +89,18 @@ public class NotificationModule extends AbstractModule {
     }
 
     private void run() {
-        moduleAlive = true;
         while (moduleAlive) {
-            if (!notificationQueue.isEmpty()) {
-                NotificationContainer notificationContainer = notificationQueue.removeFirst();
-
-                if (notificationContainer != null) {
-                    NotificationEvent notificationEvent = new NotificationEvent(notificationContainer.notification, notificationContainer.notificationPriority);
-                    STEMApp.getInstance().getEventModule().getStemEventBus().fireEvent(notificationEvent);
-                }
+            NotificationContainer notificationContainer;
+            try {
+                notificationContainer = notificationQueue.take();
+            } catch (InterruptedException e) {
+                continue;
             }
             try {
-                Thread.sleep(50);
-            } catch (InterruptedException ignored) {
+                NotificationEvent notificationEvent = new NotificationEvent(notificationContainer.notification, notificationContainer.notificationPriority);
+                STEMApp.getInstance().getEventModule().getStemEventBus().fireEvent(notificationEvent);
+            } catch (Exception e) {
+                STEMApp.LOGGER.ERROR(e);
             }
         }
     }

@@ -18,45 +18,64 @@ import de.linzn.stem.taskManagment.operations.AbstractOperation;
 import de.linzn.stem.taskManagment.operations.OperationOutput;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Manages callback listeners. Each listener is backed by a scheduler task; unregistering cancels that task.
+ */
 public class CallbackService {
-    private final HashMap<AbstractCallback, STEMPlugin> callbackListeners;
+    private final ConcurrentHashMap<AbstractCallback, STEMPlugin> callbackListeners;
 
     CallbackService() {
-        this.callbackListeners = new HashMap<>();
+        this.callbackListeners = new ConcurrentHashMap<>();
     }
 
     public void registerCallbackListener(AbstractCallback abstractCallback, STEMPlugin stemPlugin) {
-        this.callbackListeners.put(abstractCallback, stemPlugin);
+        if (abstractCallback == null || stemPlugin == null) {
+            STEMApp.LOGGER.ERROR("Callback register failed: callback or plugin is null");
+            return;
+        }
+        if (this.callbackListeners.putIfAbsent(abstractCallback, stemPlugin) != null) {
+            STEMApp.LOGGER.WARNING("Callback " + abstractCallback.getClass().getSimpleName() + " is already registered");
+            return;
+        }
         this.enableCallbackListener(abstractCallback, stemPlugin);
     }
 
     public void unregisterCallbackListener(AbstractCallback abstractCallback) {
         STEMApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
         this.callbackListeners.remove(abstractCallback);
+        abstractCallback.operationData.clear();
         STEMApp.LOGGER.DEBUG("Callback unregister: " + abstractCallback.getClass().getSimpleName());
     }
 
     public void unregisterCallbackListeners(STEMPlugin stemPlugin) {
-        Set<AbstractCallback> setCopy = new HashSet<>(this.callbackListeners.keySet());
-        for (AbstractCallback abstractCallback : setCopy) {
-            STEMPlugin stemPlugin1 = this.callbackListeners.get(abstractCallback);
-            if (stemPlugin == stemPlugin1) {
+        for (Map.Entry<AbstractCallback, STEMPlugin> entry : this.callbackListeners.entrySet()) {
+            if (entry.getValue() == stemPlugin) {
+                AbstractCallback abstractCallback = entry.getKey();
                 STEMApp.getInstance().getScheduler().cancelTask(abstractCallback.taskId);
                 this.callbackListeners.remove(abstractCallback);
+                abstractCallback.operationData.clear();
                 STEMApp.LOGGER.DEBUG("Callback unregister: " + abstractCallback.getClass().getSimpleName() + " from " + stemPlugin.getPluginName());
             }
         }
     }
 
+    /**
+     * @return snapshot of all registered callback listeners
+     */
     public HashMap<AbstractCallback, STEMPlugin> getCallbackListeners() {
-        return this.callbackListeners;
+        return new HashMap<>(this.callbackListeners);
     }
 
     private void enableCallbackListener(AbstractCallback abstractCallback, STEMPlugin plugin) {
         CallbackTime callbackTime = abstractCallback.getTime();
+        if (callbackTime == null) {
+            STEMApp.LOGGER.ERROR("Callback " + abstractCallback.getClass().getSimpleName() + " from " + plugin.getPluginName() + " has no callback time");
+            this.callbackListeners.remove(abstractCallback);
+            return;
+        }
         TaskMeta taskMeta;
 
         Runnable runnable = () -> callMethod(abstractCallback, plugin);
@@ -69,19 +88,25 @@ public class CallbackService {
         } else {
             taskMeta = STEMApp.getInstance().getScheduler().runAsCronTask(plugin, runnable, callbackTime.cronTask);
         }
-        STEMApp.LOGGER.DEBUG("Callback register for " + plugin.getPluginName() + " with taskId :" + taskMeta.taskId);
         abstractCallback.setIDs(taskMeta.getTaskId());
+        if (taskMeta.isCanceled()) {
+            this.callbackListeners.remove(abstractCallback);
+            STEMApp.LOGGER.ERROR("Callback " + abstractCallback.getClass().getSimpleName() + " from " + plugin.getPluginName() + " could not be scheduled");
+            return;
+        }
+        STEMApp.LOGGER.DEBUG("Callback register for " + plugin.getPluginName() + " with taskId :" + taskMeta.taskId);
     }
 
     private void callMethod(AbstractCallback abstractCallback, STEMPlugin plugin) {
         abstractCallback.operation();
 
-        while (!abstractCallback.operationData.isEmpty()) {
+        AbstractOperation abstractOperation;
+        while ((abstractOperation = abstractCallback.operationData.pollFirst()) != null) {
             STEMApp.LOGGER.DEBUG("Callback operation for " + plugin.getPluginName());
-            AbstractOperation abstractOperation = abstractCallback.operationData.removeFirst();
+            AbstractOperation operation = abstractOperation;
 
             STEMApp.getInstance().getScheduler().runTask(plugin, () -> {
-                OperationOutput operationOutput = abstractOperation.runOperation();
+                OperationOutput operationOutput = operation.runOperation();
                 abstractCallback.callback(operationOutput);
                 if (!STEMApp.getInstance().getScheduler().isTask(abstractCallback.taskId)) {
                     this.callbackListeners.remove(abstractCallback);

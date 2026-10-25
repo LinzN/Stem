@@ -27,6 +27,7 @@ import java.util.Arrays;
 
 
 public class StemLinkModule extends AbstractModule {
+    private static final String DEFAULT_AES_KEY = "3979244226452948404D635166546A576D5A7134743777217A25432A462D4A61";
     private final StemLinkServer stemLinkServer;
 
     private FileConfiguration fileConfiguration;
@@ -76,10 +77,13 @@ public class StemLinkModule extends AbstractModule {
 
         this.socketHost = this.fileConfiguration.getString("socketHost", "0.0.0.0");
         this.socketPort = this.fileConfiguration.getInt("socketPort", 11102);
-        this.cryptAESKey = this.fileConfiguration.getString("cryptAESKey", "3979244226452948404D635166546A576D5A7134743777217A25432A462D4A61");
+        this.cryptAESKey = this.fileConfiguration.getString("cryptAESKey", DEFAULT_AES_KEY);
         this.vector16B = toByteArray(this.fileConfiguration.getString("vector16B", Arrays.toString(new byte[]{1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6, 7})));
 
         this.fileConfiguration.save();
+        if (DEFAULT_AES_KEY.equalsIgnoreCase(this.cryptAESKey)) {
+            STEMApp.LOGGER.WARNING("StemLink uses the public default AES key! Set your own cryptAESKey and vector16B in module_stemLink.yml (and on all clients).");
+        }
     }
 
     @Override

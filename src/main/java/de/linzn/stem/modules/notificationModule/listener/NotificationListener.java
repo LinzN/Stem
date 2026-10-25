@@ -33,6 +33,7 @@ public class NotificationListener {
                 dataOutputStream.writeUTF(notificationEvent.getNotification());
             } catch (IOException e) {
                 STEMApp.LOGGER.ERROR(e);
+                return;
             }
             STEMApp.getInstance().getStemLinkModule().getStemLinkServer().getClients().values().forEach(serverConnection -> serverConnection.writeOutput("notification", byteArrayOutputStream.toByteArray()));
         }

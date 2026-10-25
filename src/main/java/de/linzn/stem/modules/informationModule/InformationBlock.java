@@ -16,7 +16,7 @@ import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
 
 import java.time.Instant;
-import java.util.ArrayList;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -25,12 +25,12 @@ public class InformationBlock {
     private final List<InformationIntent> informationIntents;
     private final String name;
     private final long creationTime;
-    private String description;
-    private String longDescription;
-    private boolean disableLongDescription;
-    private long expireTime;
-    private String icon;
-    private long id;
+    private volatile String description;
+    private volatile String longDescription;
+    private volatile boolean disableLongDescription;
+    private volatile long expireTime;
+    private volatile String icon;
+    private volatile long id;
 
     public InformationBlock(String name, String description, STEMPlugin sourcePlugin) {
         this(name, description, sourcePlugin, null, true);
@@ -47,7 +47,7 @@ public class InformationBlock {
         this.disableLongDescription = disableLongDescription;
         this.expireTime = 0;
         this.icon = "NONE";
-        this.informationIntents = new ArrayList<>();
+        this.informationIntents = new CopyOnWriteArrayList<>();
         this.setDescription(description, eventText);
     }
 

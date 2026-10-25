@@ -15,6 +15,7 @@ package de.linzn.stem;
 import de.linzn.simplyLogger.LogSystem;
 import de.linzn.simplyLogger.Logger;
 import de.linzn.stem.configuration.AppConfiguration;
+import de.linzn.stem.modules.AbstractModule;
 import de.linzn.stem.modules.cloudModule.CloudModule;
 import de.linzn.stem.modules.commandModule.CommandModule;
 import de.linzn.stem.modules.complianceModule.ComplianceModule;
@@ -39,35 +40,41 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Comparator;
+import java.nio.file.Path;
 import java.util.Date;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
+import java.util.stream.Stream;
 
 public class STEMApp {
 
     public static Logger LOGGER;
     public static LogSystem logSystem;
-    private static STEMApp instance;
+    private static volatile STEMApp instance;
     private final AtomicBoolean isActive;
+    private final AtomicBoolean shutdownStarted;
+    private final CountDownLatch shutdownLatch = new CountDownLatch(1);
     private final StemKernel stemKernel;
     private final Date uptimeDate;
     private final long start_time;
-    private File tempFolder;
-    private StemClassLoader stemClassLoader;
-    private AppConfiguration appConfiguration;
-    private EventModule eventModule;
-    private StemLinkModule stemLinkModule;
-    private LibraryModule libraryModule;
-    private MqttModule mqttModule;
-    private CommandModule commandModule;
-    private NotificationModule notificationModule;
-    private InformationModule informationModule;
-    private ScriptManager scriptManager;
-    private HealthModule healthModule;
-    private ComplianceModule complianceModule;
-    private DatabaseModule databaseModule;
-    private PluginModule pluginModule;
-    private CloudModule cloudModule;
+    private volatile File tempFolder;
+    private volatile StemClassLoader stemClassLoader;
+    private volatile AppConfiguration appConfiguration;
+    private volatile EventModule eventModule;
+    private volatile StemLinkModule stemLinkModule;
+    private volatile LibraryModule libraryModule;
+    private volatile MqttModule mqttModule;
+    private volatile CommandModule commandModule;
+    private volatile NotificationModule notificationModule;
+    private volatile InformationModule informationModule;
+    private volatile ScriptManager scriptManager;
+    private volatile HealthModule healthModule;
+    private volatile ComplianceModule complianceModule;
+    private volatile DatabaseModule databaseModule;
+    private volatile PluginModule pluginModule;
+    private volatile CloudModule cloudModule;
 
 
     public STEMApp(String[] args) {
@@ -75,6 +82,7 @@ public class STEMApp {
         STEMApp.LOGGER.CORE("STEM version " + JavaUtils.getVersion());
         this.start_time = System.nanoTime();
         this.isActive = new AtomicBoolean(true);
+        this.shutdownStarted = new AtomicBoolean(false);
         this.stemKernel = new StemKernel();
         Thread main = new Thread(this.stemKernel);
         main.setName(JavaUtils.getKernelName());
@@ -83,6 +91,7 @@ public class STEMApp {
         this.stemKernel.getSchedulerService().runTaskInCore(this.stemKernel.getSchedulerService().getDefaultSystemPlugin(), () -> {
             createTempFolder();
             loadModules();
+            registerShutdownHook();
             logSystem.setLogLevel(this.appConfiguration.logLevel);
             int startupTime = (int) ((System.nanoTime() - start_time) / 1e6);
             StemStartupEvent stemStartupEvent = new StemStartupEvent(startupTime);
@@ -115,27 +124,49 @@ public class STEMApp {
         return instance;
     }
 
+    /**
+     * Create a clean temp folder. Leftovers from a previous run (e.g. after a crash or kill -9,
+     * when no shutdown hook ran) are removed first, so the folder never grows across restarts.
+     */
     private void createTempFolder() {
         this.tempFolder = new File("_temp");
-        if (this.tempFolder.exists()) {
-            this.tempFolder.delete();
+        deleteRecursively(this.tempFolder);
+        if (!this.tempFolder.mkdirs() && !this.tempFolder.isDirectory()) {
+            STEMApp.LOGGER.ERROR("Could not create temp folder " + this.tempFolder.getAbsolutePath());
         }
-        tempFolder.mkdirs();
-        tempFolder.deleteOnExit();
-
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Files.walk(tempFolder.toPath()).sorted(Comparator.reverseOrder()).forEach(path -> {
-                    try {
-                        Files.delete(path);
-                    } catch (IOException _) {
-                    }
-                });
-            } catch (Exception _) {
-            }
-        }));
     }
 
+    private static void deleteRecursively(File file) {
+        if (file == null || !file.exists()) {
+            return;
+        }
+        try (Stream<Path> paths = Files.walk(file.toPath())) {
+            paths.sorted(Comparator.reverseOrder()).forEach(path -> {
+                try {
+                    Files.deleteIfExists(path);
+                } catch (IOException _) {
+                }
+            });
+        } catch (IOException _) {
+        }
+    }
+
+    /**
+     * Run a clean shutdown when the JVM is terminated (SIGTERM, service stop, System.exit)
+     * and remove the temp folder afterwards.
+     */
+    private void registerShutdownHook() {
+        Thread hook = new Thread(() -> {
+            if (this.shutdownStarted.get()) {
+                /* shutdown() already ran or is running: just wait for it to finish */
+                this.awaitShutdown();
+            } else {
+                this.shutdown(false);
+            }
+            deleteRecursively(this.tempFolder);
+        }, "STEM-ShutdownHook");
+        Runtime.getRuntime().addShutdownHook(hook);
+    }
 
     private void loadModules() {
         appConfiguration = new AppConfiguration(instance);
@@ -159,24 +190,63 @@ public class STEMApp {
         return this.isActive.get();
     }
 
+    /**
+     * Shut down STEM and exit the JVM.
+     */
     public void shutdown() {
-        this.cloudModule.shutdownModule();
-        this.commandModule.shutdownModule();
-        this.scriptManager.shutdownModule();
-        this.complianceModule.shutdownModule();
-        this.pluginModule.shutdownModule();
-        this.stemLinkModule.shutdownModule();
-        this.mqttModule.shutdownModule();
-        this.notificationModule.shutdownModule();
-        this.informationModule.shutdownModule();
-        this.healthModule.shutdownModule();
-        this.databaseModule.shutdownModule();
-        this.libraryModule.shutdownModule();
-        this.eventModule.shutdownModule();
-        this.stemKernel.endCore();
-        this.isActive.set(false);
-        STEMApp.LOGGER.CORE("Shutdown complete!");
-        System.exit(0);
+        this.shutdown(true);
+    }
+
+    private void shutdown(boolean exitJvm) {
+        if (!this.shutdownStarted.compareAndSet(false, true)) {
+            STEMApp.LOGGER.WARNING("Shutdown already in progress");
+            return;
+        }
+        try {
+            /* Plugins first: they may still use core modules in onDisable */
+            this.shutdownModule(this.pluginModule);
+            this.shutdownModule(this.cloudModule);
+            this.shutdownModule(this.commandModule);
+            this.shutdownModule(this.scriptManager);
+            this.shutdownModule(this.complianceModule);
+            this.shutdownModule(this.healthModule);
+            this.shutdownModule(this.informationModule);
+            this.shutdownModule(this.notificationModule);
+            this.shutdownModule(this.stemLinkModule);
+            this.shutdownModule(this.mqttModule);
+            this.shutdownModule(this.databaseModule);
+            this.shutdownModule(this.libraryModule);
+            this.shutdownModule(this.eventModule);
+            this.stemKernel.endCore();
+            this.isActive.set(false);
+            STEMApp.LOGGER.CORE("Shutdown complete!");
+        } finally {
+            this.shutdownLatch.countDown();
+        }
+        if (exitJvm) {
+            System.exit(0);
+        }
+    }
+
+    private void shutdownModule(AbstractModule module) {
+        if (module == null) {
+            return;
+        }
+        try {
+            module.shutdownModule();
+        } catch (Throwable throwable) {
+            STEMApp.LOGGER.ERROR("Error while unloading module " + module.getClass().getSimpleName() + ": " + throwable);
+        }
+    }
+
+    private void awaitShutdown() {
+        try {
+            if (!this.shutdownLatch.await(60, TimeUnit.SECONDS)) {
+                STEMApp.LOGGER.ERROR("Shutdown did not finish within 60 seconds");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     public void setClassLoader(StemClassLoader stemClassLoader) {

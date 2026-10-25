@@ -20,7 +20,7 @@ public class DataContainer {
     private JSONObject dataObject;
 
     public DataContainer(String name) {
-        this.name = name.toLowerCase();
+        this.name = name.toLowerCase(java.util.Locale.ROOT);
     }
 
     public void setDataObject(JSONObject jsonObject) {

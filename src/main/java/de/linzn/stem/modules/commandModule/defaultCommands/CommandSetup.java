@@ -15,26 +15,34 @@ package de.linzn.stem.modules.commandModule.defaultCommands;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.commandModule.ICommand;
 
-import java.util.TreeMap;
+import java.util.Locale;
+import java.util.concurrent.ConcurrentSkipListMap;
 
 public class CommandSetup {
     private final STEMApp stemApp;
-    public TreeMap<String, ICommand> terminalExecutes;
+    /* Sorted and thread-safe: commands are registered by plugins while the console thread reads */
+    public final ConcurrentSkipListMap<String, ICommand> terminalExecutes;
 
     public CommandSetup(STEMApp stemApp) {
         this.stemApp = stemApp;
-        this.terminalExecutes = new TreeMap<>();
+        this.terminalExecutes = new ConcurrentSkipListMap<>();
         this.initialTerminalExecutes();
     }
 
     public void runCommand(String command, String[] args) {
+        if (command == null || command.isBlank()) {
+            return;
+        }
+        String commandName = command.toLowerCase(Locale.ROOT);
+        String[] arguments = args == null ? new String[0] : args;
         this.stemApp.getScheduler().runTask(this.stemApp.getCommandModule().getModulePlugin(), () -> {
+            ICommand iCommand = this.terminalExecutes.get(commandName);
+            if (iCommand == null) {
+                STEMApp.LOGGER.LIVE("Unknown command: " + commandName + " (type 'help' for a list of commands)");
+                return;
+            }
             try {
-                if (this.terminalExecutes.containsKey(command.toLowerCase())) {
-                    this.terminalExecutes.get(command.toLowerCase()).executeTerminal(args);
-                } else {
-                    STEMApp.LOGGER.LIVE("Error on command");
-                }
+                iCommand.executeTerminal(arguments);
             } catch (Exception e) {
                 STEMApp.LOGGER.ERROR(e);
             }
@@ -43,7 +51,6 @@ public class CommandSetup {
 
     private void initialTerminalExecutes() {
         registerCommand("stop", new StopCommand());
-        registerCommand("loadplugin", new LoadPluginCommand());
         registerCommand("reboot", new RebootCommand());
         registerCommand("plugins", new PluginsCommand());
         registerCommand("push", new PushCommand());

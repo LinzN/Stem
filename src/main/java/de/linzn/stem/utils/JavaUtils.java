@@ -14,12 +14,14 @@ package de.linzn.stem.utils;
 
 import org.yaml.snakeyaml.Yaml;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.Map;
 
 public class JavaUtils {
 
-    public static Map<String, Object> data;
+    public static volatile Map<String, Object> data;
 
     public static String getVersion() {
         readConfig();
@@ -50,11 +52,14 @@ public class JavaUtils {
         return String.valueOf(data.get("buildLabel"));
     }
 
-    public static void readConfig() {
+    public static synchronized void readConfig() {
         if (data == null) {
-            InputStream inStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("version.yml");
-            Yaml yaml = new Yaml();
-            data = yaml.load(inStream);
+            try (InputStream inStream = JavaUtils.class.getClassLoader().getResourceAsStream("version.yml")) {
+                Map<String, Object> loaded = inStream == null ? null : new Yaml().load(inStream);
+                data = loaded != null ? loaded : new HashMap<>();
+            } catch (IOException e) {
+                data = new HashMap<>();
+            }
         }
     }
 }

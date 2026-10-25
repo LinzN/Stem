@@ -22,13 +22,18 @@ import de.linzn.stem.modules.AbstractModule;
 
 import java.io.File;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Locale;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class DatabaseModule extends AbstractModule {
     // Define variables
     private final DatabaseProvider databaseProvider;
+    /* Serializes writes (SQLite allows only one writer at a time) */
+    private final ReentrantLock writeLock = new ReentrantLock();
 
     private FileConfiguration fileConfiguration;
 
@@ -49,56 +54,95 @@ public class DatabaseModule extends AbstractModule {
         } else {
             this.databaseProvider = new SQLiteProvider("STEM.db");
         }
-        Connection connection = getConnection();
-        if (connection != null) {
-            releaseConnection(connection);
-        }
+        this.createDataTable();
     }
 
-
-    /* Return a new mysql connection */
+    /* Return a new database connection. Callers must release it with releaseConnection. */
     public Connection getConnection() {
         return this.databaseProvider.getConnection();
     }
 
-    /* Clear an mysql connection*/
+    /* Release a database connection; null is ignored */
     public void releaseConnection(Connection connection) {
-        this.databaseProvider.releaseConnection(connection);
+        if (connection != null) {
+            this.databaseProvider.releaseConnection(connection);
+        }
     }
 
+    private void createDataTable() {
+        Connection con = this.getConnection();
+        if (con == null) {
+            STEMApp.LOGGER.ERROR("No database connection available!");
+            return;
+        }
+        try (Statement st = con.createStatement()) {
+            st.executeUpdate("CREATE TABLE IF NOT EXISTS `data` (`key` VARCHAR(191) NOT NULL PRIMARY KEY, `jsonData` LONGTEXT)");
+        } catch (SQLException e) {
+            STEMApp.LOGGER.ERROR(e);
+        } finally {
+            this.releaseConnection(con);
+        }
+    }
 
     public DataContainer getData(String name) {
-        DataContainer dataContainer = null;
-        try {
-            Connection con = this.getConnection();
-            Statement st = con.createStatement();
-            String sqlquery = ("SELECT `jsonData` FROM `data` WHERE `key` = '" + name + "'");
-            ResultSet rs = st.executeQuery(sqlquery);
-            if (rs.next()) {
-                String jsonData = rs.getString("jsonData");
-                dataContainer = new DataContainer(name);
-                dataContainer.setDataObject(jsonData);
-            }
-            this.releaseConnection(con);
-        } catch (SQLException e) {
-            STEMApp.LOGGER.ERROR(e);
+        if (name == null) {
+            return null;
         }
-        return dataContainer;
+        String key = name.toLowerCase(Locale.ROOT);
+        Connection con = this.getConnection();
+        if (con == null) {
+            STEMApp.LOGGER.ERROR("No database connection available!");
+            return null;
+        }
+        try (PreparedStatement st = con.prepareStatement("SELECT `jsonData` FROM `data` WHERE `key` = ?")) {
+            st.setString(1, key);
+            try (ResultSet rs = st.executeQuery()) {
+                if (rs.next()) {
+                    DataContainer dataContainer = new DataContainer(key);
+                    dataContainer.setDataObject(rs.getString("jsonData"));
+                    return dataContainer;
+                }
+            }
+        } catch (SQLException | RuntimeException e) {
+            STEMApp.LOGGER.ERROR(e);
+        } finally {
+            this.releaseConnection(con);
+        }
+        return null;
     }
 
+    /**
+     * Store a data container. Existing data with the same key is replaced.
+     *
+     * @param dataContainer container to store
+     */
     public void setData(DataContainer dataContainer) {
-        try {
-            Connection con = this.getConnection();
-            Statement st = con.createStatement();
-            String sqlquery = ("SELECT `jsonData` FROM `data` WHERE `key` = '" + dataContainer.name + "'");
-            ResultSet rs = st.executeQuery(sqlquery);
-            if (!rs.next()) {
-                sqlquery = ("INSERT INTO `data` (key, jsonData) values ('" + dataContainer.name + "', '" + dataContainer.getJSONString() + "')");
-                st.executeUpdate(sqlquery);
+        if (dataContainer == null || dataContainer.name == null || dataContainer.getJSON() == null) {
+            STEMApp.LOGGER.ERROR("Invalid data container, nothing stored");
+            return;
+        }
+        Connection con = this.getConnection();
+        if (con == null) {
+            STEMApp.LOGGER.ERROR("No database connection available!");
+            return;
+        }
+        this.writeLock.lock();
+        try (PreparedStatement update = con.prepareStatement("UPDATE `data` SET `jsonData` = ? WHERE `key` = ?")) {
+            String json = dataContainer.getJSONString();
+            update.setString(1, json);
+            update.setString(2, dataContainer.name);
+            if (update.executeUpdate() == 0) {
+                try (PreparedStatement insert = con.prepareStatement("INSERT INTO `data` (`key`, `jsonData`) VALUES (?, ?)")) {
+                    insert.setString(1, dataContainer.name);
+                    insert.setString(2, json);
+                    insert.executeUpdate();
+                }
             }
-            this.releaseConnection(con);
         } catch (SQLException e) {
             STEMApp.LOGGER.ERROR(e);
+        } finally {
+            this.writeLock.unlock();
+            this.releaseConnection(con);
         }
     }
 

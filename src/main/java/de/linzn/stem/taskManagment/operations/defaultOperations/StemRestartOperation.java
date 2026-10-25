@@ -15,6 +15,7 @@ package de.linzn.stem.taskManagment.operations.defaultOperations;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.taskManagment.operations.AbstractOperation;
 import de.linzn.stem.taskManagment.operations.OperationOutput;
+import de.linzn.stem.utils.ProcessOutput;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -24,15 +25,24 @@ public class StemRestartOperation extends AbstractOperation {
     @Override
     public OperationOutput runOperation() {
         OperationOutput operationOutput = new OperationOutput(this);
+        Process p;
         try {
-            String command = "service stem restart";
-            String[] cmd = {"/bin/sh", "-c", command};
-            Process p = Runtime.getRuntime().exec(cmd);
-            p.waitFor(5, TimeUnit.SECONDS);
-            operationOutput.setExit(p.exitValue());
-
-        } catch (IOException | InterruptedException e) {
+            ProcessBuilder processBuilder = new ProcessBuilder("/bin/sh", "-c", "service stem restart");
+            processBuilder.redirectErrorStream(true);
+            p = processBuilder.start();
+            ProcessOutput.drain(p, "StemRestart");
+            if (p.waitFor(5, TimeUnit.SECONDS)) {
+                operationOutput.setExit(p.exitValue());
+                ProcessOutput.closeStreams(p);
+            } else {
+                /* The restart usually stops this JVM before the command returns */
+                operationOutput.setExit(0);
+            }
+        } catch (IOException e) {
             STEMApp.LOGGER.ERROR(e);
+            operationOutput.setExit(-1);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
             operationOutput.setExit(-1);
         }
         return operationOutput;

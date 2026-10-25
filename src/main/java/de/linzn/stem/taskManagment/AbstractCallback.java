@@ -15,15 +15,15 @@ package de.linzn.stem.taskManagment;
 import de.linzn.stem.taskManagment.operations.AbstractOperation;
 import de.linzn.stem.taskManagment.operations.OperationOutput;
 
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public abstract class AbstractCallback {
 
-    public long taskId;
-    LinkedList<AbstractOperation> operationData;
+    public volatile long taskId;
+    final ConcurrentLinkedDeque<AbstractOperation> operationData;
 
     public AbstractCallback() {
-        this.operationData = new LinkedList<>();
+        this.operationData = new ConcurrentLinkedDeque<>();
     }
 
     void setIDs(long taskId) {

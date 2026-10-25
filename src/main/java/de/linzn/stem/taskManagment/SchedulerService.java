@@ -12,7 +12,6 @@
 
 package de.linzn.stem.taskManagment;
 
-
 import de.linzn.openJL.pairs.Pair;
 import de.linzn.openJL.system.FileSystem;
 import de.linzn.simplyConfiguration.FileConfiguration;
@@ -20,31 +19,77 @@ import de.linzn.stem.STEMApp;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
 import de.linzn.stem.utils.JavaUtils;
 import it.sauronsoftware.cron4j.Scheduler;
+import it.sauronsoftware.cron4j.SchedulingPattern;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.time.Duration;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.TimeZone;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * Central task scheduler of STEM.
+ * <ul>
+ *     <li>Core tasks ("InCore") run sequentially on the kernel thread.</li>
+ *     <li>All other tasks run on virtual threads, so blocking plugin code never starves the system.</li>
+ *     <li>Timing is handled by a small platform-thread timer pool that only dispatches work;
+ *     no thread sleeps on behalf of a repeating task.</li>
+ *     <li>All cron tasks share a single cron4j scheduler; cancelling removes the cron entry immediately.</li>
+ * </ul>
+ */
 public class SchedulerService {
+    /* Time zone used for fixed time-of-day tasks and cron patterns */
+    public static final ZoneId STEM_ZONE = ZoneId.of("Europe/Berlin");
+
     private final StemKernel stemKernel;
-    private final ScheduledExecutorService scheduledExecutorService;
+    private final ScheduledThreadPoolExecutor timerExecutor;
     private final ExecutorService executorService;
+    private final Scheduler cronScheduler;
     private final DefaultSTEMPlugin defaultSystemPlugin;
-    private HashSet<TaskMeta> tasks;
+    private final ConcurrentHashMap<Long, TaskMeta> tasks;
+    private volatile boolean shutdown;
 
     SchedulerService(StemKernel stemKernel) {
         this.stemKernel = stemKernel;
-        this.scheduledExecutorService = new ScheduledThreadPoolExecutor(50);
-        this.executorService = new ThreadPoolExecutor(30, 30, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
-        this.tasks = new HashSet<>();
+        this.tasks = new ConcurrentHashMap<>();
         this.defaultSystemPlugin = new DefaultSTEMPlugin();
+
+        AtomicInteger timerCounter = new AtomicInteger();
+        this.timerExecutor = new ScheduledThreadPoolExecutor(2, runnable -> {
+            Thread thread = new Thread(runnable, "STEM-Timer-" + timerCounter.incrementAndGet());
+            thread.setDaemon(true);
+            return thread;
+        });
+        /* Drop cancelled futures from the queue right away instead of at their trigger time */
+        this.timerExecutor.setRemoveOnCancelPolicy(true);
+        this.timerExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        this.timerExecutor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+
+        this.executorService = Executors.newThreadPerTaskExecutor(Thread.ofVirtual().name("STEM-Async-", 1).factory());
+
+        this.cronScheduler = new Scheduler();
+        this.cronScheduler.setDaemon(true);
+        this.cronScheduler.setTimeZone(TimeZone.getTimeZone(STEM_ZONE));
+        this.cronScheduler.start();
+    }
+
+    /**
+     * Log any throwable thrown by a task. Errors are logged by message because the logger only renders
+     * stack traces for exceptions.
+     */
+    static void logThrowable(Throwable throwable) {
+        if (throwable instanceof Exception exception) {
+            STEMApp.LOGGER.ERROR(exception);
+        } else {
+            STEMApp.LOGGER.ERROR("Uncaught error in task: " + throwable);
+        }
     }
 
     public TaskMeta runTaskInCore(STEMPlugin plugin, Runnable task) {
@@ -55,7 +100,6 @@ public class SchedulerService {
         return execTask(plugin, task, false);
     }
 
-
     public TaskMeta runTaskLaterInCore(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return this.execTaskDelay(plugin, task, delay, timeUnit, true);
     }
@@ -63,7 +107,6 @@ public class SchedulerService {
     public TaskMeta runTaskLater(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit) {
         return this.execTaskDelay(plugin, task, delay, timeUnit, false);
     }
-
 
     public TaskMeta runRepeatSchedulerInCore(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit) {
         return this.execRepeatTask(plugin, task, delay, period, timeUnit, true);
@@ -82,147 +125,186 @@ public class SchedulerService {
     }
 
     public TaskMeta runAsCronTask(STEMPlugin plugin, Runnable task, String cronString) {
-        if (!this.checkIsValid()) {
-            return null;
+        TaskMeta taskMeta = this.createTask(plugin, false);
+        if (taskMeta.isCanceled) {
+            return taskMeta;
         }
-
-        TaskMeta taskMeta = new TaskMeta(plugin, false);
-        this.tasks.add(taskMeta);
+        if (cronString == null || !SchedulingPattern.validate(cronString)) {
+            STEMApp.LOGGER.ERROR("Invalid cron pattern '" + cronString + "' from owner: " + plugin.getPluginName());
+            taskMeta.cancel();
+            return taskMeta;
+        }
         STEMApp.LOGGER.CORE("TaskMeta setup cronJob task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
 
-        Scheduler scheduler = new Scheduler();
-        scheduler.schedule(cronString, () -> {
-            this.tasks.remove(taskMeta);
-            if (!taskMeta.isCanceled) {
-                pushCoreRunner(taskMeta, task);
-                this.tasks.add(taskMeta);
-            } else {
-                scheduler.stop();
-            }
-        });
-        scheduler.start();
-
+        String cronId = this.cronScheduler.schedule(cronString, () -> this.dispatchRepeating(taskMeta, task));
+        taskMeta.setHooks(() -> this.cronScheduler.deschedule(cronId), () -> this.tasks.remove(taskMeta.taskId));
         return taskMeta;
     }
 
     private TaskMeta execFixedTask(STEMPlugin plugin, Runnable task, int days, int hours, int minutes, boolean daily, boolean runInCore) {
-        if (!this.checkIsValid()) {
-            return null;
+        TaskMeta taskMeta = this.createTask(plugin, runInCore);
+        if (taskMeta.isCanceled) {
+            return taskMeta;
         }
-
-        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
-        this.tasks.add(taskMeta);
         STEMApp.LOGGER.DEBUG("TaskMeta setup fixed task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
-        long times = this.getTimerTime(days, hours, minutes);
-        Runnable runnableContainer = () -> {
-            while (!taskMeta.isCanceled) {
-                this.pushCoreRunner(taskMeta, task);
-
-                if (daily) {
-                    try {
-                        Thread.sleep(TimeUnit.HOURS.toMillis(24));
-                    } catch (InterruptedException ignored) {
-                    }
-                } else {
-                    taskMeta.cancel();
-                }
-            }
-            tasks.remove(taskMeta);
-        };
-
-        this.scheduledExecutorService.schedule(runnableContainer, times, TimeUnit.MILLISECONDS);
+        taskMeta.setHooks(null, () -> this.tasks.remove(taskMeta.taskId));
+        ZonedDateTime firstRun = firstFixedRun(ZonedDateTime.now(STEM_ZONE), days, hours, minutes);
+        this.scheduleFixedRun(taskMeta, task, firstRun, hours, minutes, daily);
         return taskMeta;
     }
 
-    private TaskMeta execRepeatTask(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
-        if (!this.checkIsValid()) {
-            return null;
+    /**
+     * Schedule one fixed run. Daily tasks reschedule themselves for the next calendar day at the same local
+     * time, so daylight saving changes never shift the execution time.
+     */
+    private void scheduleFixedRun(TaskMeta taskMeta, Runnable task, ZonedDateTime runAt, int hours, int minutes, boolean daily) {
+        if (taskMeta.isCanceled || this.shutdown) {
+            return;
         }
-
-        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
-        this.tasks.add(taskMeta);
-        STEMApp.LOGGER.DEBUG("TaskMeta setup repeat task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
-        Runnable runnableContainer = () -> {
-            while (!taskMeta.isCanceled) {
-                this.pushCoreRunner(taskMeta, task);
-
-                try {
-                    Thread.sleep(timeUnit.toMillis(period));
-                } catch (InterruptedException ignored) {
-                }
+        long delayMillis = Math.max(0, Duration.between(ZonedDateTime.now(STEM_ZONE), runAt).toMillis());
+        ScheduledFuture<?> future = this.timerExecutor.schedule(() -> {
+            if (taskMeta.isCanceled) {
+                return;
             }
-            tasks.remove(taskMeta);
-        };
+            if (daily) {
+                this.dispatchRepeating(taskMeta, task);
+                ZonedDateTime next = runAt.toLocalDate().plusDays(1).atTime(hours, minutes).atZone(STEM_ZONE);
+                this.scheduleFixedRun(taskMeta, task, next, hours, minutes, true);
+            } else {
+                this.dispatch(taskMeta, task);
+                taskMeta.cancel();
+            }
+        }, delayMillis, TimeUnit.MILLISECONDS);
+        taskMeta.setCancelHook(() -> future.cancel(false));
+    }
 
-        this.scheduledExecutorService.schedule(runnableContainer, delay, timeUnit);
+    static ZonedDateTime firstFixedRun(ZonedDateTime now, int days, int hours, int minutes) {
+        ZonedDateTime candidate = now.toLocalDate().plusDays(days).atTime(hours, minutes).atZone(STEM_ZONE);
+        if (candidate.isBefore(now)) {
+            candidate = now.toLocalDate().plusDays(days + 1L).atTime(hours, minutes).atZone(STEM_ZONE);
+        }
+        return candidate;
+    }
+
+    private TaskMeta execRepeatTask(STEMPlugin plugin, Runnable task, int delay, int period, TimeUnit timeUnit, boolean runInCore) {
+        TaskMeta taskMeta = this.createTask(plugin, runInCore);
+        if (taskMeta.isCanceled) {
+            return taskMeta;
+        }
+        if (period <= 0) {
+            STEMApp.LOGGER.ERROR("Invalid repeat period " + period + " from owner: " + plugin.getPluginName());
+            taskMeta.cancel();
+            return taskMeta;
+        }
+        STEMApp.LOGGER.DEBUG("TaskMeta setup repeat task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
+        ScheduledFuture<?> future = this.timerExecutor.scheduleAtFixedRate(() -> this.dispatchRepeating(taskMeta, task),
+                Math.max(0, delay), period, timeUnit);
+        taskMeta.setHooks(() -> future.cancel(false), () -> this.tasks.remove(taskMeta.taskId));
         return taskMeta;
     }
 
     private TaskMeta execTask(STEMPlugin plugin, Runnable task, boolean runInCore) {
-        if (!this.checkIsValid()) {
-            return null;
+        TaskMeta taskMeta = this.createTask(plugin, runInCore);
+        if (taskMeta.isCanceled) {
+            return taskMeta;
         }
-
-        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
-        this.tasks.add(taskMeta);
         STEMApp.LOGGER.DEBUG("TaskMeta setup task from owner:" + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
-
-        tasks.remove(taskMeta);
-        if (!taskMeta.isCanceled) {
-            this.pushCoreRunner(taskMeta, task);
-        }
-
+        /* One-shot tasks are not tracked: they are dispatched immediately */
+        this.tasks.remove(taskMeta.taskId);
+        this.dispatch(taskMeta, task);
         return taskMeta;
     }
 
     private TaskMeta execTaskDelay(STEMPlugin plugin, Runnable task, long delay, TimeUnit timeUnit, boolean runInCore) {
-        if (!this.checkIsValid()) {
-            return null;
+        TaskMeta taskMeta = this.createTask(plugin, runInCore);
+        if (taskMeta.isCanceled) {
+            return taskMeta;
         }
-
-        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
-        this.tasks.add(taskMeta);
         STEMApp.LOGGER.DEBUG("TaskMeta setup delayed task from owner: " + plugin.getPluginName() + " taskId:" + taskMeta.taskId);
-        Runnable runnableContainer = () -> {
-            tasks.remove(taskMeta);
+        ScheduledFuture<?> future = this.timerExecutor.schedule(() -> {
+            this.tasks.remove(taskMeta.taskId);
             if (!taskMeta.isCanceled) {
-                this.pushCoreRunner(taskMeta, task);
+                this.dispatch(taskMeta, task);
             }
-        };
-
-        this.scheduledExecutorService.schedule(runnableContainer, delay, timeUnit);
+        }, Math.max(0, delay), timeUnit);
+        taskMeta.setHooks(() -> future.cancel(false), () -> this.tasks.remove(taskMeta.taskId));
         return taskMeta;
     }
 
-    private void pushCoreRunner(TaskMeta taskMeta, Runnable task) {
+    /**
+     * Create and register a task. During shutdown a cancelled task is returned instead of null,
+     * so callers never run into a NullPointerException.
+     */
+    private TaskMeta createTask(STEMPlugin plugin, boolean runInCore) {
+        if (plugin == null) {
+            plugin = this.defaultSystemPlugin;
+        }
+        TaskMeta taskMeta = new TaskMeta(plugin, runInCore);
+        if (this.shutdown) {
+            STEMApp.LOGGER.ERROR("Try to register task while shutdown! Owner: " + plugin.getPluginName());
+            taskMeta.isCanceled = true;
+            return taskMeta;
+        }
+        this.tasks.put(taskMeta.taskId, taskMeta);
+        return taskMeta;
+    }
+
+    /**
+     * Dispatch a repeating task, skipping the run if the previous run of the same task is still active.
+     * This prevents unbounded pile-up when a task is slower than its period.
+     */
+    private void dispatchRepeating(TaskMeta taskMeta, Runnable task) {
+        if (taskMeta.isCanceled || this.shutdown) {
+            return;
+        }
+        if (!taskMeta.running.compareAndSet(false, true)) {
+            STEMApp.LOGGER.DEBUG("Skip run of task " + taskMeta.taskId + " from " + taskMeta.owner.getPluginName() + ": previous run still active");
+            return;
+        }
+        this.dispatch(taskMeta, () -> {
+            try {
+                task.run();
+            } finally {
+                taskMeta.running.set(false);
+            }
+        });
+    }
+
+    private void dispatch(TaskMeta taskMeta, Runnable task) {
+        if (this.shutdown) {
+            return;
+        }
+        Runnable guarded = () -> {
+            try {
+                task.run();
+            } catch (Throwable throwable) {
+                logThrowable(throwable);
+            }
+        };
         if (taskMeta.synchronous) {
-            this.stemKernel.queueTask(new Pair<>(taskMeta, task));
+            this.stemKernel.queueTask(new Pair<>(taskMeta, guarded));
         } else {
-            Runnable asyncTask = () -> executorService.submit(task);
-            this.stemKernel.queueTask(new Pair<>(taskMeta, asyncTask));
+            try {
+                this.executorService.execute(guarded);
+            } catch (RejectedExecutionException e) {
+                STEMApp.LOGGER.ERROR("Task " + taskMeta.taskId + " rejected: executor is shut down");
+            }
         }
     }
 
     public boolean isTask(long taskId) {
-        for (TaskMeta taskMeta : this.tasks) {
-            if (taskMeta.getTaskId() == taskId) {
-                return true;
-            }
-        }
-        return false;
+        return this.tasks.containsKey(taskId);
     }
 
     public void cancelTask(long taskId) {
-        for (TaskMeta taskMeta : this.tasks) {
-            if (taskMeta.getTaskId() == taskId) {
-                taskMeta.cancel();
-                break;
-            }
+        TaskMeta taskMeta = this.tasks.get(taskId);
+        if (taskMeta != null) {
+            taskMeta.cancel();
         }
     }
 
     public void cancelTasks(STEMPlugin stemPlugin) {
-        for (TaskMeta taskMeta : this.tasks) {
+        for (TaskMeta taskMeta : this.tasks.values()) {
             if (taskMeta.owner == stemPlugin) {
                 taskMeta.cancel();
             }
@@ -230,42 +312,37 @@ public class SchedulerService {
     }
 
     void cancelAll() {
-        for (TaskMeta taskMeta : this.tasks) {
+        this.shutdown = true;
+        for (TaskMeta taskMeta : this.tasks.values()) {
             taskMeta.cancel();
         }
         this.tasks.clear();
-        this.tasks = null;
+        this.timerExecutor.shutdownNow();
+        try {
+            this.cronScheduler.stop();
+        } catch (IllegalStateException ignored) {
+            /* already stopped */
+        }
+        this.executorService.shutdown();
+        if (Thread.currentThread().isVirtual()) {
+            /* Shutdown runs inside an async task (e.g. the stop command): do not wait for ourselves */
+            return;
+        }
+        try {
+            if (!this.executorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                this.executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            this.executorService.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
     }
 
+    /**
+     * @return snapshot of all currently scheduled (not yet finished) tasks
+     */
     public HashSet<TaskMeta> getTasks() {
-        return this.tasks;
-    }
-
-
-    private long getTimerTime(int days, int hours, int minute) {
-        long selectTime = selectTime(days, hours, minute);
-        if (selectTime < System.currentTimeMillis()) {
-            selectTime = selectTime(days + 1, hours, minute);
-        }
-        return selectTime - System.currentTimeMillis();
-    }
-
-    private long selectTime(int days, int hours, int minute) {
-        Calendar selectedDay = new GregorianCalendar();
-        TimeZone timezone = TimeZone.getTimeZone("Europe/Berlin");
-        selectedDay.setTimeZone(timezone);
-        selectedDay.add(Calendar.DATE, days);
-        Calendar result = new GregorianCalendar(selectedDay.get(Calendar.YEAR),
-                selectedDay.get(Calendar.MONTH), selectedDay.get(Calendar.DATE), hours,
-                minute);
-        return result.getTime().getTime();
-    }
-
-    private boolean checkIsValid() {
-        if (this.tasks == null) {
-            STEMApp.LOGGER.ERROR("Try to register task while shutdown!");
-        }
-        return this.tasks != null;
+        return new HashSet<>(this.tasks.values());
     }
 
     public DefaultSTEMPlugin getDefaultSystemPlugin() {
@@ -274,7 +351,7 @@ public class SchedulerService {
 
 
     public static class DefaultSTEMPlugin extends STEMPlugin {
-        private File tempFolder = null;
+        private volatile File tempFolder = null;
 
         private DefaultSTEMPlugin() {
         }
@@ -318,7 +395,7 @@ public class SchedulerService {
         }
 
         @Override
-        public File getTempFolder() {
+        public synchronized File getTempFolder() {
             if (this.tempFolder != null) {
                 return this.tempFolder;
             }

@@ -27,7 +27,7 @@ import java.util.UUID;
 public class CloudModule extends AbstractModule {
 
     private FileConfiguration fileConfiguration;
-    private NextcloudConnector nextcloudConnector;
+    private volatile NextcloudConnector nextcloudConnector;
 
     private boolean isEnabled;
     private String cloudURL;
@@ -57,7 +57,18 @@ public class CloudModule extends AbstractModule {
         this.nextcloudConnector = new NextcloudConnector(this.cloudURL, true, cloudPort, cloudUser, cloudPassToken);
     }
 
+    private boolean isAvailable() {
+        if (!this.isEnabled || this.nextcloudConnector == null) {
+            STEMApp.LOGGER.WARNING("Cloud module is disabled");
+            return false;
+        }
+        return true;
+    }
+
     public CloudFile getCloudFile(String absoluteFilePath) {
+        if (!this.isAvailable()) {
+            return null;
+        }
         if (this.nextcloudConnector.fileExists(absoluteFilePath)) {
             return new CloudFile(this.nextcloudConnector, absoluteFilePath);
         }
@@ -70,6 +81,9 @@ public class CloudModule extends AbstractModule {
     }
 
     public CloudFile uploadFile(File file, String absoluteFolderPath, String cloudFileName) {
+        if (!this.isAvailable()) {
+            return null;
+        }
         String path = absoluteFolderPath + cloudFileName;
 
         if (!this.nextcloudConnector.fileExists(path)) {
@@ -82,7 +96,7 @@ public class CloudModule extends AbstractModule {
     @Override
     public void onShutdown() {
         try {
-            if (this.isEnabled) {
+            if (this.isEnabled && this.nextcloudConnector != null) {
                 this.nextcloudConnector.shutdown();
             }
         } catch (IOException e) {

@@ -16,9 +16,9 @@ import de.linzn.stem.STEMApp;
 import de.linzn.stem.taskManagment.operations.AbstractOperation;
 import de.linzn.stem.taskManagment.operations.OperationOutput;
 
-import java.io.BufferedReader;
+import de.linzn.stem.utils.ProcessOutput;
+
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -34,37 +34,69 @@ public class ShellOperation extends AbstractOperation {
     @Override
     public OperationOutput runOperation() {
         OperationOutput operationOutput = new OperationOutput(this);
+        if (scriptCommand == null || scriptCommand.isBlank()) {
+            STEMApp.LOGGER.ERROR("ShellOperation without command");
+            operationOutput.setExit(-1);
+            return operationOutput;
+        }
+        List<String> command = new ArrayList<>();
+        if (useSSH) {
+            if (!isSafeSshArgument(sshUser) || !isSafeSshArgument(sshHost)) {
+                STEMApp.LOGGER.ERROR("ShellOperation with invalid ssh user or host");
+                operationOutput.setExit(-1);
+                return operationOutput;
+            }
+            /* No local shell: the remote command is passed to ssh as a single argument, so quotes in it
+             * can never break out into a local command. BatchMode prevents hanging on password prompts. */
+            command.add("ssh");
+            command.add("-p");
+            command.add(String.valueOf(sshPort));
+            command.add("-C");
+            command.add("-o");
+            command.add("BatchMode=yes");
+            command.add(sshUser + "@" + sshHost);
+            command.add(scriptCommand);
+        } else {
+            command.add("/bin/sh");
+            command.add("-c");
+            command.add(scriptCommand);
+        }
+
+        Process p = null;
         try {
-
-            StringBuilder command = new StringBuilder();
-            if (useSSH) {
-                command.append("ssh ").append(sshUser).append("@").append(sshHost).append(" -p ").append(sshPort).append(" -C '");
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.redirectErrorStream(true);
+            p = processBuilder.start();
+            ProcessOutput processOutput = ProcessOutput.drain(p, "ShellOperation");
+            if (!p.waitFor(60, TimeUnit.MINUTES)) {
+                STEMApp.LOGGER.ERROR("ShellOperation timed out: " + (useSSH ? sshHost : "local"));
+                p.descendants().forEach(ProcessHandle::destroyForcibly);
+                p.destroyForcibly();
+                operationOutput.setExit(-1);
+                return operationOutput;
             }
-
-            command.append(scriptCommand);
-
-            if (useSSH) {
-                command.append("'");
-            }
-
-            String[] cmd = {"/bin/sh", "-c", command.toString()};
-            Process p = Runtime.getRuntime().exec(cmd);
-            p.waitFor(60, TimeUnit.MINUTES);
+            processOutput.awaitCompletion(10, TimeUnit.SECONDS);
             if (useOutput) {
-                List<String> lines = new ArrayList<>();
-                BufferedReader b = new BufferedReader(new InputStreamReader(p.getInputStream()));
-                String line;
-                while ((line = b.readLine()) != null) {
-                    lines.add(line);
-                }
-                operationOutput.setData(lines);
+                operationOutput.setData(processOutput.getLines());
             }
             operationOutput.setExit(p.exitValue());
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             STEMApp.LOGGER.ERROR(e);
             operationOutput.setExit(-1);
+        } catch (InterruptedException e) {
+            if (p != null) {
+                p.destroyForcibly();
+            }
+            Thread.currentThread().interrupt();
+            operationOutput.setExit(-1);
+        } finally {
+            ProcessOutput.closeStreams(p);
         }
         return operationOutput;
+    }
+
+    private static boolean isSafeSshArgument(String value) {
+        return value != null && !value.isBlank() && !value.startsWith("-") && value.chars().noneMatch(Character::isWhitespace);
     }
 
     public boolean isUseOutput() {

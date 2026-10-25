@@ -12,23 +12,39 @@
 
 package de.linzn.stem.modules.notificationModule.archive;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Bounded archive of the most recent notifications. Older entries are dropped,
+ * so the archive never grows beyond its capacity.
+ */
 public class NotificationArchive {
 
-    private final List<ArchivedNotification> archive;
+    private static final int CAPACITY = 100;
+    private final ArrayDeque<ArchivedNotification> archive;
     private final int max = 10;
 
     public NotificationArchive() {
-        this.archive = new ArrayList<>();
+        this.archive = new ArrayDeque<>(CAPACITY);
     }
 
-    public void addToArchive(ArchivedNotification archivedNotification) {
-        this.archive.add(archivedNotification);
+    public synchronized void addToArchive(ArchivedNotification archivedNotification) {
+        if (this.archive.size() >= CAPACITY) {
+            this.archive.removeFirst();
+        }
+        this.archive.addLast(archivedNotification);
     }
 
-    public List<ArchivedNotification> getLastNotifications() {
-        return this.archive.size() <= max ? this.archive : this.archive.subList(this.archive.size() - max, this.archive.size());
+    /**
+     * @return copy of the last notifications, oldest first
+     */
+    public synchronized List<ArchivedNotification> getLastNotifications() {
+        List<ArchivedNotification> all = new ArrayList<>(this.archive);
+        if (all.size() <= max) {
+            return all;
+        }
+        return new ArrayList<>(all.subList(all.size() - max, all.size()));
     }
 }

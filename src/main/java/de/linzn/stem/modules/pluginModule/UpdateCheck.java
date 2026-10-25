@@ -26,7 +26,7 @@ public class UpdateCheck {
         this.availableUpdates = new HashSet<>();
     }
 
-    public boolean checkForUpdates() {
+    public synchronized boolean checkForUpdates() {
         this.availableUpdates.clear();
         STEMPlugin stemDefaultPlugin = STEMApp.getInstance().getScheduler().getDefaultSystemPlugin();
         AvailableBuild availableFrameworkBuild = new AvailableBuild(stemDefaultPlugin, this.pluginModule);
@@ -61,7 +61,7 @@ public class UpdateCheck {
         return !this.availableUpdates.isEmpty();
     }
 
-    public int upgradeAvailableBuilds() {
+    public synchronized int upgradeAvailableBuilds() {
         int updatesDone = 0;
         for (AvailableBuild availableBuild : this.availableUpdates) {
             if (!availableBuild.locked()) {

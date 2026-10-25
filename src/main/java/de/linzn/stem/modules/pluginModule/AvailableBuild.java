@@ -15,107 +15,157 @@ package de.linzn.stem.modules.pluginModule;
 import de.linzn.openJL.system.FileSystem;
 import de.linzn.stem.STEMApp;
 import de.linzn.stem.taskManagment.SchedulerService;
+import de.linzn.stem.utils.SafeFiles;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.*;
-import java.net.URL;
-import java.nio.file.Files;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
+/**
+ * Checks the MirraNET Jenkins server for a newer build of the framework or a plugin and downloads it.
+ * All requests use timeouts, every stream is closed, and downloads are written atomically so an
+ * interrupted download never leaves a broken jar behind.
+ */
 public class AvailableBuild {
+    private static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(30);
+    private static final Duration DOWNLOAD_TIMEOUT = Duration.ofMinutes(10);
+    private static final HttpClient HTTP_CLIENT = HttpClient.newBuilder()
+            .connectTimeout(CONNECT_TIMEOUT)
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
+
     private final STEMPlugin stemPlugin;
     private final PluginModule pluginModule;
     private final boolean isCustom;
-    private boolean updateAvailable;
-    private int updateAvailableBuildId;
-    private AtomicBoolean locked;
-    private boolean isStemFramework;
+    private final AtomicBoolean locked = new AtomicBoolean(false);
+    private final boolean isStemFramework;
+    private volatile boolean updateAvailable;
+    private volatile int updateAvailableBuildId;
 
     public AvailableBuild(STEMPlugin stemPlugin, PluginModule pluginModule) {
         this.stemPlugin = stemPlugin;
         this.pluginModule = pluginModule;
-        this.isCustom = this.stemPlugin.getBuildJobName().equalsIgnoreCase("CUSTOM") || this.stemPlugin.getBuildNumber().equalsIgnoreCase("SNAPSHOT") || this.stemPlugin.getBuildNumber().equalsIgnoreCase("IDEA");
+        this.isCustom = isCustomBuild(stemPlugin);
         this.isStemFramework = this.stemPlugin instanceof SchedulerService.DefaultSTEMPlugin;
         this.updateAvailable = false;
         this.updateAvailableBuildId = -1;
     }
 
+    private static boolean isCustomBuild(STEMPlugin plugin) {
+        String jobName = plugin.getBuildJobName();
+        String buildNumber = plugin.getBuildNumber();
+        if (jobName == null || buildNumber == null) {
+            return true;
+        }
+        if (jobName.equalsIgnoreCase("CUSTOM") || buildNumber.equalsIgnoreCase("SNAPSHOT") || buildNumber.equalsIgnoreCase("IDEA")) {
+            return true;
+        }
+        try {
+            Integer.parseInt(buildNumber);
+            return false;
+        } catch (NumberFormatException e) {
+            return true;
+        }
+    }
+
     public void check() {
-        if (!this.isCustom) {
-            int fileBuildId = Integer.parseInt(this.stemPlugin.getBuildNumber());
-            int latestBuildId = this.getJenkinsNewestJobId(this.stemPlugin.getBuildJobName());
-
-            String fileBuiltRevision = getJenkinsBuiltRevision(this.stemPlugin.getBuildJobName(), fileBuildId);
-            String latestBuiltRevision = getJenkinsBuiltRevision(this.stemPlugin.getBuildJobName(), latestBuildId);
-
-            if (!fileBuiltRevision.equalsIgnoreCase(latestBuiltRevision) && latestBuildId > fileBuildId) {
-                this.updateAvailable = true;
-                this.updateAvailableBuildId = latestBuildId;
-            } else {
-                this.updateAvailable = false;
-                this.updateAvailableBuildId = -1;
-            }
+        if (this.isCustom) {
+            return;
+        }
+        int fileBuildId = Integer.parseInt(this.stemPlugin.getBuildNumber());
+        int latestBuildId = this.getJenkinsNewestJobId(this.stemPlugin.getBuildJobName());
+        if (latestBuildId <= fileBuildId) {
+            this.updateAvailable = false;
+            this.updateAvailableBuildId = -1;
+            return;
+        }
+        String fileBuiltRevision = getJenkinsBuiltRevision(this.stemPlugin.getBuildJobName(), fileBuildId);
+        String latestBuiltRevision = getJenkinsBuiltRevision(this.stemPlugin.getBuildJobName(), latestBuildId);
+        if (!fileBuiltRevision.equalsIgnoreCase(latestBuiltRevision)) {
+            this.updateAvailable = true;
+            this.updateAvailableBuildId = latestBuildId;
+        } else {
+            this.updateAvailable = false;
+            this.updateAvailableBuildId = -1;
         }
     }
 
     public boolean update() {
-
-        if (this.locked == null || !this.locked.get()) {
-            JSONObject artifactData = this.getArtifactData(this.stemPlugin.getBuildJobName(), this.updateAvailableBuildId);
-
-            JSONArray artifacts = artifactData.getJSONArray("artifacts");
-            String baseUrl = artifactData.getString("url");
-
-            for (int i = 0; i < artifacts.length(); i++) {
-                JSONObject artifact = artifacts.getJSONObject(i);
-                String fileName = artifact.getString("fileName");
-                String relPath = artifact.getString("relativePath");
-                String downloadUrl = baseUrl + "artifact/" + relPath;
-
-                try {
-                    if (fileName.endsWith(".jar")) {
-                        downloadArtifact(downloadUrl, this.stemPlugin.getFilePath());
-                    } else if (fileName.equalsIgnoreCase("libraries.zip") || fileName.equalsIgnoreCase("coreDependencies.zip")) {
-                        if (this.isStemFramework) {
-                            Path zipFile = Paths.get(new File(this.stemPlugin.getTempFolder(), "core.zip").getAbsolutePath());
-                            downloadArtifact(downloadUrl, zipFile);
-                            if (zipFile.toFile().exists()) {
-                                Path rootPath = this.stemPlugin.getDataFolder().toPath();
-                                File oldCores = new File(rootPath.toFile(), "core");
-                                if (FileSystem.deleteFolder(oldCores)) {
-                                    try (ZipInputStream zis = new ZipInputStream(Files.newInputStream(zipFile))) {
-                                        ZipEntry entry;
-                                        while ((entry = zis.getNextEntry()) != null) {
-                                            if (entry.isDirectory()) continue;
-                                            Path newFile = rootPath.resolve(entry.getName());
-                                            Files.createDirectories(newFile.getParent()).toFile();
-                                            STEMApp.LOGGER.INFO("Copy core library file " + newFile.toFile().getName() + " for STEM framework");
-                                            Files.copy(zis, newFile, StandardCopyOption.REPLACE_EXISTING);
-                                        }
-                                    }
-                                } else {
-                                    STEMApp.LOGGER.ERROR("Something went wrong while removing old core!");
-                                }
-                            }
-                        } else {
-                            downloadArtifact(downloadUrl, Paths.get(new File(this.stemPlugin.getDataFolder(), fileName).getAbsolutePath()));
-                        }
-                    }
-                    locked = new AtomicBoolean(true);
-                } catch (IOException e) {
-                    locked = new AtomicBoolean(false);
-                    STEMApp.LOGGER.ERROR(e);
-                }
-            }
-            return this.locked.get();
+        if (this.locked.get()) {
+            return true;
         }
-        return true;
+        if (!this.updateAvailable || this.updateAvailableBuildId < 0) {
+            return false;
+        }
+        JSONObject artifactData = this.getArtifactData(this.stemPlugin.getBuildJobName(), this.updateAvailableBuildId);
+        if (artifactData == null) {
+            STEMApp.LOGGER.ERROR("No artifact data for " + this.stemPlugin.getPluginName() + " build #" + this.updateAvailableBuildId);
+            return false;
+        }
+        JSONArray artifacts = artifactData.optJSONArray("artifacts");
+        String baseUrl = artifactData.optString("url", null);
+        if (artifacts == null || baseUrl == null) {
+            STEMApp.LOGGER.ERROR("Invalid artifact data for " + this.stemPlugin.getPluginName());
+            return false;
+        }
+        if (!baseUrl.endsWith("/")) {
+            baseUrl = baseUrl + "/";
+        }
+
+        boolean success = true;
+        for (int i = 0; i < artifacts.length(); i++) {
+            JSONObject artifact = artifacts.optJSONObject(i);
+            if (artifact == null) {
+                continue;
+            }
+            String fileName = artifact.optString("fileName", "");
+            String relPath = artifact.optString("relativePath", null);
+            if (relPath == null) {
+                continue;
+            }
+            String downloadUrl = baseUrl + "artifact/" + relPath;
+            try {
+                if (fileName.endsWith(".jar")) {
+                    downloadArtifact(downloadUrl, this.stemPlugin.getFilePath());
+                } else if (fileName.equalsIgnoreCase("libraries.zip") || fileName.equalsIgnoreCase("coreDependencies.zip")) {
+                    if (this.isStemFramework) {
+                        this.updateCoreLibraries(downloadUrl);
+                    } else {
+                        downloadArtifact(downloadUrl, new File(this.stemPlugin.getDataFolder(), fileName).toPath());
+                    }
+                }
+            } catch (IOException e) {
+                success = false;
+                STEMApp.LOGGER.ERROR(e);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+        this.locked.set(success);
+        return success;
+    }
+
+    private void updateCoreLibraries(String downloadUrl) throws IOException, InterruptedException {
+        Path zipFile = new File(this.stemPlugin.getTempFolder(), "core.zip").toPath();
+        downloadArtifact(downloadUrl, zipFile);
+        Path rootPath = this.stemPlugin.getDataFolder().toPath();
+        File oldCores = new File(rootPath.toFile(), "core");
+        if (!FileSystem.deleteFolder(oldCores)) {
+            throw new IOException("Something went wrong while removing old core!");
+        }
+        SafeFiles.unzip(zipFile, rootPath, newFile ->
+                STEMApp.LOGGER.INFO("Copy core library file " + newFile.getFileName() + " for STEM framework"));
     }
 
     public boolean isCustom() {
@@ -135,87 +185,88 @@ public class AvailableBuild {
     }
 
     public boolean locked() {
-        if (this.locked != null) {
-            return this.locked.get();
-        }
-        return false;
+        return this.locked.get();
     }
 
     public STEMPlugin getStemPlugin() {
         return stemPlugin;
     }
 
-    private String getJenkinsBuiltRevision(String jobName, int jobId) {
-        JSONObject jsonObject;
-        try {
-            URL url = new URL(this.pluginModule.jenkinsURL + "/job/" + jobName + "/" + jobId + "/api/json?pretty=true");
-            InputStream input = url.openStream();
-            InputStreamReader isr = new InputStreamReader(input);
-            BufferedReader reader = new BufferedReader(isr);
-            StringBuilder json = new StringBuilder();
-            int c;
-            while ((c = reader.read()) != -1) {
-                json.append((char) c);
-            }
-            jsonObject = new JSONObject(json.toString());
-            JSONObject revisionTab = jsonObject.getJSONArray("actions").getJSONObject(2);
+    private String jenkinsJobUrl(String jobName) {
+        String base = this.pluginModule.jenkinsURL;
+        if (base.endsWith("/")) {
+            base = base.substring(0, base.length() - 1);
+        }
+        return base + "/job/" + jobName + "/";
+    }
 
-            if (jsonObject.getJSONArray("actions").getJSONObject(2).isEmpty()) {
-                revisionTab = jsonObject.getJSONArray("actions").getJSONObject(1);
+    private JSONObject fetchJson(String url) {
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(url)).timeout(REQUEST_TIMEOUT).GET().build();
+            HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() != 200) {
+                STEMApp.LOGGER.ERROR("Jenkins request failed with HTTP " + response.statusCode() + ": " + url);
+                return null;
             }
-            return revisionTab.getJSONObject("lastBuiltRevision").getString("SHA1");
+            return new JSONObject(response.body());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return null;
         } catch (Exception e) {
-            STEMApp.LOGGER.ERROR(e);
+            STEMApp.LOGGER.ERROR("Jenkins request failed: " + url + " (" + e + ")");
+            return null;
+        }
+    }
+
+    private String getJenkinsBuiltRevision(String jobName, int jobId) {
+        JSONObject jsonObject = fetchJson(jenkinsJobUrl(jobName) + jobId + "/api/json");
+        if (jsonObject == null) {
             return "error";
         }
+        JSONArray actions = jsonObject.optJSONArray("actions");
+        if (actions == null) {
+            return "error";
+        }
+        for (int i = 0; i < actions.length(); i++) {
+            JSONObject action = actions.optJSONObject(i);
+            if (action == null) {
+                continue;
+            }
+            JSONObject revision = action.optJSONObject("lastBuiltRevision");
+            if (revision != null) {
+                return revision.optString("SHA1", "error");
+            }
+        }
+        return "error";
     }
 
     private int getJenkinsNewestJobId(String jobName) {
-        JSONObject jsonObject;
-        try {
-            URL url = new URL(this.pluginModule.jenkinsURL + "/job/" + jobName + "/lastSuccessfulBuild/api/json?pretty=true");
-            InputStream input = url.openStream();
-            InputStreamReader isr = new InputStreamReader(input);
-            BufferedReader reader = new BufferedReader(isr);
-            StringBuilder json = new StringBuilder();
-            int c;
-            while ((c = reader.read()) != -1) {
-                json.append((char) c);
-            }
-            jsonObject = new JSONObject(json.toString());
-        } catch (IOException e) {
-            STEMApp.LOGGER.ERROR(e);
+        JSONObject jsonObject = fetchJson(jenkinsJobUrl(jobName) + "lastSuccessfulBuild/api/json");
+        if (jsonObject == null || !jsonObject.has("id")) {
             return 0;
         }
-        if (jsonObject.has("id")) {
-            return jsonObject.getInt("id");
-        } else {
+        try {
+            return Integer.parseInt(jsonObject.optString("id", "0"));
+        } catch (NumberFormatException e) {
             return 0;
         }
     }
 
-    private void downloadArtifact(String artifactUrl, Path destination) throws IOException {
-        try (InputStream in = new URL(artifactUrl).openStream()) {
-            Files.copy(in, destination, StandardCopyOption.REPLACE_EXISTING);
+    private void downloadArtifact(String artifactUrl, Path destination) throws IOException, InterruptedException {
+        if (destination == null) {
+            throw new IOException("No destination for download " + artifactUrl);
+        }
+        HttpRequest request = HttpRequest.newBuilder(URI.create(artifactUrl)).timeout(DOWNLOAD_TIMEOUT).GET().build();
+        HttpResponse<InputStream> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        try (InputStream in = response.body()) {
+            if (response.statusCode() != 200) {
+                throw new IOException("Download failed with HTTP " + response.statusCode() + ": " + artifactUrl);
+            }
+            SafeFiles.writeAtomically(in, destination);
         }
     }
 
     private JSONObject getArtifactData(String jobName, int jobId) {
-        JSONObject jsonObject = null;
-        try {
-            URL url = new URL(this.pluginModule.jenkinsURL + "/job/" + jobName + "/" + jobId + "/api/json?pretty=true");
-            InputStream input = url.openStream();
-            InputStreamReader isr = new InputStreamReader(input);
-            BufferedReader reader = new BufferedReader(isr);
-            StringBuilder json = new StringBuilder();
-            int c;
-            while ((c = reader.read()) != -1) {
-                json.append((char) c);
-            }
-            jsonObject = new JSONObject(json.toString());
-        } catch (IOException e) {
-            STEMApp.LOGGER.ERROR(e);
-        }
-        return jsonObject;
+        return fetchJson(jenkinsJobUrl(jobName) + jobId + "/api/json");
     }
 }
