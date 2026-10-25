@@ -63,7 +63,7 @@ public class MyPlugin extends STEMPlugin {
 |----------------------------|-----------------------------------------------------------------------------|
 | `scheduler()`              | Async, core-thread, delayed, repeating, daily and cron tasks; callbacks      |
 | `events()`                 | Register `@StemEventHandler` listeners, fire events                         |
-| `commands()`               | Console commands (`ICommand`), case-insensitive                            |
+| `commands()`               | Console commands (`ICommand`), case-insensitive; `execute(...)` runs a command and returns its log output |
 | `mqtt()`                   | Publish, subscribe; subscriptions survive reconnects                        |
 | `notifications()`          | Push notifications to StemLink clients and the console                      |
 | `information()`            | Information blocks for displays, AI text engine                             |
@@ -71,11 +71,12 @@ public class MyPlugin extends STEMPlugin {
 | `data()`                   | JSON key/value storage, `withConnection(...)` for raw SQL                   |
 | `scripts()`                | Run `.stemsh` scripts with parameters and timeout                           |
 
-Callback operations `ShellOperation` and `ScriptOperation` are part of `stem-api` as well.
 | `cloud()`                  | Nextcloud upload and share links                                            |
 | `plugins()`                | Loaded plugins and their state                                              |
 | `system()`                 | Version, uptime, time zone, temp folder                                     |
 | `logger()`                 | Logger prefixed with the plugin name (also `STEMPlugin#getPluginLogger()`)  |
+
+Callback operations `ShellOperation` and `ScriptOperation` are part of `stem-api` as well.
 
 ## Threading rules
 

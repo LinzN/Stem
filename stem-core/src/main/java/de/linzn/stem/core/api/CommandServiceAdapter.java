@@ -13,10 +13,12 @@
 package de.linzn.stem.core.api;
 
 import de.linzn.stem.STEMApp;
+import de.linzn.stem.api.command.CommandResult;
 import de.linzn.stem.api.command.CommandService;
 import de.linzn.stem.modules.commandModule.ICommand;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
 
+import java.time.Duration;
 import java.util.List;
 
 final class CommandServiceAdapter implements CommandService {
@@ -41,5 +43,10 @@ final class CommandServiceAdapter implements CommandService {
     @Override
     public List<String> getCommands() {
         return List.copyOf(this.stemApp.getCommandModule().getCommandList());
+    }
+
+    @Override
+    public CommandResult execute(String commandLine, Duration timeout) {
+        return this.stemApp.getCommandModule().executeCommand(commandLine, timeout, owner);
     }
 }

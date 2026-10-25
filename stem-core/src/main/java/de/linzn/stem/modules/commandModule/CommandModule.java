@@ -14,16 +14,20 @@ package de.linzn.stem.modules.commandModule;
 
 import de.linzn.simplyLogger.input.InputHandler;
 import de.linzn.stem.STEMApp;
+import de.linzn.stem.api.command.CommandResult;
 import de.linzn.stem.modules.AbstractModule;
 import de.linzn.stem.modules.commandModule.defaultCommands.CommandSetup;
 import de.linzn.stem.modules.pluginModule.PluginModule;
 import de.linzn.stem.modules.pluginModule.STEMPlugin;
 
+import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.LogRecord;
 
 public class CommandModule extends AbstractModule implements InputHandler {
     private final CommandSetup commandSetup;
@@ -102,6 +106,55 @@ public class CommandModule extends AbstractModule implements InputHandler {
 
     public List<String> getCommandList() {
         return new ArrayList<>(this.commandSetup.terminalExecutes.keySet());
+    }
+
+    /**
+     * Execute a command line on its own thread and wait for it. The log lines the command writes on that
+     * thread are captured as output.
+     *
+     * @param commandLine command and arguments separated by whitespace
+     * @param timeout     maximum time to wait
+     * @param caller      plugin that requested the execution, for the log; may be null
+     */
+    public CommandResult executeCommand(String commandLine, Duration timeout, STEMPlugin caller) {
+        String line = commandLine == null ? "" : commandLine.trim();
+        if (line.isEmpty()) {
+            return CommandResult.notFound("");
+        }
+        String[] parts = line.split("\\s+");
+        String commandName = parts[0].toLowerCase(Locale.ROOT);
+        String[] arguments = Arrays.copyOfRange(parts, 1, parts.length);
+        ICommand command = this.commandSetup.terminalExecutes.get(commandName);
+        if (command == null) {
+            return CommandResult.notFound(commandName);
+        }
+        STEMApp.LOGGER.INFO("Execute command '" + line + "'" + (caller != null ? " for plugin " + caller.getPluginName() : ""));
+        long start = System.currentTimeMillis();
+        boolean[] success = {false};
+        Thread worker = Thread.ofVirtual().name("STEM-Command-" + commandName).unstarted(() -> {
+            try {
+                success[0] = command.executeTerminal(arguments);
+            } catch (Exception e) {
+                STEMApp.LOGGER.ERROR("Command " + commandName + " failed: " + e);
+                STEMApp.LOGGER.ERROR(e);
+            }
+        });
+        worker.start();
+        boolean finished;
+        try {
+            finished = worker.join(timeout == null ? Duration.ofSeconds(60) : timeout);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            finished = false;
+        }
+        long threadId = worker.threadId();
+        List<String> output = new ArrayList<>();
+        for (LogRecord logRecord : STEMApp.LOGGER.getLastEntries(5000)) {
+            if (logRecord.getLongThreadID() == threadId && logRecord.getMillis() >= start) {
+                output.add(logRecord.getMessage());
+            }
+        }
+        return new CommandResult(true, finished, finished && success[0], output);
     }
 
     @Override

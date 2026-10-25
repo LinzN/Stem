@@ -14,10 +14,11 @@ package de.linzn.stem.api.command;
 
 import de.linzn.stem.modules.commandModule.ICommand;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
- * Console command registration. Command names are case-insensitive.
+ * Console command registration and execution. Command names are case-insensitive.
  */
 public interface CommandService {
 
@@ -35,4 +36,24 @@ public interface CommandService {
      * @return names of all registered commands, sorted
      */
     List<String> getCommands();
+
+    /**
+     * Execute a console command like it was typed into the STEM console and wait until it returns.
+     * The log lines the command writes on its own thread are returned as output; work the command
+     * starts asynchronously keeps running after this method returned.
+     *
+     * @param commandLine command with arguments, e.g. {@code "fuel 5"}
+     * @param timeout     maximum time to wait for the command
+     * @return result with the captured output
+     */
+    CommandResult execute(String commandLine, Duration timeout);
+
+    /**
+     * Execute a console command with a timeout of 60 seconds.
+     *
+     * @see #execute(String, Duration)
+     */
+    default CommandResult execute(String commandLine) {
+        return execute(commandLine, Duration.ofSeconds(60));
+    }
 }
