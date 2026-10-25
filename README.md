@@ -1,4 +1,4 @@
-![MirraNET Logo](https://raw.githubusercontent.com/LinzN/Stem/refs/heads/master/src/main/resources/header-logo.png)
+![MirraNET Logo](stem-core/src/main/resources/header-logo.png)
 
 # STEM
 
