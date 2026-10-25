@@ -12,7 +12,7 @@
 
 package de.linzn.stem.taskManagment.operations.defaultOperations;
 
-import de.linzn.stem.STEMApp;
+import de.linzn.stem.api.Stem;
 import de.linzn.stem.taskManagment.operations.AbstractOperation;
 import de.linzn.stem.taskManagment.operations.OperationOutput;
 
@@ -35,14 +35,14 @@ public class ShellOperation extends AbstractOperation {
     public OperationOutput runOperation() {
         OperationOutput operationOutput = new OperationOutput(this);
         if (scriptCommand == null || scriptCommand.isBlank()) {
-            STEMApp.LOGGER.ERROR("ShellOperation without command");
+            logError("ShellOperation without command");
             operationOutput.setExit(-1);
             return operationOutput;
         }
         List<String> command = new ArrayList<>();
         if (useSSH) {
             if (!isSafeSshArgument(sshUser) || !isSafeSshArgument(sshHost)) {
-                STEMApp.LOGGER.ERROR("ShellOperation with invalid ssh user or host");
+                logError("ShellOperation with invalid ssh user or host");
                 operationOutput.setExit(-1);
                 return operationOutput;
             }
@@ -69,7 +69,7 @@ public class ShellOperation extends AbstractOperation {
             p = processBuilder.start();
             ProcessOutput processOutput = ProcessOutput.drain(p, "ShellOperation");
             if (!p.waitFor(60, TimeUnit.MINUTES)) {
-                STEMApp.LOGGER.ERROR("ShellOperation timed out: " + (useSSH ? sshHost : "local"));
+                logError("ShellOperation timed out: " + (useSSH ? sshHost : "local"));
                 p.descendants().forEach(ProcessHandle::destroyForcibly);
                 p.destroyForcibly();
                 operationOutput.setExit(-1);
@@ -81,7 +81,7 @@ public class ShellOperation extends AbstractOperation {
             }
             operationOutput.setExit(p.exitValue());
         } catch (IOException e) {
-            STEMApp.LOGGER.ERROR(e);
+            logError(e);
             operationOutput.setExit(-1);
         } catch (InterruptedException e) {
             if (p != null) {
@@ -93,6 +93,17 @@ public class ShellOperation extends AbstractOperation {
             ProcessOutput.closeStreams(p);
         }
         return operationOutput;
+    }
+
+    private static void logError(Object message) {
+        if (!Stem.isAvailable()) {
+            return;
+        }
+        if (message instanceof Throwable throwable) {
+            Stem.api().logger().error(throwable);
+        } else {
+            Stem.api().logger().error(String.valueOf(message));
+        }
     }
 
     private static boolean isSafeSshArgument(String value) {

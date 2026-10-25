@@ -70,6 +70,8 @@ public class MyPlugin extends STEMPlugin {
 | `health()`                 | Register `HealthCheck`s, run checks on demand                               |
 | `data()`                   | JSON key/value storage, `withConnection(...)` for raw SQL                   |
 | `scripts()`                | Run `.stemsh` scripts with parameters and timeout                           |
+
+Callback operations `ShellOperation` and `ScriptOperation` are part of `stem-api` as well.
 | `cloud()`                  | Nextcloud upload and share links                                            |
 | `plugins()`                | Loaded plugins and their state                                              |
 | `system()`                 | Version, uptime, time zone, temp folder                                     |
