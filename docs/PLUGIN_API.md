@@ -77,6 +77,20 @@ public class MyPlugin extends STEMPlugin {
 
 Callback operations `ShellOperation` and `ScriptOperation` are part of `stem-api` as well.
 
+## Events
+
+Event handlers are methods annotated with `@StemEventHandler` that take one event parameter. A handler receives
+events of exactly that class. A handler whose parameter type is `StemEvent` itself receives every event; it runs
+after the handlers of the same priority registered for the concrete class. Use it for logging or for automations
+that react to events of other plugins without depending on them.
+
+```java
+@StemEventHandler(priority = StemEventPriority.LOW)
+public void onAnyEvent(StemEvent event) {
+    // event.getName() is the simple class name, e.g. MQTTSnapmakerPrintEndEvent
+}
+```
+
 ## Threading rules
 
 - `runAsync`, `runLater`, `runRepeating`, `runDaily`, `runOnceAt` and `runCron` run on virtual threads.

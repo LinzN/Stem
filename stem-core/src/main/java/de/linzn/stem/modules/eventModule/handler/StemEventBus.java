@@ -191,7 +191,9 @@ public class StemEventBus {
     }
 
     /**
-     * Call all listener with the IEvent
+     * Call all listeners of the event. Handlers whose parameter type is {@link StemEvent} itself receive every
+     * event (for example to log events or to build event based automations); they run after the handlers of the
+     * same priority that are registered for the concrete event class.
      *
      * @param event StemEvent to call in classInstance
      */
@@ -200,20 +202,23 @@ public class StemEventBus {
             return;
         }
         STEMApp.LOGGER.DEBUG("Fire event " + event.getName());
-        Handler[][] handlers = this.index.get(event.getClass());
-        if (handlers == null) {
+        Map<Class<?>, Handler[][]> current = this.index;
+        Handler[][] handlers = current.get(event.getClass());
+        Handler[][] catchAll = event.getClass() == StemEvent.class ? null : current.get(StemEvent.class);
+        if (handlers == null && catchAll == null) {
             return;
         }
-        if (!event.isCanceled()) {
-            fireEventPriority(event, handlers[StemEventPriority.HIGH.ordinal()]);
+        for (StemEventPriority priority : PRIORITIES) {
+            if (priority != StemEventPriority.CANCELED && event.isCanceled()) {
+                continue;
+            }
+            if (handlers != null) {
+                fireEventPriority(event, handlers[priority.ordinal()]);
+            }
+            if (catchAll != null) {
+                fireEventPriority(event, catchAll[priority.ordinal()]);
+            }
         }
-        if (!event.isCanceled()) {
-            fireEventPriority(event, handlers[StemEventPriority.NORMAL.ordinal()]);
-        }
-        if (!event.isCanceled()) {
-            fireEventPriority(event, handlers[StemEventPriority.LOW.ordinal()]);
-        }
-        fireEventPriority(event, handlers[StemEventPriority.CANCELED.ordinal()]);
     }
 
     private void fireEventPriority(StemEvent event, Handler[] handlers) {
