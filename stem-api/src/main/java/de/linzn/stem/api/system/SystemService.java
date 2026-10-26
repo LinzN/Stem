@@ -16,6 +16,7 @@ import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 
 /**
  * Runtime information about STEM.
@@ -51,4 +52,13 @@ public interface SystemService {
      * @return true while STEM is running and not shutting down
      */
     boolean isActive();
+
+    /**
+     * Recent entries of the STEM log, including the messages of all plugins.
+     *
+     * @param max           maximum number of entries
+     * @param minLevelValue only entries with at least this level, e.g. 900 for warnings and errors, 0 for all
+     * @return entries, oldest first
+     */
+    List<LogEntry> getRecentLog(int max, int minLevelValue);
 }

@@ -72,7 +72,7 @@ public class MyPlugin extends STEMPlugin {
 | `scripts()`                | Run `.stemsh` scripts with parameters and timeout                           |
 | `cloud()`                  | Nextcloud upload and share links                                            |
 | `plugins()`                | Loaded plugins and their state                                              |
-| `system()`                 | Version, uptime, time zone, temp folder                                     |
+| `system()`                 | Version, uptime, time zone, temp folder, recent log entries (`getRecentLog`) |
 | `logger()`                 | Logger prefixed with the plugin name (also `STEMPlugin#getPluginLogger()`)  |
 
 Callback operations `ShellOperation` and `ScriptOperation` are part of `stem-api` as well.

@@ -13,6 +13,7 @@
 package de.linzn.stem.core.api;
 
 import de.linzn.stem.STEMApp;
+import de.linzn.stem.api.system.LogEntry;
 import de.linzn.stem.api.system.SystemService;
 import de.linzn.stem.taskManagment.SchedulerService;
 import de.linzn.stem.utils.JavaUtils;
@@ -21,6 +22,9 @@ import java.io.File;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.LogRecord;
 
 final class SystemServiceAdapter implements SystemService {
     private final STEMApp stemApp;
@@ -61,5 +65,28 @@ final class SystemServiceAdapter implements SystemService {
     @Override
     public boolean isActive() {
         return this.stemApp.isActive();
+    }
+
+    @Override
+    public List<LogEntry> getRecentLog(int max, int minLevelValue) {
+        List<LogEntry> entries = new ArrayList<>();
+        if (max <= 0 || STEMApp.LOGGER == null) {
+            return entries;
+        }
+        /* the logger keeps a bounded history; filter from the newest backwards */
+        List<LogRecord> records = STEMApp.LOGGER.getLastEntries(Integer.MAX_VALUE);
+        for (int i = records.size() - 1; i >= 0 && entries.size() < max; i--) {
+            LogRecord record = records.get(i);
+            if (record.getLevel() == null || record.getLevel().intValue() < minLevelValue) {
+                continue;
+            }
+            String message = record.getMessage();
+            if (record.getThrown() != null) {
+                message = (message == null ? "" : message + " ") + record.getThrown();
+            }
+            entries.add(new LogEntry(record.getInstant(), record.getLevel().getName(), record.getLevel().intValue(), message));
+        }
+        java.util.Collections.reverse(entries);
+        return entries;
     }
 }
